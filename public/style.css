@@ -1,0 +1,7 @@
+path:hover {
+    stroke: red !important;
+  }
+
+.selected {
+    stroke: blue !important;
+}

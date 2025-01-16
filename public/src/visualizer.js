@@ -1,3 +1,5 @@
+let visualElements
+
 fetch("../hyper.svg")
   .then(response => response.text())
   .then(svgText => {
@@ -6,7 +8,29 @@ fetch("../hyper.svg")
     const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
     const svg = document.body.appendChild(svgDoc.documentElement);
 
-    // Access elements within the SVG
-    //const circle = svg.querySelector("circle");
-    // ...
+    visualElements = document.getElementsByTagName("path")
+
+    console.log(visualElements)
+
+    console.log(visualElements.length)
+
+    for(let i = 0; i < visualElements.length; i++) {
+        console.log("add listener")
+        visualElements.item(i).addEventListener("click", ToggleSelected)
+    }
   })
+
+function ToggleSelected(evt) {
+    evt.currentTarget.classList.toggle("selected")
+    console.log("toggle select")
+}
+
+
+
+
+
+
+
+//visualElements.forEach(element => {
+ //   element.addEventListener("click", ToggleSelected(element))
+//})
