@@ -1,4 +1,5 @@
 let visualElements
+let svgElement
 const wrapper = document.getElementById("wrapper")
 const visualContainer = document.getElementById("visual-container")
 
@@ -12,7 +13,8 @@ function LoadSvg() {
         // Create SVG element
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-        let svg = visualContainer.appendChild(svgDoc.documentElement);
+        svgElement = visualContainer.appendChild(svgDoc.documentElement);
+        console.log(svgElement)
 
         // Make elements selectable
         visualElements = document.getElementsByTagName("path")
@@ -31,6 +33,7 @@ function LoadSvg() {
 
 function OnLoadSvg() {
     EnablePanning()
+    EnableZoom()
 }
 
 function EnablePanning() {
@@ -59,6 +62,25 @@ function EnablePanning() {
     document.addEventListener("mouseup", () => {
         isDragging = false
         wrapper.style.cursor = "grab"
+    })
+}
+
+function EnableZoom() {
+    let svgE = document.getElementsByTagName("svg")[0]
+    document.getElementById("zoom-in").addEventListener("click", () => {
+        let newHeight = parseInt(svgE.height) * 2
+        let newWidth = parseInt(svgE.width) * 2
+
+        svgE.setAttribute("height", newHeight.toString())
+        svgE.setAttribute("width", newWidth.toString())
+    })
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+        let newHeight = svgElement.height * 0.5
+        let newWidth = svgElement.width * 0.5
+
+        svgElement.height = newHeight + "px"
+        svgElement.width = newWidth + "px"
     })
 }
 
