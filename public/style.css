@@ -1,3 +1,19 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#wrapper {
+    min-height: 100%;
+}
+
+#visual-container {
+    display: inline-block;
+    position: relative;
+    min-height: none;
+    min-width: fit-content;
+}
+
 path:hover {
     stroke: red !important;
   }
