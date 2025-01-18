@@ -1,0 +1,30 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#wrapper {
+    min-height: 100%;
+    align-items: center;
+}
+
+#visual-container {
+    display: inline-block;
+    position: relative;
+    min-height: none;
+    min-width: fit-content;
+}
+
+path:hover {
+    stroke: red !important;
+  }
+
+.selected {
+    stroke: blue !important;
+}
+
+svg {
+    width: 500px;
+    height: 500px;
+    border: 1px solid red; /* temp, visualize size of .svg box */
+  }
