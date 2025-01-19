@@ -16,7 +16,7 @@ document.getElementById("participant-button").addEventListener("click", (evt) =>
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
     wrapper.classList.add("participant") 
-    LoadSvg();
+    //LoadSvg();
     const uploader = document.getElementById("svg-uploader");
     uploader.addEventListener("change", handleSvgUpload);
 });
@@ -45,17 +45,18 @@ document.getElementById("save-svg").addEventListener("click", () => {
     URL.revokeObjectURL(url);
 });
 
+// no more default svg
 // Reads SVG file, then inserts it as a set of DOM elements into page
-function LoadSvg() {
-    fetch("../hyper.svg")
-      .then((response) => response.text())
-      .then((svgText) => {
-        loadSvgFromText(svgText);
-      })
-      .catch(err => {
-        console.error("Error fetching default SVG:", err);
-      });
-}
+// function LoadSvg() {
+//     fetch("../hyper.svg")
+//       .then((response) => response.text())
+//       .then((svgText) => {
+//         loadSvgFromText(svgText);
+//       })
+//       .catch(err => {
+//         console.error("Error fetching default SVG:", err);
+//       });
+// }
 
 function handleSvgUpload(event){
     const file = event.target.files[0];
