@@ -14,38 +14,26 @@ html, body {
     min-width: 100%;
 }
 
-.editor .selection-element:hover, .selectable.selection-element:hover {
+path:hover, .editor path:hover {
     stroke: red !important;
-    stroke-opacity: 50 !important;
 }
 
-.participant .selected.selection-element, .editor .selectable.selection-element {
+.participant path.selected, .editor path.selectable {
     stroke: blue !important;
-    stroke-opacity: 50 !important;
 }
 
-.editor .selection-element {
+.editor path {
     stroke: lightblue !important;
-    stroke-opacity: 50 !important;
 }
-
-.selection-element {
-    stroke-opacity: 0 !important;
-    fill-opacity: 0 !important;
-}
-
 
 svg {
     width: 100% !important;
     height: 100% !important;
     position: absolute;
-    z-index: -1;
+    z-index: 10;
 }
 
-.selection-svg {
-    z-index: 0;
-}
-
-button {
-    z-index: 1;
+button, input {
+    z-index: 11;
+    position: relative;
 }
