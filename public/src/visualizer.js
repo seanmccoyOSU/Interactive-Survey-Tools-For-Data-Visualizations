@@ -1,10 +1,22 @@
+let selectionSvgElement
 let svgElement                                                          // var to hold entire svg element
 let visualElements                                                      // var to hold the list of all svg vector elements
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 const visualContainer = document.getElementById("visual-container")     // container for the visual
 
+document.getElementById("editor-button").addEventListener("click", (evt) => {
+    wrapper.classList.remove("participant") 
+    wrapper.classList.add("editor") 
+})
+
+document.getElementById("participant-button").addEventListener("click", (evt) => {
+    wrapper.classList.remove("editor") 
+    wrapper.classList.add("participant") 
+})
+
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
+    wrapper.classList.add("participant") 
     LoadSvg();
     const uploader = document.getElementById("svg-uploader");
     uploader.addEventListener("change", handleSvgUpload);
@@ -72,10 +84,17 @@ function loadSvgFromText(svgText) {
     if (svgElement) {
       visualContainer.removeChild(svgElement);
     }
-  
+
+
+    visualContainer.style.height = "300px"
     // Parse SVG text
-    visualContainer.appendChild(svgDoc.documentElement);
-    svgElement = document.getElementsByTagName("svg")[0]
+    //visualContainer.setAttribute("height", svgDoc.documentElement.height.baseVal.value + "px")
+    selectionSvgElement = svgDoc.documentElement.cloneNode(false)
+    selectionSvgElement.classList.add("selection-svg")
+    svgElement = visualContainer.appendChild(svgDoc.documentElement);
+    visualContainer.appendChild(selectionSvgElement);
+    //svgElement = document.getElementsByTagName("svg")[0]
+    //selectionSvgElement = document.getElementsByTagName("svg")[1]
     console.log("Appended SVG:", svgElement);
   
     // Re-initialize pan/zoom
@@ -91,12 +110,24 @@ function OnLoadSvg() {
 // Enable user to select/deselect vector elements by clicking on them
 function EnableSelection() {
     // get list of vector elements (path elements)
-    visualElements = document.getElementsByTagName("path")
-
+    visualElements = svgElement.getElementsByTagName("path")
+    console.log(visualElements)
+    
     // define event that toggles selection for each vector element
     // vector is selected if it belongs to the "selected" class
     for(let i = 0; i < visualElements.length; i++) {
-        visualElements.item(i).addEventListener("click", evt => { evt.currentTarget.classList.toggle("selected") })
+        let selectableItem = visualElements.item(i).cloneNode(false)
+        selectableItem.style.strokeWidth = selectableItem.style.strokeWidth * 3
+        selectableItem.classList.add("selection-element")
+        selectableItem.classList.add("selectable")
+        selectionSvgElement.appendChild(selectableItem)
+        selectableItem.addEventListener("click", evt => { 
+            if (wrapper.classList.contains("participant") && evt.currentTarget.classList.contains("selectable")) { 
+                evt.currentTarget.classList.toggle("selected") 
+            } 
+        })
+        selectableItem.addEventListener("click", evt => { if (wrapper.classList.contains("editor")) { evt.currentTarget.classList.toggle("selectable") } })
+        //visualElements.item(i).addEventListener("click", evt => { evt.currentTarget.classList.toggle("selected") })
     }
 }
 
@@ -152,22 +183,31 @@ function EnableZoom() {
 
     // set viewBox attribute, this is necessary for scaling
     svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+    selectionSvgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
     
     // define zoom in event for clicking zoom in button
     document.getElementById("zoom-in").addEventListener("click", () => {
-        let newHeight = svgElement.height.baseVal.value * zoomInIntensity
-        let newWidth = svgElement.width.baseVal.value * zoomInIntensity
+        // let newHeight = svgElement.height.baseVal.value * zoomInIntensity
+        // let newWidth = svgElement.width.baseVal.value * zoomInIntensity
 
-        svgElement.setAttribute("height", newHeight)
-        svgElement.setAttribute("width", newWidth)
+        // svgElement.setAttribute("height", newHeight)
+        // svgElement.setAttribute("width", newWidth)
+        let heightText = visualContainer.style.height
+        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
+        let newHeight =  curHeight * zoomInIntensity
+        visualContainer.style.height = newHeight + "px"
     })
 
     // define zoom out event for clicking zoom out button
     document.getElementById("zoom-out").addEventListener("click", () => {
-        let newHeight = svgElement.height.baseVal.value * zoomOutIntensity
-        let newWidth = svgElement.width.baseVal.value * zoomOutIntensity
+        // let newHeight = svgElement.height.baseVal.value * zoomOutIntensity
+        // let newWidth = svgElement.width.baseVal.value * zoomOutIntensity
 
-        svgElement.setAttribute("height", newHeight)
-        svgElement.setAttribute("width", newWidth)
+        // svgElement.setAttribute("height", newHeight)
+        // svgElement.setAttribute("width", newWidth)
+        let heightText = visualContainer.style.height
+        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
+        let newHeight =  curHeight * zoomOutIntensity
+        visualContainer.style.height = newHeight + "px"
     })
 }

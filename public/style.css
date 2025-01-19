@@ -11,18 +11,41 @@ html, body {
 #visual-container {
     display: inline-block;
     position: relative;
-    min-height: none;
-    min-width: fit-content;
+    min-width: 100%;
 }
 
-path:hover {
+.editor .selection-element:hover, .selectable.selection-element:hover {
     stroke: red !important;
-  }
-
-.selected {
-    stroke: blue !important;
+    stroke-opacity: 50 !important;
 }
+
+.participant .selected.selection-element, .editor .selectable.selection-element {
+    stroke: blue !important;
+    stroke-opacity: 50 !important;
+}
+
+.editor .selection-element {
+    stroke: lightblue !important;
+    stroke-opacity: 50 !important;
+}
+
+.selection-element {
+    stroke-opacity: 0 !important;
+    fill-opacity: 0 !important;
+}
+
 
 svg {
-    border: 1px solid red; /* temp, visualize size of .svg box */
-  }
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute;
+    z-index: -1;
+}
+
+.selection-svg {
+    z-index: 0;
+}
+
+button {
+    z-index: 1;
+}
