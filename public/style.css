@@ -14,7 +14,7 @@ html, body {
     min-width: 100%;
 }
 
-path:hover, .editor path:hover {
+.participant path.selectable:hover, .editor path:hover {
     stroke: red !important;
 }
 
