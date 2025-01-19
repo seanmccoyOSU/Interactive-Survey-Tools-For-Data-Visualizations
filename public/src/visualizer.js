@@ -1,29 +1,87 @@
+let svgElement                                                          // var to hold entire svg element
 let visualElements                                                      // var to hold the list of all svg vector elements
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 const visualContainer = document.getElementById("visual-container")     // container for the visual
 
 // start loading svg once page has loaded
-document.addEventListener("DOMContentLoaded", LoadSvg)
+addEventListener("DOMContentLoaded", () => {
+    LoadSvg();
+    const uploader = document.getElementById("svg-uploader");
+    uploader.addEventListener("change", handleSvgUpload);
+});
+
+
+//Locally saves the current .SVG file being displayed
+document.getElementById("save-svg").addEventListener("click", () => {
+    // 1) Convert the current <svg> to a string
+    //    Using XMLSerializer preserves all attributes and nested elements
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgElement);
+  
+    // 2) Create a Blob from the string, then a URL from the Blob
+    const blob = new Blob([svgString], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+  
+    // 3) Create a temporary link element
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "edited-visual.svg"; // default file name in download dialog
+    document.body.appendChild(link);
+  
+    // 4) Programmatically click it to start the download, then clean up
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+});
 
 // Reads SVG file, then inserts it as a set of DOM elements into page
 function LoadSvg() {
-    // Read text from SVG file
     fetch("../hyper.svg")
-    .then(response => response.text())
-    .then(svgText => {
-        // Create SVG DOM element
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-
-        // Insert SVG in visual container
-        visualContainer.appendChild(svgDoc.documentElement);
-
-        // Code to execute after loading SVG
-        OnLoadSvg()
-    })
+      .then((response) => response.text())
+      .then((svgText) => {
+        loadSvgFromText(svgText);
+      })
+      .catch(err => {
+        console.error("Error fetching default SVG:", err);
+      });
 }
 
-// Code to execute after loading SVG
+function handleSvgUpload(event){
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.svg')) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const svgText = e.target.result;
+        loadSvgFromText(svgText);
+    }
+    reader.readAsText(file);
+}
+
+function loadSvgFromText(svgText) {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
+  
+    // Check if the parse failed
+    if (svgDoc.documentElement.nodeName === "parsererror") {
+      console.error("Error parsing SVG:", svgDoc.documentElement);
+      return;
+    }
+    // Remove old SVG if one is already present
+    if (svgElement) {
+      visualContainer.removeChild(svgElement);
+    }
+  
+    // Parse SVG text
+    visualContainer.appendChild(svgDoc.documentElement);
+    svgElement = document.getElementsByTagName("svg")[0]
+    console.log("Appended SVG:", svgElement);
+  
+    // Re-initialize pan/zoom
+    OnLoadSvg();
+}
+
 function OnLoadSvg() {
     EnableSelection()
     EnablePanning()
@@ -92,27 +150,24 @@ function EnableZoom() {
     const zoomInIntensity = 1.5
     const zoomOutIntensity = 1./zoomInIntensity     // inverse of zoom in
 
-    // get svg element
-    const svgE = document.getElementsByTagName("svg")[0]
-
     // set viewBox attribute, this is necessary for scaling
-    svgE.setAttribute("viewBox", "0 0 " + svgE.width.baseVal.value + " " + svgE.height.baseVal.value)
+    svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
     
     // define zoom in event for clicking zoom in button
     document.getElementById("zoom-in").addEventListener("click", () => {
-        let newHeight = svgE.height.baseVal.value * zoomInIntensity
-        let newWidth = svgE.width.baseVal.value * zoomInIntensity
+        let newHeight = svgElement.height.baseVal.value * zoomInIntensity
+        let newWidth = svgElement.width.baseVal.value * zoomInIntensity
 
-        svgE.setAttribute("height", newHeight)
-        svgE.setAttribute("width", newWidth)
+        svgElement.setAttribute("height", newHeight)
+        svgElement.setAttribute("width", newWidth)
     })
 
     // define zoom out event for clicking zoom out button
     document.getElementById("zoom-out").addEventListener("click", () => {
-        let newHeight = svgE.height.baseVal.value * zoomOutIntensity
-        let newWidth = svgE.width.baseVal.value * zoomOutIntensity
+        let newHeight = svgElement.height.baseVal.value * zoomOutIntensity
+        let newWidth = svgElement.width.baseVal.value * zoomOutIntensity
 
-        svgE.setAttribute("height", newHeight)
-        svgE.setAttribute("width", newWidth)
+        svgElement.setAttribute("height", newHeight)
+        svgElement.setAttribute("width", newWidth)
     })
 }

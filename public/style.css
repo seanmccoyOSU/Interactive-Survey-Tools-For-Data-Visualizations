@@ -22,3 +22,7 @@ path:hover {
 .selected {
     stroke: blue !important;
 }
+
+svg {
+    border: 1px solid red; /* temp, visualize size of .svg box */
+  }
