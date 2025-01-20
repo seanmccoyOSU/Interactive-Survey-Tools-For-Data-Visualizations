@@ -109,7 +109,12 @@ function EnableSelection() {
     // loop through list
     for(let i = 0; i < visualElements.length; i++) {
         // mark all elements as selectable by default
-        visualElements.item(i).classList.add("selectable")
+        // only do this for a first time upload
+        if (!svgElement.classList.contains("marked-selectables"))
+        {
+            visualElements.item(i).classList.add("selectable")
+        }
+        
 
         // clicking on selectable element as a participant marks/unmarks as "selected"
         visualElements.item(i).addEventListener("click", evt => { 
@@ -124,6 +129,11 @@ function EnableSelection() {
                 evt.currentTarget.classList.toggle("selectable") 
             } 
         })
+    }
+
+    // mark svg to not mark all selectables on re-upload
+    if (!svgElement.classList.contains("marked-selectables")) {
+        svgElement.classList.add("marked-selectables")
     }
 }
 
