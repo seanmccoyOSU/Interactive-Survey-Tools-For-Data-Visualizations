@@ -1,10 +1,22 @@
-let visualElements
-let svgElement
-const wrapper = document.getElementById("wrapper")
-const visualContainer = document.getElementById("visual-container")
+let svgElement                                                          // var to hold entire svg element
+let visualElements                                                      // var to hold the list of all svg vector elements
+const wrapper = document.getElementById("wrapper")                      // container that covers entire page
+const visualContainer = document.getElementById("visual-container")     // container for the visual
 
-document.addEventListener("DOMContentLoaded", () => {
-    LoadSvg();
+document.getElementById("editor-button").addEventListener("click", (evt) => {
+    wrapper.classList.remove("participant") 
+    wrapper.classList.add("editor") 
+})
+
+document.getElementById("participant-button").addEventListener("click", (evt) => {
+    wrapper.classList.remove("editor") 
+    wrapper.classList.add("participant") 
+})
+
+// start loading svg once page has loaded
+addEventListener("DOMContentLoaded", () => {
+    wrapper.classList.add("participant") 
+    //LoadSvg();
     const uploader = document.getElementById("svg-uploader");
     uploader.addEventListener("change", handleSvgUpload);
 });
@@ -33,16 +45,18 @@ document.getElementById("save-svg").addEventListener("click", () => {
     URL.revokeObjectURL(url);
 });
 
-function LoadSvg() {
-    fetch("../hyper.svg")
-      .then((response) => response.text())
-      .then((svgText) => {
-        loadSvgFromText(svgText);
-      })
-      .catch(err => {
-        console.error("Error fetching default SVG:", err);
-      });
-}
+// no more default svg
+// Reads SVG file, then inserts it as a set of DOM elements into page
+// function LoadSvg() {
+//     fetch("../hyper.svg")
+//       .then((response) => response.text())
+//       .then((svgText) => {
+//         loadSvgFromText(svgText);
+//       })
+//       .catch(err => {
+//         console.error("Error fetching default SVG:", err);
+//       });
+// }
 
 function handleSvgUpload(event){
     const file = event.target.files[0];
@@ -70,87 +84,125 @@ function loadSvgFromText(svgText) {
     if (svgElement) {
       visualContainer.removeChild(svgElement);
     }
-  
+
+    visualContainer.style.height = "300px"
+
     // Parse SVG text
     svgElement = visualContainer.appendChild(svgDoc.documentElement);
     console.log("Appended SVG:", svgElement);
-  
-    // Make elements selectable
-    visualElements = svgElement.getElementsByTagName("path");
-    for (let i = 0; i < visualElements.length; i++) {
-      visualElements.item(i).addEventListener("click", ToggleSelected);
-    }
   
     // Re-initialize pan/zoom
     OnLoadSvg();
 }
 
-
 function OnLoadSvg() {
+    EnableSelection()
     EnablePanning()
     EnableZoom()
 }
 
+// Enable user to select/deselect vector elements by clicking on them
+function EnableSelection() {
+    // get list of vector elements (path elements)
+    visualElements = svgElement.getElementsByTagName("path")
+    
+    // loop through list
+    for(let i = 0; i < visualElements.length; i++) {
+        // mark all elements as selectable by default
+        // only do this for a first time upload
+        if (!svgElement.classList.contains("marked-selectables"))
+        {
+            visualElements.item(i).classList.add("selectable")
+        }
+        
+
+        // clicking on selectable element as a participant marks/unmarks as "selected"
+        visualElements.item(i).addEventListener("click", evt => { 
+            if (wrapper.classList.contains("participant") && evt.currentTarget.classList.contains("selectable")) { 
+                evt.currentTarget.classList.toggle("selected") 
+            } 
+        })
+
+        // clicking on element as an editor marks/unmarks as "selectable"
+        visualElements.item(i).addEventListener("click", evt => { 
+            if (wrapper.classList.contains("editor")) { 
+                evt.currentTarget.classList.toggle("selectable") 
+            } 
+        })
+    }
+
+    // mark svg to not mark all selectables on re-upload
+    if (!svgElement.classList.contains("marked-selectables")) {
+        svgElement.classList.add("marked-selectables")
+    }
+}
+
+// Enable user to pan the visual by clicking and dragging anywhere on the page
 function EnablePanning() {
-    let isDragging = false
+    let isPanning = false
     let startX, startY
 
+    // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
-        isDragging = true
+        // while user holds the mouse button down, the user is panning
+        isPanning = true
+
+        // get starting coordinates for visual
         startX = evt.clientX - visualContainer.offsetLeft
         startY = evt.clientY - visualContainer.offsetTop
+
+        // change cursor image to grabbing
         wrapper.style.cursor = "grabbing"
     })
 
+    // define behavior for when user moves mouse while panning
     document.addEventListener("mousemove", evt => {
-        if (isDragging) {
+        if (isPanning) {
+            // prevent mouse from highlighting text while panning
             evt.preventDefault()
 
+            // coordinates to move visual to
             const x = evt.clientX - startX
             const y = evt.clientY - startY
 
+            // move the visual accordingly
             visualContainer.style.left = x + "px"
             visualContainer.style.top = y + "px"
         }
     })
 
+    // define behavior for when user releases mouse button
     document.addEventListener("mouseup", () => {
-        isDragging = false
+        // the user is not panning if the mouse button is not pressed down
+        isPanning = false
+
+        // change cursor image to grab
         wrapper.style.cursor = "grab"
     })
 }
 
+// Enable user to zoom the visual by clicking the zoom buttons
 function EnableZoom() {
-    let svgE = document.getElementsByTagName("svg")[0]
+    // specify zoom intensities
+    const zoomInIntensity = 1.5
+    const zoomOutIntensity = 1./zoomInIntensity     // inverse of zoom in
+
+    // set viewBox attribute, this is necessary for scaling
+    svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+    
+    // define zoom in event for clicking zoom in button
     document.getElementById("zoom-in").addEventListener("click", () => {
-        let newHeight = parseInt(svgE.height) * 2
-        let newWidth = parseInt(svgE.width) * 2
-
-        svgE.setAttribute("height", newHeight.toString())
-        svgE.setAttribute("width", newWidth.toString())
+        let heightText = visualContainer.style.height
+        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
+        let newHeight =  curHeight * zoomInIntensity
+        visualContainer.style.height = newHeight + "px"
     })
 
+    // define zoom out event for clicking zoom out button
     document.getElementById("zoom-out").addEventListener("click", () => {
-        let newHeight = svgElement.height * 0.5
-        let newWidth = svgElement.width * 0.5
-
-        svgElement.height = newHeight + "px"
-        svgElement.width = newWidth + "px"
+        let heightText = visualContainer.style.height
+        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
+        let newHeight =  curHeight * zoomOutIntensity
+        visualContainer.style.height = newHeight + "px"
     })
 }
-
-
-function ToggleSelected(evt) {
-    evt.currentTarget.classList.toggle("selected")
-    console.log("toggle select")
-}
-
-
-
-
-
-
-
-//visualElements.forEach(element => {
- //   element.addEventListener("click", ToggleSelected(element))
-//})

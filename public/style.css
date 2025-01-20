@@ -11,20 +11,29 @@ html, body {
 #visual-container {
     display: inline-block;
     position: relative;
-    min-height: none;
-    min-width: fit-content;
+    min-width: 100%;
 }
 
-path:hover {
+.participant path.selectable:hover, .editor path:hover {
     stroke: red !important;
-  }
+}
 
-.selected {
+.participant path.selected, .editor path.selectable {
     stroke: blue !important;
 }
 
+.editor path {
+    stroke: lightblue !important;
+}
+
 svg {
-    width: 500px;
-    height: 500px;
-    border: 1px solid red; /* temp, visualize size of .svg box */
-  }
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute;
+    z-index: 10;
+}
+
+button, input {
+    z-index: 11;
+    position: relative;
+}
