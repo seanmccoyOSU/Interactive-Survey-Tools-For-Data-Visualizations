@@ -1,5 +1,7 @@
-let svgElement                                                          // var to hold entire svg element
-let visualElements                                                      // var to hold the list of all svg vector elements
+import {VisualizationElement} from "./visualizationElement.js"
+
+let visualizationElement
+let svgElement
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 const visualContainer = document.getElementById("visual-container")     // container for the visual
 
@@ -82,7 +84,7 @@ function loadSvgFromText(svgText) {
     }
     // Remove old SVG if one is already present
     if (svgElement) {
-      visualContainer.removeChild(svgElement);
+      visualContainer.removeChild(visualizationElement.svg);
     }
 
     visualContainer.style.height = "300px"
@@ -90,6 +92,9 @@ function loadSvgFromText(svgText) {
     // Parse SVG text
     svgElement = visualContainer.appendChild(svgDoc.documentElement);
     console.log("Appended SVG:", svgElement);
+
+    visualizationElement = new VisualizationElement(svgElement)
+    console.log("Visualization Element Object:", visualizationElement);
   
     // Re-initialize pan/zoom
     OnLoadSvg();
@@ -103,37 +108,21 @@ function OnLoadSvg() {
 
 // Enable user to select/deselect vector elements by clicking on them
 function EnableSelection() {
-    // get list of vector elements (path elements)
-    visualElements = svgElement.getElementsByTagName("path")
-    
-    // loop through list
-    for(let i = 0; i < visualElements.length; i++) {
-        // mark all elements as selectable by default
-        // only do this for a first time upload
-        if (!svgElement.classList.contains("marked-selectables"))
-        {
-            visualElements.item(i).classList.add("selectable")
-        }
-        
-
+    // loop through all visual elements and add event listeners to each
+    for(const visualElement of visualizationElement.visualElements) {
         // clicking on selectable element as a participant marks/unmarks as "selected"
-        visualElements.item(i).addEventListener("click", evt => { 
-            if (wrapper.classList.contains("participant") && evt.currentTarget.classList.contains("selectable")) { 
-                evt.currentTarget.classList.toggle("selected") 
+        visualElement.addEventListener("click", evt => { 
+            if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
+                visualizationElement.toggleSelection(evt.currentTarget)
             } 
         })
 
         // clicking on element as an editor marks/unmarks as "selectable"
-        visualElements.item(i).addEventListener("click", evt => { 
+        visualElement.addEventListener("click", evt => { 
             if (wrapper.classList.contains("editor")) { 
-                evt.currentTarget.classList.toggle("selectable") 
+                visualizationElement.toggleSelectable(evt.currentTarget)
             } 
         })
-    }
-
-    // mark svg to not mark all selectables on re-upload
-    if (!svgElement.classList.contains("marked-selectables")) {
-        svgElement.classList.add("marked-selectables")
     }
 }
 
@@ -188,7 +177,8 @@ function EnableZoom() {
     const zoomOutIntensity = 1./zoomInIntensity     // inverse of zoom in
 
     // set viewBox attribute, this is necessary for scaling
-    svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+     svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+    
     
     // define zoom in event for clicking zoom in button
     document.getElementById("zoom-in").addEventListener("click", () => {
