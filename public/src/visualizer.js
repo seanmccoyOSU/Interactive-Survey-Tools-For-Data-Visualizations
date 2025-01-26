@@ -1,5 +1,6 @@
 import {VisualizationElement} from "./visualizationElement.js"
 
+let mouseMode = "pan"
 let visualizationElement
 let svgElement
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
@@ -13,6 +14,26 @@ document.getElementById("editor-button").addEventListener("click", (evt) => {
 document.getElementById("participant-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("editor") 
     wrapper.classList.add("participant") 
+})
+
+document.getElementById("pan-button").addEventListener("click", (evt) => {
+    mouseMode = "pan" 
+    wrapper.style.cursor = "grab"
+})
+
+document.getElementById("select-button").addEventListener("click", (evt) => {
+    mouseMode = "select" 
+    wrapper.style.cursor = "default"
+})
+
+document.getElementById("create-button").addEventListener("click", (evt) => {
+    mouseMode = "create" 
+    wrapper.style.cursor = "default"
+})
+
+document.getElementById("delete-button").addEventListener("click", (evt) => {
+    mouseMode = "delete" 
+    wrapper.style.cursor = "default"
 })
 
 // start loading svg once page has loaded
@@ -126,18 +147,20 @@ function EnablePanning() {
 
     // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
-        evt.preventDefault()
-        // while user holds the mouse button down, the user is panning
-        isPanning = true
-
-        // get starting coordinates for visual and mouse
-        startXMouse = evt.clientX
-        startYMouse = evt.clientY
-        startXVisual = visualizationElement.x
-        startYVisual = visualizationElement.y
-
-        // change cursor image to grabbing
-        wrapper.style.cursor = "grabbing"
+        if (mouseMode == "pan") {
+            evt.preventDefault()
+            // while user holds the mouse button down, the user is panning
+            isPanning = true
+    
+            // get starting coordinates for visual and mouse
+            startXMouse = evt.clientX
+            startYMouse = evt.clientY
+            startXVisual = visualizationElement.x
+            startYVisual = visualizationElement.y
+    
+            // change cursor image to grabbing
+            wrapper.style.cursor = "grabbing"
+        }
     })
 
     // define behavior for when user moves mouse while panning
@@ -156,11 +179,13 @@ function EnablePanning() {
 
     // define behavior for when user releases mouse button
     document.addEventListener("mouseup", () => {
-        // the user is not panning if the mouse button is not pressed down
-        isPanning = false
+        if (mouseMode == "pan") {
+            // the user is not panning if the mouse button is not pressed down
+            isPanning = false
 
-        // change cursor image to grab
-        wrapper.style.cursor = "grab"
+            // change cursor image to grab
+            wrapper.style.cursor = "grab"
+        }
     })
 }
 
