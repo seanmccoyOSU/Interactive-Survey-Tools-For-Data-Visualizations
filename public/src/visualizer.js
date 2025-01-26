@@ -137,7 +137,8 @@ function EnableSelection() {
 // Enable user to pan the visual by clicking and dragging anywhere on the page
 function EnablePanning() {
     let isPanning = false
-    let startX, startY
+    let startXMouse, startYMouse
+    let startXVisual, startYVisual
 
     // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
@@ -145,12 +146,11 @@ function EnablePanning() {
         // while user holds the mouse button down, the user is panning
         isPanning = true
 
-        // get starting coordinates for visual
-        //startX = evt.clientX - visualContainer.offsetLeft
-        //startY = evt.clientY - visualContainer.offsetTop
-
-        startX = evt.clientX + svgElement.viewBox.baseVal.x
-        startY = evt.clientY + svgElement.viewBox.baseVal.y
+        // get starting coordinates for visual and mouse
+        startXMouse = evt.clientX
+        startYMouse = evt.clientY
+        startXVisual = svgElement.viewBox.baseVal.x
+        startYVisual = svgElement.viewBox.baseVal.y
 
         // change cursor image to grabbing
         wrapper.style.cursor = "grabbing"
@@ -165,13 +165,10 @@ function EnablePanning() {
             const speedModifier = 0.5
 
             // coordinates to move visual to
-            const x = (startX - evt.clientX) * speedModifier
-            const y = (startY - evt.clientY) * speedModifier
+            const x = startXVisual - (evt.clientX - startXMouse) * speedModifier
+            const y = startYVisual - (evt.clientY - startYMouse) * speedModifier
 
             // move the visual accordingly
-            //visualContainer.style.left = x + "px"
-            //visualContainer.style.top = y + "px"
-
             svgElement.setAttribute("viewBox", x + " " + y + " " + svgElement.viewBox.baseVal.width + " " + svgElement.viewBox.baseVal.height)
         }
     })
