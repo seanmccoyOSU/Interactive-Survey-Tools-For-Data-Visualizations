@@ -49,6 +49,13 @@ const VisualizationElement = class {
         this.svg = svg
         this.visualElements = ExtractVisualElements(svg)
 
+        console.log(this.svg.width)
+        console.log(this.svg.viewBox)
+        this.defaultWidth = this.svg.viewBox.baseVal.width ? this.svg.viewBox.baseVal.width : this.svg.width.baseVal.value
+        this.defaultHeight = this.svg.viewBox.baseVal.height ? this.svg.viewBox.baseVal.height : this.svg.height.baseVal.value
+        this.resetScaleAndPosition()
+        
+
         // on first time upload, mark all visual elements as selectable by default
         if (!this.svg.classList.contains(FIRST_TIME_MARK_LABEL)) {
             this.setSelectableMultiple(this.visualElements)
@@ -147,6 +154,43 @@ const VisualizationElement = class {
     removeVisualElement(element) {
         // simply remove from the DOM
         element.remove()
+    }
+
+    /**
+     * Resets scale and position to calculated default which should fill the container
+     */
+    resetScaleAndPosition() {
+        const scale = this.defaultWidth > this.defaultHeight ? this.defaultWidth : this.defaultHeight
+        this.svg.setAttribute("viewBox", "0 0 " + scale + " " + scale)
+    }
+
+    get scale() {
+        return this.svg.viewBox.baseVal.width
+    }
+
+    set scale(num) {
+        if (num > 0) {
+            this.svg.setAttribute("viewBox", this.x + " " + this.y + " " + 
+                num + " " + num)
+        }
+    }
+
+    get x() {
+        return this.svg.viewBox.baseVal.x
+    }
+
+    set x(pos) {
+        this.svg.setAttribute("viewBox", pos + " " + this.y + " " + 
+            this.scale + " " + this.scale)
+    }
+
+    get y() {
+        return this.svg.viewBox.baseVal.y
+    }
+
+    set y(pos) {
+        this.svg.setAttribute("viewBox", this.x + " " + pos + " " + 
+            this.scale + " " + this.scale)
     }
 }
 
