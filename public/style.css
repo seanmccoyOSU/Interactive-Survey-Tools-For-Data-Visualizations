@@ -13,15 +13,15 @@ html, body {
     min-height: 100%;
 }
 
-.participant path.selectable:hover, .editor path:hover {
+.participant .visual-element.selectable:hover, .editor .visual-element:hover {
     stroke: red !important;
 }
 
-.participant path.selected, .editor path.selectable {
+.participant .visual-element.selected, .editor .visual-element.selectable {
     stroke: blue !important;
 }
 
-.editor path {
+.editor .visual-element {
     stroke: lightblue !important;
 }
 

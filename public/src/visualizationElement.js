@@ -4,10 +4,15 @@
  * @type {string[]}
  * @default
  */
-const VISUAL_ELEMENT_TAGS = ["path"]
-// below is what we want it to be, but not fully implemented yet
-// const VISUAL_ELEMENT_TAGS = ["path", "rect", "circle", "ellipse", "polygon", "line", "polyline"]
+const VISUAL_ELEMENT_TAGS = ["path", "rect", "circle", "ellipse", "polygon", "line", "polyline"]
 
+/**
+ * Class name for visual elements
+ * @const
+ * @type {string}
+ * @default
+ */
+const VISUAL_ELEMENT_LABEL = "visual-element"
 /**
  * Class name for selected elements
  * @const
@@ -125,8 +130,11 @@ const VisualizationElement = class {
      * @param {Element} element 
      */
     addVisualElement(element) {
+        // append the element to the SVG
         const liveElement = this.svg.appendChild(element)
-        this.visualElements.push(liveElement)
+
+        // mark as a visual element
+        element.classList.add(VISUAL_ELEMENT_LABEL)
 
         // make selectable by default
         this.setSelectable(liveElement)
@@ -137,21 +145,33 @@ const VisualizationElement = class {
      * @param {Element} element 
      */
     removeVisualElement(element) {
+        // simply remove from the DOM
         element.remove()
     }
 }
 
 /**
- * Returns array of all current visual elements from SVG
+ * Marks visual elements then returns live collection of visual elements from SVG
  * @param {Element} svg SVG DOM element to extract visual elements from
- * @returns {Array} Array of visual elements
+ * @returns {HTMLCollection} Live collection of visual elements
  */
 function ExtractVisualElements(svg) {
-    const elements = []
+    // this is a live collection of elements in class <VISUAL_ELEMENT_LABEL>
+    const elements = svg.getElementsByClassName(VISUAL_ELEMENT_LABEL)
 
+    // remove all existing visual element marks just to be safe
+    while (elements.length > 0) {
+        elements.item(0).classList.remove(VISUAL_ELEMENT_LABEL)
+    }
+
+    // mark all elements with the appropriate tag
     for (const tag of VISUAL_ELEMENT_TAGS) {
         const shapeGroup = svg.getElementsByTagName(tag)
-        elements.push(...shapeGroup)
+        console.log(shapeGroup)
+        for (const shape of shapeGroup) {
+            console.log(shape)
+            shape.classList.add(VISUAL_ELEMENT_LABEL)
+        }
     }
 
     return elements
