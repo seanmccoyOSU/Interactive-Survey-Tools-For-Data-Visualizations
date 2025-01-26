@@ -9,9 +9,8 @@ html, body {
 }
 
 #visual-container {
-    display: inline-block;
-    position: relative;
     min-width: 100%;
+    min-height: 100%;
 }
 
 .participant path.selectable:hover, .editor path:hover {

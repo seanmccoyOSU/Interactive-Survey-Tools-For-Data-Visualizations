@@ -74,6 +74,7 @@ function handleSvgUpload(event){
 }
 
 function loadSvgFromText(svgText) {
+    let firstUpload = true
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
   
@@ -85,9 +86,10 @@ function loadSvgFromText(svgText) {
     // Remove old SVG if one is already present
     if (svgElement) {
       visualContainer.removeChild(visualizationElement.svg);
+      firstUpload = false
     }
 
-    visualContainer.style.height = "300px"
+    //visualContainer.style.height = "300px"
 
     // Parse SVG text
     svgElement = visualContainer.appendChild(svgDoc.documentElement);
@@ -98,10 +100,16 @@ function loadSvgFromText(svgText) {
   
     // Re-initialize pan/zoom
     OnLoadSvg();
+    if (firstUpload)
+        OnFirstUpload();
 }
 
 function OnLoadSvg() {
+    svgElement.setAttribute("viewBox", "0 0 " + 1000 + " " + 1000)
     EnableSelection()
+}
+
+function OnFirstUpload() {
     EnablePanning()
     EnableZoom()
 }
@@ -133,12 +141,16 @@ function EnablePanning() {
 
     // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
+        evt.preventDefault()
         // while user holds the mouse button down, the user is panning
         isPanning = true
 
         // get starting coordinates for visual
-        startX = evt.clientX - visualContainer.offsetLeft
-        startY = evt.clientY - visualContainer.offsetTop
+        //startX = evt.clientX - visualContainer.offsetLeft
+        //startY = evt.clientY - visualContainer.offsetTop
+
+        startX = evt.clientX + svgElement.viewBox.baseVal.x
+        startY = evt.clientY + svgElement.viewBox.baseVal.y
 
         // change cursor image to grabbing
         wrapper.style.cursor = "grabbing"
@@ -150,13 +162,17 @@ function EnablePanning() {
             // prevent mouse from highlighting text while panning
             evt.preventDefault()
 
+            const speedModifier = 0.5
+
             // coordinates to move visual to
-            const x = evt.clientX - startX
-            const y = evt.clientY - startY
+            const x = (startX - evt.clientX) * speedModifier
+            const y = (startY - evt.clientY) * speedModifier
 
             // move the visual accordingly
-            visualContainer.style.left = x + "px"
-            visualContainer.style.top = y + "px"
+            //visualContainer.style.left = x + "px"
+            //visualContainer.style.top = y + "px"
+
+            svgElement.setAttribute("viewBox", x + " " + y + " " + svgElement.viewBox.baseVal.width + " " + svgElement.viewBox.baseVal.height)
         }
     })
 
@@ -173,26 +189,43 @@ function EnablePanning() {
 // Enable user to zoom the visual by clicking the zoom buttons
 function EnableZoom() {
     // specify zoom intensities
-    const zoomInIntensity = 1.5
-    const zoomOutIntensity = 1./zoomInIntensity     // inverse of zoom in
+    //const zoomInIntensity = 1.5
+    //const zoomOutIntensity = 1./zoomInIntensity     // inverse of zoom in
+
+    const zoomRate = 200
 
     // set viewBox attribute, this is necessary for scaling
-     svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+     //svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+
+     
     
     
     // define zoom in event for clicking zoom in button
     document.getElementById("zoom-in").addEventListener("click", () => {
-        let heightText = visualContainer.style.height
-        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
-        let newHeight =  curHeight * zoomInIntensity
-        visualContainer.style.height = newHeight + "px"
+        // let heightText = visualContainer.style.height
+        // let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
+        // let newHeight =  curHeight * zoomInIntensity
+        // visualContainer.style.height = newHeight + "px"
+
+        let newSize = svgElement.viewBox.baseVal.width - zoomRate
+        console.log(svgElement.viewBox.baseVal.width)
+        if (newSize > 0) {
+            svgElement.setAttribute("viewBox", svgElement.viewBox.baseVal.x + " " + svgElement.viewBox.baseVal.y + " " + 
+                newSize + " " + newSize
+            )
+        }
     })
 
     // define zoom out event for clicking zoom out button
     document.getElementById("zoom-out").addEventListener("click", () => {
-        let heightText = visualContainer.style.height
-        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
-        let newHeight =  curHeight * zoomOutIntensity
-        visualContainer.style.height = newHeight + "px"
+        // let heightText = visualContainer.style.height
+        // let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
+        // let newHeight =  curHeight * zoomOutIntensity
+        // visualContainer.style.height = newHeight + "px"
+        let newSize = svgElement.viewBox.baseVal.width + zoomRate
+
+        svgElement.setAttribute("viewBox", svgElement.viewBox.baseVal.x + " " + svgElement.viewBox.baseVal.y + " " + 
+            newSize + " " + newSize
+        )
     })
 }
