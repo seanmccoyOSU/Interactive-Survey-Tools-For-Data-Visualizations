@@ -2,15 +2,18 @@ let svgElement                                                          // var t
 let visualElements                                                      // var to hold the list of all svg vector elements
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 const visualContainer = document.getElementById("visual-container")     // container for the visual
+const currentRole = wrapper.classList[0]
 
 document.getElementById("editor-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("participant") 
-    wrapper.classList.add("editor") 
+    wrapper.classList.add("editor")
+    document.getElementById("current-class").textContent= wrapper.classList[0]
 })
 
 document.getElementById("participant-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("editor") 
     wrapper.classList.add("participant") 
+    document.getElementById("current-class").textContent = wrapper.classList[0]
 })
 
 // start loading svg once page has loaded
