@@ -278,6 +278,10 @@ function EnableBox() {
     })
 }
 
+// The following function was adapted from stackoverflow user "inna" (Jan 19, 2018)
+// Adapted from function transformPoint() (name was taken from Paul LeBeau's answer) 
+// Sourced on 1/30/2025
+// Source URL: https://stackoverflow.com/questions/48343436/how-to-convert-svg-element-coordinates-to-screen-coordinates
 function screenToSVG(screenX, screenY) {
     const p = svgElement.createSVGPoint()
     p.x = screenX
