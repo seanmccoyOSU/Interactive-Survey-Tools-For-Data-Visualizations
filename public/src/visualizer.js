@@ -1,22 +1,51 @@
-let svgElement                                                          // var to hold entire svg element
-let visualElements                                                      // var to hold the list of all svg vector elements
+import {VisualizationElement} from "./visualizationElement.js"
+
+let mouseMode = "pan"
+let visualizationElement
+let svgElement
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 const visualContainer = document.getElementById("visual-container")     // container for the visual
 
 document.getElementById("editor-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("participant") 
     wrapper.classList.add("editor") 
+    document.getElementById("pan-button").removeAttribute("hidden")
+    document.getElementById("create-button").removeAttribute("hidden")
+    document.getElementById("delete-button").removeAttribute("hidden")
 })
 
 document.getElementById("participant-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("editor") 
     wrapper.classList.add("participant") 
+    mouseMode = "pan"
+    document.getElementById("pan-button").setAttribute("hidden", "true")
+    document.getElementById("create-button").setAttribute("hidden", "true")
+    document.getElementById("delete-button").setAttribute("hidden", "true")
+})
+
+document.getElementById("pan-button").addEventListener("click", (evt) => {
+    mouseMode = "pan" 
+    wrapper.style.cursor = "grab"
+})
+
+// document.getElementById("select-button").addEventListener("click", (evt) => {
+//     mouseMode = "select" 
+//     wrapper.style.cursor = "default"
+// })
+
+document.getElementById("create-button").addEventListener("click", (evt) => {
+    mouseMode = "create" 
+    wrapper.style.cursor = "crosshair"
+})
+
+document.getElementById("delete-button").addEventListener("click", (evt) => {
+    mouseMode = "delete" 
+    wrapper.style.cursor = "default"
 })
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
     wrapper.classList.add("participant") 
-    //LoadSvg();
     const uploader = document.getElementById("svg-uploader");
     uploader.addEventListener("change", handleSvgUpload);
 });
@@ -24,6 +53,9 @@ addEventListener("DOMContentLoaded", () => {
 
 //Locally saves the current .SVG file being displayed
 document.getElementById("save-svg").addEventListener("click", () => {
+    // we don't want to save modified scale and position
+    visualizationElement.resetScaleAndPosition()
+
     // 1) Convert the current <svg> to a string
     //    Using XMLSerializer preserves all attributes and nested elements
     const serializer = new XMLSerializer();
@@ -45,18 +77,6 @@ document.getElementById("save-svg").addEventListener("click", () => {
     URL.revokeObjectURL(url);
 });
 
-// no more default svg
-// Reads SVG file, then inserts it as a set of DOM elements into page
-// function LoadSvg() {
-//     fetch("../hyper.svg")
-//       .then((response) => response.text())
-//       .then((svgText) => {
-//         loadSvgFromText(svgText);
-//       })
-//       .catch(err => {
-//         console.error("Error fetching default SVG:", err);
-//       });
-// }
 
 function handleSvgUpload(event){
     const file = event.target.files[0];
@@ -72,6 +92,7 @@ function handleSvgUpload(event){
 }
 
 function loadSvgFromText(svgText) {
+    let firstUpload = true
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
   
@@ -82,77 +103,93 @@ function loadSvgFromText(svgText) {
     }
     // Remove old SVG if one is already present
     if (svgElement) {
-      visualContainer.removeChild(svgElement);
+      visualContainer.removeChild(visualizationElement.svg);
+      firstUpload = false
     }
-
-    visualContainer.style.height = "300px"
 
     // Parse SVG text
     svgElement = visualContainer.appendChild(svgDoc.documentElement);
     console.log("Appended SVG:", svgElement);
+
+    visualizationElement = new VisualizationElement(svgElement)
+    console.log("Visualization Element Object:", visualizationElement);
   
     // Re-initialize pan/zoom
     OnLoadSvg();
+    if (firstUpload)
+        OnFirstUpload();
 }
 
 function OnLoadSvg() {
     EnableSelection()
+}
+
+function OnFirstUpload() {
     EnablePanning()
     EnableZoom()
+    EnableBox()
 }
 
 // Enable user to select/deselect vector elements by clicking on them
 function EnableSelection() {
-    // get list of vector elements (path elements)
-    visualElements = svgElement.getElementsByTagName("path")
-    
-    // loop through list
-    for(let i = 0; i < visualElements.length; i++) {
-        // mark all elements as selectable by default
-        // only do this for a first time upload
-        if (!svgElement.classList.contains("marked-selectables"))
-        {
-            visualElements.item(i).classList.add("selectable")
-        }
-        
-
-        // clicking on selectable element as a participant marks/unmarks as "selected"
-        visualElements.item(i).addEventListener("click", evt => { 
-            if (wrapper.classList.contains("participant") && evt.currentTarget.classList.contains("selectable")) { 
-                evt.currentTarget.classList.toggle("selected") 
-            } 
-        })
-
-        // clicking on element as an editor marks/unmarks as "selectable"
-        visualElements.item(i).addEventListener("click", evt => { 
-            if (wrapper.classList.contains("editor")) { 
-                evt.currentTarget.classList.toggle("selectable") 
-            } 
-        })
+    // loop through all visual elements and add event listeners to each
+    for(const visualElement of visualizationElement.visualElements) {
+        EnableSelectionOfElement(visualElement)
     }
+}
 
-    // mark svg to not mark all selectables on re-upload
-    if (!svgElement.classList.contains("marked-selectables")) {
-        svgElement.classList.add("marked-selectables")
+// Enable user to select/deselect a single visual element
+function EnableSelectionOfElement(visualElement) {
+    // clicking on selectable element as a participant marks/unmarks as "selected"
+    visualElement.addEventListener("click", evt => { 
+        if (mouseMode == "pan" || mouseMode == "select") {
+            if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
+                visualizationElement.toggleSelection(evt.currentTarget)
+            } 
+        }
+    })
+
+    // clicking on element as an editor marks/unmarks as "selectable"
+    visualElement.addEventListener("click", evt => { 
+        if (mouseMode == "pan" || mouseMode == "select") {
+            if (wrapper.classList.contains("editor")) { 
+                visualizationElement.toggleSelectable(evt.currentTarget)
+            } 
+        }
+    })
+
+    // clicking on element in delete mode deletes it (only for custom elements)
+    if (visualizationElement.isCustom(visualElement)) {
+        visualElement.addEventListener("click", evt => {
+            if (mouseMode == "delete") {
+                visualizationElement.removeVisualElement(visualElement)
+            }
+        })
     }
 }
 
 // Enable user to pan the visual by clicking and dragging anywhere on the page
 function EnablePanning() {
     let isPanning = false
-    let startX, startY
+    let startXMouse, startYMouse
+    let startXVisual, startYVisual
 
     // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
-        // while user holds the mouse button down, the user is panning
-        isPanning = true
-
-        // get starting coordinates for visual
-        startX = evt.clientX - visualContainer.offsetLeft
-        startY = evt.clientY - visualContainer.offsetTop
-
-        // change cursor image to grabbing
-        wrapper.style.cursor = "grabbing"
+        if (mouseMode == "pan") {
+            evt.preventDefault()
+            // while user holds the mouse button down, the user is panning
+            isPanning = true
+    
+            // get starting coordinates for visual and mouse
+            startXMouse = evt.clientX
+            startYMouse = evt.clientY
+            startXVisual = visualizationElement.x
+            startYVisual = visualizationElement.y
+    
+            // change cursor image to grabbing
+            wrapper.style.cursor = "grabbing"
+        }
     })
 
     // define behavior for when user moves mouse while panning
@@ -161,48 +198,136 @@ function EnablePanning() {
             // prevent mouse from highlighting text while panning
             evt.preventDefault()
 
-            // coordinates to move visual to
-            const x = evt.clientX - startX
-            const y = evt.clientY - startY
+            // get scale of visualization as it is displayed in the window
+            const svgBoundingBox = visualizationElement.svg.getBoundingClientRect()
+            const svgWindowScale = svgBoundingBox.height < svgBoundingBox.width ? svgBoundingBox.height : svgBoundingBox.width
 
-            // move the visual accordingly
-            visualContainer.style.left = x + "px"
-            visualContainer.style.top = y + "px"
+            // panning speed adjusts based on visualization's programmed scale and its window scale 
+            const speedModifier = visualizationElement.scale / svgWindowScale
+
+            // coordinates to move visual to
+            visualizationElement.x = startXVisual - (evt.clientX - startXMouse) * speedModifier
+            visualizationElement.y = startYVisual - (evt.clientY - startYMouse) * speedModifier
         }
     })
 
     // define behavior for when user releases mouse button
     document.addEventListener("mouseup", () => {
-        // the user is not panning if the mouse button is not pressed down
-        isPanning = false
+        if (mouseMode == "pan") {
+            // the user is not panning if the mouse button is not pressed down
+            isPanning = false
 
-        // change cursor image to grab
-        wrapper.style.cursor = "grab"
+            // change cursor image to grab
+            wrapper.style.cursor = "grab"
+        }
     })
 }
 
 // Enable user to zoom the visual by clicking the zoom buttons
 function EnableZoom() {
-    // specify zoom intensities
-    const zoomInIntensity = 1.5
-    const zoomOutIntensity = 1./zoomInIntensity     // inverse of zoom in
-
-    // set viewBox attribute, this is necessary for scaling
-    svgElement.setAttribute("viewBox", "0 0 " + svgElement.width.baseVal.value + " " + svgElement.height.baseVal.value)
+    const zoomOutIntensity = 2
+    const zoomInIntensity = 1./zoomOutIntensity     // inverse
     
     // define zoom in event for clicking zoom in button
     document.getElementById("zoom-in").addEventListener("click", () => {
-        let heightText = visualContainer.style.height
-        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
-        let newHeight =  curHeight * zoomInIntensity
-        visualContainer.style.height = newHeight + "px"
+        let newSize = visualizationElement.scale * zoomInIntensity
+
+        visualizationElement.scale = newSize
     })
 
     // define zoom out event for clicking zoom out button
     document.getElementById("zoom-out").addEventListener("click", () => {
-        let heightText = visualContainer.style.height
-        let curHeight = parseInt(heightText.substring(0, heightText.length - 2))
-        let newHeight =  curHeight * zoomOutIntensity
-        visualContainer.style.height = newHeight + "px"
+        let newSize = visualizationElement.scale * zoomOutIntensity
+
+        visualizationElement.scale = newSize
     })
 }
+
+// Enable user to draw a box on the screen
+function EnableBox() {
+    let box
+    let boxStartingPoint
+    let isStartDrawing = false
+    let isDrawingBox = false
+
+    // when user presses mouse in select or create mode, enable box drawing
+    wrapper.addEventListener("mousedown", evt => {
+        if (mouseMode == "select" || mouseMode == "create") {
+            evt.preventDefault()
+            isStartDrawing = true
+        }
+    })
+
+    document.addEventListener("mousemove", evt => {
+        if (isStartDrawing) {       // when user has just started moving mouse after pressing down
+            evt.preventDefault()
+
+            // create rectangle element to start drawing the box at the mouse point
+            box = document.createElementNS("http://www.w3.org/2000/svg", "rect")
+            box.setAttribute("width", 0)
+            box.setAttribute("height", 0)
+            boxStartingPoint = screenToSVG(evt.clientX, evt.clientY)
+            box.setAttribute("x", boxStartingPoint.x)
+            box.setAttribute("y", boxStartingPoint.y)
+            box.setAttribute("id", "user-box")
+
+            visualizationElement.svg.appendChild(box)
+
+            isDrawingBox = true
+            isStartDrawing = false
+        } else if (isDrawingBox) {  // when user continues to move mouse
+            // prevent mouse from highlighting text while drawing
+            evt.preventDefault()
+
+            // calculate box dimensions based on where mouse has moved from its starting point
+            const newPoint = screenToSVG(evt.clientX, evt.clientY)
+            const newWidth = newPoint.x - boxStartingPoint.x
+            const newHeight = newPoint.y - boxStartingPoint.y
+
+            // width and height grow box to the right and down respectively
+            // if the user moves the mouse to the left or up (indicated by negative dimensions),
+            // the box needs to be shifted accordingly in the same direction to appear to grow in that direction
+            if (newWidth <= 0) {
+                box.setAttribute("x", boxStartingPoint.x + newWidth)
+            }
+            if (newHeight <= 0) {
+                box.setAttribute("y", boxStartingPoint.y + newHeight)
+            }
+
+            // set new box dimensions, can only be positive
+            box.setAttribute("width", Math.abs(newWidth))
+            box.setAttribute("height", Math.abs(newHeight))
+            
+        }
+    })
+
+    document.addEventListener("mouseup", evt => {
+        // user is not longer drawing on mouse release
+        isDrawingBox = false
+        isStartDrawing = false
+        if (box) {
+            if (mouseMode == "select") {
+                box.remove()
+                // FUTURE GOAL: box selection
+            } else if (mouseMode == "create") {
+                // change from temporary box to actual visual element 
+                box.removeAttribute("id")
+                visualizationElement.addVisualElement(box)
+                EnableSelectionOfElement(box)
+            }
+
+            box = null
+        }
+    })
+}
+
+// The following function was adapted from stackoverflow user "inna" (Jan 19, 2018)
+// Adapted from function transformPoint() (name was taken from Paul LeBeau's answer) 
+// Sourced on 1/30/2025
+// Source URL: https://stackoverflow.com/questions/48343436/how-to-convert-svg-element-coordinates-to-screen-coordinates
+function screenToSVG(screenX, screenY) {
+    const p = DOMPoint.fromPoint(svgElement)
+    p.x = screenX
+    p.y = screenY
+    return p.matrixTransform(svgElement.getScreenCTM().inverse());
+ }
