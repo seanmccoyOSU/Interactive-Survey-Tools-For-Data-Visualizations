@@ -194,7 +194,12 @@ function EnablePanning() {
             // prevent mouse from highlighting text while panning
             evt.preventDefault()
 
-            const speedModifier = visualizationElement.scale / 1000
+            // get scale of visualization as it is displayed in the window
+            const svgBoundingBox = visualizationElement.svg.getBoundingClientRect()
+            const svgWindowScale = svgBoundingBox.height < svgBoundingBox.width ? svgBoundingBox.height : svgBoundingBox.width
+
+            // panning speed adjusts based on visualization's programmed scale and its window scale 
+            const speedModifier = visualizationElement.scale / svgWindowScale
 
             // coordinates to move visual to
             visualizationElement.x = startXVisual - (evt.clientX - startXMouse) * speedModifier
