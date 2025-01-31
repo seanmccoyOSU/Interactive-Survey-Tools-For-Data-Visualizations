@@ -55,7 +55,7 @@ addEventListener("DOMContentLoaded", () => {
 document.getElementById("save-svg").addEventListener("click", () => {
     // we don't want to save modified scale and position
     visualizationElement.resetScaleAndPosition()
-    
+
     // 1) Convert the current <svg> to a string
     //    Using XMLSerializer preserves all attributes and nested elements
     const serializer = new XMLSerializer();
@@ -138,6 +138,7 @@ function EnableSelection() {
     }
 }
 
+// Enable user to select/deselect a single visual element
 function EnableSelectionOfElement(visualElement) {
     // clicking on selectable element as a participant marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
@@ -242,12 +243,14 @@ function EnableZoom() {
     })
 }
 
+// Enable user to draw a box on the screen
 function EnableBox() {
     let box
+    let boxStartingPoint
     let isStartDrawing = false
     let isDrawingBox = false
-    let boxStartingPoint
 
+    // when user presses mouse in select or create mode, enable box drawing
     wrapper.addEventListener("mousedown", evt => {
         if (mouseMode == "select" || mouseMode == "create") {
             evt.preventDefault()
@@ -256,9 +259,10 @@ function EnableBox() {
     })
 
     document.addEventListener("mousemove", evt => {
-        if (isStartDrawing) {
+        if (isStartDrawing) {       // when user has just started moving mouse after pressing down
             evt.preventDefault()
 
+            // create rectangle element to start drawing the box at the mouse point
             box = document.createElementNS("http://www.w3.org/2000/svg", "rect")
             box.setAttribute("width", 0)
             box.setAttribute("height", 0)
@@ -269,18 +273,20 @@ function EnableBox() {
 
             visualizationElement.svg.appendChild(box)
 
-            
-
             isDrawingBox = true
             isStartDrawing = false
-        } else if (isDrawingBox) {
+        } else if (isDrawingBox) {  // when user continues to move mouse
             // prevent mouse from highlighting text while drawing
             evt.preventDefault()
 
+            // calculate box dimensions based on where mouse has moved from its starting point
             const newPoint = screenToSVG(evt.clientX, evt.clientY)
             const newWidth = newPoint.x - boxStartingPoint.x
             const newHeight = newPoint.y - boxStartingPoint.y
 
+            // width and height grow box to the right and down respectively
+            // if the user moves the mouse to the left or up (indicated by negative dimensions),
+            // the box needs to be shifted accordingly in the same direction to appear to grow in that direction
             if (newWidth <= 0) {
                 box.setAttribute("x", boxStartingPoint.x + newWidth)
             }
@@ -288,6 +294,7 @@ function EnableBox() {
                 box.setAttribute("y", boxStartingPoint.y + newHeight)
             }
 
+            // set new box dimensions, can only be positive
             box.setAttribute("width", Math.abs(newWidth))
             box.setAttribute("height", Math.abs(newHeight))
             
@@ -295,12 +302,15 @@ function EnableBox() {
     })
 
     document.addEventListener("mouseup", evt => {
+        // user is not longer drawing on mouse release
         isDrawingBox = false
         isStartDrawing = false
         if (box) {
             if (mouseMode == "select") {
                 box.remove()
+                // FUTURE GOAL: box selection
             } else if (mouseMode == "create") {
+                // change from temporary box to actual visual element 
                 box.removeAttribute("id")
                 visualizationElement.addVisualElement(box)
                 EnableSelectionOfElement(box)

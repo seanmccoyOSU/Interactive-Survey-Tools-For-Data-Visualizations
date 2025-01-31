@@ -56,13 +56,10 @@ const VisualizationElement = class {
         this.svg = svg
         this.visualElements = ExtractVisualElements(svg)
 
-        console.log(this.svg.width)
-        console.log(this.svg.viewBox)
         this.defaultWidth = this.svg.viewBox.baseVal.width ? this.svg.viewBox.baseVal.width : this.svg.width.baseVal.value
         this.defaultHeight = this.svg.viewBox.baseVal.height ? this.svg.viewBox.baseVal.height : this.svg.height.baseVal.value
         this.resetScaleAndPosition()
         
-
         // on first time upload, mark all visual elements as selectable by default
         if (!this.svg.classList.contains(FIRST_TIME_MARK_LABEL)) {
             this.setSelectableMultiple(this.visualElements)
