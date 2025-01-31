@@ -124,20 +124,24 @@ function OnFirstUpload() {
 function EnableSelection() {
     // loop through all visual elements and add event listeners to each
     for(const visualElement of visualizationElement.visualElements) {
-        // clicking on selectable element as a participant marks/unmarks as "selected"
-        visualElement.addEventListener("click", evt => { 
-            if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
-                visualizationElement.toggleSelection(evt.currentTarget)
-            } 
-        })
-
-        // clicking on element as an editor marks/unmarks as "selectable"
-        visualElement.addEventListener("click", evt => { 
-            if (wrapper.classList.contains("editor")) { 
-                visualizationElement.toggleSelectable(evt.currentTarget)
-            } 
-        })
+        EnableSelectionOfElement(visualElement)
     }
+}
+
+function EnableSelectionOfElement(visualElement) {
+    // clicking on selectable element as a participant marks/unmarks as "selected"
+    visualElement.addEventListener("click", evt => { 
+        if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
+            visualizationElement.toggleSelection(evt.currentTarget)
+        } 
+    })
+
+    // clicking on element as an editor marks/unmarks as "selectable"
+    visualElement.addEventListener("click", evt => { 
+        if (wrapper.classList.contains("editor")) { 
+            visualizationElement.toggleSelectable(evt.currentTarget)
+        } 
+    })
 }
 
 // Enable user to pan the visual by clicking and dragging anywhere on the page
@@ -267,10 +271,11 @@ function EnableBox() {
         isStartDrawing = false
         if (box) {
             if (mouseMode == "select") {
-                visualizationElement.removeVisualElement(box)
+                box.remove()
             } else if (mouseMode == "create") {
                 box.removeAttribute("id")
                 visualizationElement.addVisualElement(box)
+                EnableSelectionOfElement(box)
             }
 
             box = null
