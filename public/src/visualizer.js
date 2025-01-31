@@ -142,6 +142,15 @@ function EnableSelectionOfElement(visualElement) {
             visualizationElement.toggleSelectable(evt.currentTarget)
         } 
     })
+
+    // clicking on element in delete mode deletes it (only for custom elements)
+    if (visualElement.classList.contains("custom")) {
+        visualElement.addEventListener("click", evt => {
+            if (mouseMode == "delete") {
+                visualizationElement.removeVisualElement(visualElement)
+            }
+        })
+    }
 }
 
 // Enable user to pan the visual by clicking and dragging anywhere on the page
