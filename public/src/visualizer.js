@@ -53,6 +53,9 @@ addEventListener("DOMContentLoaded", () => {
 
 //Locally saves the current .SVG file being displayed
 document.getElementById("save-svg").addEventListener("click", () => {
+    // we don't want to save modified scale and position
+    visualizationElement.resetScaleAndPosition()
+    
     // 1) Convert the current <svg> to a string
     //    Using XMLSerializer preserves all attributes and nested elements
     const serializer = new XMLSerializer();
