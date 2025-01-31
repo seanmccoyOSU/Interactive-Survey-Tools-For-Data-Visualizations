@@ -117,6 +117,7 @@ function OnLoadSvg() {
 function OnFirstUpload() {
     EnablePanning()
     EnableZoom()
+    EnableBox()
 }
 
 // Enable user to select/deselect vector elements by clicking on them
@@ -208,3 +209,78 @@ function EnableZoom() {
         visualizationElement.scale = newSize
     })
 }
+
+function EnableBox() {
+    let box
+    let isStartDrawing = false
+    let isDrawingBox = false
+    let boxStartingPoint
+
+    wrapper.addEventListener("mousedown", evt => {
+        if (mouseMode == "select" || mouseMode == "create") {
+            evt.preventDefault()
+            isStartDrawing = true
+        }
+    })
+
+    document.addEventListener("mousemove", evt => {
+        if (isStartDrawing) {
+            evt.preventDefault()
+
+            box = document.createElementNS("http://www.w3.org/2000/svg", "rect")
+            box.setAttribute("width", 0)
+            box.setAttribute("height", 0)
+            boxStartingPoint = screenToSVG(evt.clientX, evt.clientY)
+            box.setAttribute("x", boxStartingPoint.x)
+            box.setAttribute("y", boxStartingPoint.y)
+            box.setAttribute("id", "user-box")
+
+            visualizationElement.svg.appendChild(box)
+
+            
+
+            isDrawingBox = true
+            isStartDrawing = false
+        } else if (isDrawingBox) {
+            // prevent mouse from highlighting text while drawing
+            evt.preventDefault()
+
+            const newPoint = screenToSVG(evt.clientX, evt.clientY)
+            const newWidth = newPoint.x - boxStartingPoint.x
+            const newHeight = newPoint.y - boxStartingPoint.y
+
+            if (newWidth <= 0) {
+                box.setAttribute("x", boxStartingPoint.x + newWidth)
+            }
+            if (newHeight <= 0) {
+                box.setAttribute("y", boxStartingPoint.y + newHeight)
+            }
+
+            box.setAttribute("width", Math.abs(newWidth))
+            box.setAttribute("height", Math.abs(newHeight))
+            
+        }
+    })
+
+    document.addEventListener("mouseup", evt => {
+        isDrawingBox = false
+        isStartDrawing = false
+        if (box) {
+            if (mouseMode == "select") {
+                visualizationElement.removeVisualElement(box)
+            } else if (mouseMode == "create") {
+                box.removeAttribute("id")
+                visualizationElement.addVisualElement(box)
+            }
+
+            box = null
+        }
+    })
+}
+
+function screenToSVG(screenX, screenY) {
+    const p = svgElement.createSVGPoint()
+    p.x = screenX
+    p.y = screenY
+    return p.matrixTransform(svgElement.getScreenCTM().inverse());
+ }

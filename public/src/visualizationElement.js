@@ -34,6 +34,13 @@ const SELECTABLE_LABEL = "selectable"
  * @default
  */
 const FIRST_TIME_MARK_LABEL = "marked-selectables"
+/**
+ * Class name for user-created visual elements
+ * @const
+ * @type {string}
+ * @default
+ */
+const CUSTOM_ELEMENT_LABEL = "custom"
 
 /**
  * Class for the visualization element in the DOM
@@ -138,13 +145,16 @@ const VisualizationElement = class {
      */
     addVisualElement(element) {
         // append the element to the SVG
-        const liveElement = this.svg.appendChild(element)
+        //const liveElement = this.svg.appendChild(element)
 
         // mark as a visual element
         element.classList.add(VISUAL_ELEMENT_LABEL)
 
+        // mark as a custom element
+        element.classList.add(CUSTOM_ELEMENT_LABEL)
+
         // make selectable by default
-        this.setSelectable(liveElement)
+        this.setSelectable(element)
     }
 
     /**

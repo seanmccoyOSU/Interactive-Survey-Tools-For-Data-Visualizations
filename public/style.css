@@ -36,3 +36,12 @@ button, input {
     z-index: 11;
     position: relative;
 }
+
+.custom {
+    fill-opacity: 0%;
+}
+
+#user-box {
+    fill: blue;
+    fill-opacity: 20%;
+}
