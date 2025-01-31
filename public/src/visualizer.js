@@ -9,11 +9,18 @@ const visualContainer = document.getElementById("visual-container")     // conta
 document.getElementById("editor-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("participant") 
     wrapper.classList.add("editor") 
+    document.getElementById("pan-button").removeAttribute("hidden")
+    document.getElementById("create-button").removeAttribute("hidden")
+    document.getElementById("delete-button").removeAttribute("hidden")
 })
 
 document.getElementById("participant-button").addEventListener("click", (evt) => {
     wrapper.classList.remove("editor") 
     wrapper.classList.add("participant") 
+    mouseMode = "pan"
+    document.getElementById("pan-button").setAttribute("hidden", "true")
+    document.getElementById("create-button").setAttribute("hidden", "true")
+    document.getElementById("delete-button").setAttribute("hidden", "true")
 })
 
 document.getElementById("pan-button").addEventListener("click", (evt) => {
@@ -21,14 +28,14 @@ document.getElementById("pan-button").addEventListener("click", (evt) => {
     wrapper.style.cursor = "grab"
 })
 
-document.getElementById("select-button").addEventListener("click", (evt) => {
-    mouseMode = "select" 
-    wrapper.style.cursor = "default"
-})
+// document.getElementById("select-button").addEventListener("click", (evt) => {
+//     mouseMode = "select" 
+//     wrapper.style.cursor = "default"
+// })
 
 document.getElementById("create-button").addEventListener("click", (evt) => {
     mouseMode = "create" 
-    wrapper.style.cursor = "default"
+    wrapper.style.cursor = "crosshair"
 })
 
 document.getElementById("delete-button").addEventListener("click", (evt) => {
@@ -131,20 +138,24 @@ function EnableSelection() {
 function EnableSelectionOfElement(visualElement) {
     // clicking on selectable element as a participant marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
-        if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
-            visualizationElement.toggleSelection(evt.currentTarget)
-        } 
+        if (mouseMode == "pan" || mouseMode == "select") {
+            if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
+                visualizationElement.toggleSelection(evt.currentTarget)
+            } 
+        }
     })
 
     // clicking on element as an editor marks/unmarks as "selectable"
     visualElement.addEventListener("click", evt => { 
-        if (wrapper.classList.contains("editor")) { 
-            visualizationElement.toggleSelectable(evt.currentTarget)
-        } 
+        if (mouseMode == "pan" || mouseMode == "select") {
+            if (wrapper.classList.contains("editor")) { 
+                visualizationElement.toggleSelectable(evt.currentTarget)
+            } 
+        }
     })
 
     // clicking on element in delete mode deletes it (only for custom elements)
-    if (visualElement.classList.contains("custom")) {
+    if (visualizationElement.isCustom(visualElement)) {
         visualElement.addEventListener("click", evt => {
             if (mouseMode == "delete") {
                 visualizationElement.removeVisualElement(visualElement)
@@ -297,7 +308,7 @@ function EnableBox() {
 // Sourced on 1/30/2025
 // Source URL: https://stackoverflow.com/questions/48343436/how-to-convert-svg-element-coordinates-to-screen-coordinates
 function screenToSVG(screenX, screenY) {
-    const p = svgElement.createSVGPoint()
+    const p = DOMPoint.fromPoint(svgElement)
     p.x = screenX
     p.y = screenY
     return p.matrixTransform(svgElement.getScreenCTM().inverse());

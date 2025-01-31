@@ -140,6 +140,16 @@ const VisualizationElement = class {
     }
 
     /**
+     * Returns true if element was drawn by user
+     * @param {Element} element 
+     * @returns {boolean} 
+     */
+    isCustom(element) {
+        return element.classList.contains(CUSTOM_ELEMENT_LABEL)
+    }
+    
+
+    /**
      * Adds visual element to visualization
      * @param {Element} element 
      */
@@ -221,9 +231,7 @@ function ExtractVisualElements(svg) {
     // mark all elements with the appropriate tag
     for (const tag of VISUAL_ELEMENT_TAGS) {
         const shapeGroup = svg.getElementsByTagName(tag)
-        console.log(shapeGroup)
         for (const shape of shapeGroup) {
-            console.log(shape)
             shape.classList.add(VISUAL_ELEMENT_LABEL)
         }
     }
