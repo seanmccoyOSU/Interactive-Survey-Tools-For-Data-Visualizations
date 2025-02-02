@@ -1,22 +1,33 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const { DataTypes } = require('sequelize')
+const sequelize = require('../lib/sequelize')
+const bcrypt = require('bcryptjs')
 
-const UserSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
+const User = sequelize.define('user', {
+  name: { type: DataTypes.STRING, allowNull: false, unique: true },
+  password: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    set(value) {
+        this.setDataValue('password', bcrypt.hashSync(value, 8))
+    }
+  }
+})
 
-// Hash password before saving
-UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-});
+exports.User = User
 
-// Compare entered password with stored hashed password
-UserSchema.methods.comparePassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-};
+/*
+ * Export an array containing the names of fields the client is allowed to set
+ * on users.
+ */
+exports.UserClientFields = [
+  'name',
+  'password'
+]
 
-module.exports = mongoose.model('User', UserSchema);
+/*
+ * validate username and password
+ */
+exports.validateCredentials = async function (name, password) {
+    const user = await User.findOne({ where: { name: name }})
+    return user && await bcrypt.compare(password, user.password)
+}

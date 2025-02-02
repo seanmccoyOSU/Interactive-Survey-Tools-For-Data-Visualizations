@@ -1,10 +1,11 @@
+require('dotenv').config()
+
 const express = require('express');
-const connectDB = require('./config/db');
 const cors = require('cors');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 
-connectDB();
+const sequelize = require('./lib/sequelize')
 
 const app = express();
 
@@ -27,5 +28,22 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
+app.use('*', function (req, res, next) {
+    res.status(404).send({
+        error: "Requested resource " + req.originalUrl + " does not exist"
+    })
+})
+
+app.use('*', function (err, req, res, next) {
+    console.error("== Error:", err)
+    res.status(500).send({
+        error: "Server error.  Please try again later."
+    })
+})
+
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+sequelize.sync().then(function () {
+    app.listen(PORT, function () {
+        console.log("== Server is running on port", PORT)
+    })
+})
