@@ -48,9 +48,11 @@ app.get('/login', (req, res) => {
 });
 
 app.use('*', function (req, res, next) {
-    res.status(404).send({
-        error: "Requested resource " + req.originalUrl + " does not exist"
-    })
+    // res.status(404).send({
+    //     error: "Requested resource " + req.originalUrl + " does not exist"
+    // })
+    res.render("404page")
+    
 })
 
 app.use('*', function (err, req, res, next) {

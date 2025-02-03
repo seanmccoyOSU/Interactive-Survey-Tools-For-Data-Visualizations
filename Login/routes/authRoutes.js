@@ -23,7 +23,9 @@ router.post('/', async (req, res, next) => {
       res.status(201).redirect(req.protocol + "://" + req.get("host"))
   } catch (e) {
       if (e instanceof ValidationError) {
-          res.status(400).send({ error: e.message })
+          res.status(400).render("register", { 
+            error: e.message 
+          })
       } else {
           next(e)
       }
