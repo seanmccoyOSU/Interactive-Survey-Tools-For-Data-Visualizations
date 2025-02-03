@@ -40,8 +40,8 @@ router.post('/login', async (req, res, next) => {
         res.cookie("access_token", token, {httpOnly: true})
         res.status(200).redirect(req.protocol + "://" + req.get("host"))
       } else {
-        res.status(401).send({
-          error: "Invalid authentication credentials"
+        res.status(401).render("login", {
+          error: "invalid login credentials"
         })
       }
     } catch (e) {
