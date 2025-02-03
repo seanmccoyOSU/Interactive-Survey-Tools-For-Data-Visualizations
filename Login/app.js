@@ -1,31 +1,47 @@
 require('dotenv').config()
 
 const express = require('express');
-const cors = require('cors');
+const exphbs = require('express-handlebars');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
+const { checkAuthentication } = require('./lib/auth')
+
+const { User } = require('./model/User')
 
 const sequelize = require('./lib/sequelize')
 
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 app.use('/auth', authRoutes);
 
 app.use(express.static(path.join(__dirname, 'Login', 'views'))); // Serving static files
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'home.html'));
+app.engine("handlebars", exphbs.engine({
+    defaultLayout: "main.handlebars"
+  }))
+  app.set("view engine", "handlebars")
+
+app.get('/', checkAuthentication, async (req, res) => {
+    const user = await User.findOne({ where: { id: req.userid }})
+
+    const welcomeMessage = user ? `Hello, ${user.name}!` : ""
+
+    res.render("home", {
+        name: welcomeMessage
+    })
 });
 
 app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'register.html'));
+    res.render("register")
 });
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'login.html'));
+    res.render("login")
 });
 
 app.use('*', function (req, res, next) {
