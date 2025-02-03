@@ -27,7 +27,10 @@ app.engine("handlebars", exphbs.engine({
   app.set("view engine", "handlebars")
 
 app.get('/', checkAuthentication, async (req, res) => {
-    const user = await User.findOne({ where: { id: req.userid }})
+    let user = null 
+    
+    if (req.userid)
+        user = await User.findOne({ where: { id: req.userid }})
 
     const welcomeMessage = user ? `Hello, ${user.name}!` : ""
 

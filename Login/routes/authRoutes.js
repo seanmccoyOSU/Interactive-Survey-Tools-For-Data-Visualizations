@@ -32,22 +32,30 @@ router.post('/', async (req, res, next) => {
 
 // Login user
 router.post('/login', async (req, res, next) => {
-    try {
-        const authenticated = await validateCredentials(req.body.name, req.body.password)
-        if (authenticated) {
-          const user = await User.findOne({ where: { name: req.body.name}})
-          const token = generateAuthToken(user.id)
-          res.cookie("access_token", token, {httpOnly: true})
-          res.status(200).redirect(req.protocol + "://" + req.get("host"))
-
-        } else {
-          res.status(401).send({
-            error: "Invalid authentication credentials"
-          })
-        }
-      } catch (e) {
-        next(e)
+  try {
+      const authenticated = await validateCredentials(req.body.name, req.body.password)
+      if (authenticated) {
+        const user = await User.findOne({ where: { name: req.body.name}})
+        const token = generateAuthToken(user.id)
+        res.cookie("access_token", token, {httpOnly: true})
+        res.status(200).redirect(req.protocol + "://" + req.get("host"))
+      } else {
+        res.status(401).send({
+          error: "Invalid authentication credentials"
+        })
       }
+    } catch (e) {
+      next(e)
+    }
+});
+
+router.post('/logout', async (req, res, next) => {
+  try {
+    res.cookie("access_token", null, {httpOnly: true})
+    res.status(200).redirect(req.protocol + "://" + req.get("host"))
+  } catch (e) {
+    next(e)
+  }
 });
 
 module.exports = router;

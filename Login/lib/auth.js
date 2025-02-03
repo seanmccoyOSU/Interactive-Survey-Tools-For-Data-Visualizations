@@ -11,14 +11,12 @@ exports.generateAuthToken = function (userId) {
 
 exports.requireAuthentication = function (req, res, next) {
   let token = req.cookies.access_token
-  console.log(token)
-  if (!token) {
-    const authHeader = req.get("Authorization") || ""
-    const authHeaderParts = authHeader.split(" ")
-    token = authHeaderParts[0] === "Bearer" ? authHeaderParts[1] : null
-  }
 
-  console.log(token)
+  // if (!token) {
+  //   const authHeader = req.get("Authorization") || ""
+  //   const authHeaderParts = authHeader.split(" ")
+  //   token = authHeaderParts[0] === "Bearer" ? authHeaderParts[1] : null
+  // }
 
   try {
     const payload = jwt.verify(token, secretKey)
@@ -33,17 +31,15 @@ exports.requireAuthentication = function (req, res, next) {
 
 exports.checkAuthentication = function (req, res, next) {
   let token = req.cookies.access_token
-  console.log(token)
-  if (!token) {
-    const authHeader = req.get("Authorization") || ""
-    const authHeaderParts = authHeader.split(" ")
-    token = authHeaderParts[0] === "Bearer" ? authHeaderParts[1] : null
-  }
 
-  console.log(token)
+  // if (!token) {
+  //   const authHeader = req.get("Authorization") || ""
+  //   const authHeaderParts = authHeader.split(" ")
+  //   token = authHeaderParts[0] === "Bearer" ? authHeaderParts[1] : null
+  // }
+
   try {
     const payload = jwt.verify(token, secretKey)
-    console.log(payload)
     req.userid = payload.sub
     next()
   } catch (e) {
