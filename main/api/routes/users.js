@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
 // Get current user info (just the name for right now)
-router.get('/users', requireAuthentication, async (req, res, next) => {
+router.get('/', requireAuthentication, async (req, res, next) => {
   try {
     // find user with matching id and return info
     const user = await User.findOne({ where: { id: req.userid }})

@@ -35,7 +35,7 @@ app.engine("handlebars", exphbs.engine({
 // home page
 app.get('/', async (req, res, next) => {
     try {
-        const response = await api.get('/auth/users')
+        const response = await api.get('/users')
 
         let user = null 
 
@@ -69,7 +69,7 @@ app.get('/login', (req, res) => {
 });
 
 // login post request will be relayed to api
-app.post('/auth/login', async (req, res, next) => {
+app.post('/users/login', async (req, res, next) => {
     try {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
@@ -91,7 +91,7 @@ app.post('/auth/login', async (req, res, next) => {
 })
 
 // logout post request will be relayed to api
-app.post('/auth/logout', async (req, res, next) => {
+app.post('/users/logout', async (req, res, next) => {
     try {
         // relay to api
         const response = await api.post(req.originalUrl, req.body)
@@ -105,7 +105,7 @@ app.post('/auth/logout', async (req, res, next) => {
 })
 
 // register post request will be relayed to api
-app.post('/auth', async (req, res, next) => {
+app.post('/users', async (req, res, next) => {
     try {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
