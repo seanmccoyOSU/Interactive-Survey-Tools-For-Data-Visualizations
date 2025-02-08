@@ -23,6 +23,7 @@ exports.requireAuthentication = function (req, res, next) {
     req.userid = payload.sub
     next()
   } catch (e) {
+    console.log("failed to authenticate")
     res.status(401).send({
       error: "Valid authentication token required"
     })
