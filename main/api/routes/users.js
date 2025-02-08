@@ -31,7 +31,9 @@ router.post('/', async (req, res, next) => {
   } catch (e) {
       if (e instanceof ValidationError) {
         // user entered bad credentials for registration
-        res.status(400).send()
+        res.status(400).send({
+          msg: "Invalid input or user already exists"
+        })
       } else {
           next(e)
       }
@@ -53,7 +55,9 @@ router.post('/login', async (req, res, next) => {
         res.status(200).send()
       } else {
         // invalid login attempt
-        res.status(401).send()
+        res.status(401).send({
+          msg: "Invalid login credentials"
+        })
       }
     } catch (e) {
       next(e)

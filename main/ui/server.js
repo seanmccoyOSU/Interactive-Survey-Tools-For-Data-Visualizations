@@ -32,25 +32,26 @@ app.engine("handlebars", exphbs.engine({
   }))
   app.set("view engine", "handlebars")
 
+// map certain API endpoints to name of page to render
+const apiPageNames = {
+    '/users': 'register',
+    '/users/login': 'login'
+}
+
 // home page
 app.get('/', async (req, res, next) => {
     try {
+        // get user info
         const response = await api.get('/users')
 
-        let user = null 
-
-        if (response.data.name)
-            user = response.data.name
-
-        const welcomeMessage = user ? `Hello, ${user}!` : ""
-
+        // if logged in, display name
         res.render("home", {
-            name: welcomeMessage
+            name: `Hello, ${response.data.name}!`
         })
 
     } catch (error) {
         if (error.response) {
-            //console.log(error)
+            // if not logged in, display default page
             res.render("home")
         } else {
             next(error)
@@ -68,60 +69,25 @@ app.get('/login', (req, res) => {
     res.render("login")
 });
 
-// login post request will be relayed to api
-app.post('/users/login', async (req, res, next) => {
+// handles what to do on ui registration, login, or logout
+app.post('/users(/*)?', async (req, res, next) => {
     try {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
 
-        // go back to home page
+        // on success, go back to home page
         res.redirect(req.protocol + "://" + req.get("host"))
         
     } catch (error) {
         if (error.response) {
-            // re-render page with error message
-            res.render("login", {
-                error: "Invalid login credentials"
+            // on fail, re-render page with error message
+            res.render(apiPageNames[req.originalUrl], {
+                error: error.response.data.msg
             })
         } else {
             next(error)
         }
         
-    }
-})
-
-// logout post request will be relayed to api
-app.post('/users/logout', async (req, res, next) => {
-    try {
-        // relay to api
-        const response = await api.post(req.originalUrl, req.body)
-
-        // go back to home page
-        res.redirect(req.protocol + "://" + req.get("host"))
-        
-    } catch (error) {
-        next(error)
-    }
-})
-
-// register post request will be relayed to api
-app.post('/users', async (req, res, next) => {
-    try {
-        // relay post request to api
-        const response = await api.post(req.originalUrl, req.body)
-
-        // go back to home page
-        res.redirect(req.protocol + "://" + req.get("host"))
-        
-    } catch (error) {
-       if (error.response) {
-            // re-render page with error message
-            res.render("register", {
-                error: "Invalid registration credentials or user already exists"
-            })
-        } else {
-            next(error)
-        }
     }
 })
 
