@@ -4,8 +4,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev-visual": "nodemon server.js",
+    "start": "node visualization/ui/server.js",
+    "dev-visual": "nodemon visualization/ui/server.js",
     "dev-main-api": "nodemon main/api/server.js",
     "dev-main-ui": "nodemon main/ui/server.js",
     "dev-main": "concurrently \"npm run dev-main-api\" \"npm run dev-main-ui\""
