@@ -42,20 +42,21 @@ const apiPageNames = {
     '/users/login': 'login'
 }
 
-// home page
+// Default path
+// when there is not path in the URL, go to generic homepage or user dashboard
 app.get('/', async (req, res, next) => {
     try {
         // get user info
         const response = await api.get('/users')
 
-        // if logged in, display name
-        res.render("home", {
-            name: `Hello, ${response.data.name}!`
+        // if logged in, display user dashboard
+        res.render("dashboard", {
+            name: response.data.name
         })
 
     } catch (error) {
         if (error.response) {
-            // if not logged in, display default page
+            // if not logged in, display generic home page
             res.render("home")
         } else {
             next(error)
