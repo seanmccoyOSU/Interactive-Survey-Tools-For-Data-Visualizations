@@ -26,11 +26,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // express-handlebars setup
 // this dynamically renders pages
+const path = require('path');
+app.set('views', path.join(__dirname, 'views'));
 const exphbs = require('express-handlebars');
 app.engine("handlebars", exphbs.engine({
-    defaultLayout: "main.handlebars"
-  }))
-  app.set("view engine", "handlebars")
+    defaultLayout: "main.handlebars",
+    layoutsDir: path.join(app.get('views'), 'layouts'),
+    partialsDir: path.join(app.get('views'), 'partials'),
+}))
+app.set("view engine", "handlebars")
 
 // map certain API endpoints to name of page to render
 const apiPageNames = {
@@ -55,7 +59,7 @@ app.get('/', async (req, res, next) => {
             res.render("home")
         } else {
             next(error)
-        }       
+        }
     }
 });
 
@@ -77,7 +81,7 @@ app.post('/users(/*)?', async (req, res, next) => {
 
         // on success, go back to home page
         res.redirect(req.protocol + "://" + req.get("host"))
-        
+
     } catch (error) {
         if (error.response) {
             // on fail, re-render page with error message
@@ -87,13 +91,13 @@ app.post('/users(/*)?', async (req, res, next) => {
         } else {
             next(error)
         }
-        
+
     }
 })
 
 // anything else is 404
 app.use('*', function (req, res, next) {
-    res.render("404page")  
+    res.render("404page")
 })
 
 // error case
