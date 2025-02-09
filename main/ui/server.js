@@ -45,15 +45,12 @@ const apiPageNames = {
 // Default path
 // when there is not path in the URL, go to generic homepage or user dashboard
 app.get('/', async (req, res, next) => {
+    let user = null
+    
     try {
         // get user info
         const response = await api.get('/users')
-
-        // if logged in, display user dashboard
-        res.render("dashboard", {
-            name: response.data.name
-        })
-
+        user = response.data
     } catch (error) {
         if (error.response) {
             // if not logged in, display generic home page
@@ -62,6 +59,23 @@ app.get('/', async (req, res, next) => {
             next(error)
         }
     }
+
+    // if logged in, display user dashboard
+    if (user) {
+        try {
+            // get user visualizations
+            const response = await api.get(`/users/${user.id}/visualizations`)
+            
+            // TODO: implement user visualizations
+    
+        } catch (error) {
+            res.render("dashboard", {
+                name: user.name,
+                visError: "Unable to load visualizations."
+            })
+        }
+    }
+    
 });
 
 // register page
