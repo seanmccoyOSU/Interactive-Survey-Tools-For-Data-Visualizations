@@ -5,7 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node visualization/ui/server.js",
-    "dev-visual": "nodemon visualization/ui/server.js",
+    "dev-visual-api": "nodemon visualization/api/server.js",
+    "dev-visual-ui": "nodemon visualization/ui/server.js",
+    "dev-visual": "concurrently \"npm run dev-visual-api\" \"npm run dev-visual-ui\"",
     "dev-main-api": "nodemon main/api/server.js",
     "dev-main-ui": "nodemon main/ui/server.js",
     "dev-main": "concurrently \"npm run dev-main-api\" \"npm run dev-main-ui\""

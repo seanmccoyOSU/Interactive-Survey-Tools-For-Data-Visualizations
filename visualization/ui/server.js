@@ -36,8 +36,17 @@ app.get('/', function(req,res,next) {
     }
 })
 
+// ui post
+app.post('/', async function(req,res,next) {
+    try {
+        const response = await api.post(req.originalUrl, req.body)
+    } catch (e) {
+        next(e)
+    }
+})
+
 // endpoint to load specific visualization
-app.get('/{id}', async function(req,res,next) {
+app.get('/:id', async function(req,res,next) {
     try {
         const response = await api.get(`/${req.params.id}`)
         if (req.query.editor) {

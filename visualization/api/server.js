@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 
 // Get visualization info with ID {id}
-app.get('/{id}', async (req, res, next) => {
+app.get('/:id', async (req, res, next) => {
     try {
 		// find visualization with matching id and return info
 		const visualization = await Visualization.findOne({ where: { id: req.params.id } })
