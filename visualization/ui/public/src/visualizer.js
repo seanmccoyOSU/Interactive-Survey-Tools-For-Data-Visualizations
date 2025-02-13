@@ -33,28 +33,32 @@ addEventListener("DOMContentLoaded", () => {
         document.getElementById("create-button").removeAttribute("hidden")
         document.getElementById("delete-button").removeAttribute("hidden")
     } else {
-        // debug mode set up
-        wrapper.classList.add("participant") 
-        document.getElementById("editor-button").removeAttribute("hidden")
-        document.getElementById("participant-button").removeAttribute("hidden")
-
-        // make buttons functional
-        document.getElementById("editor-button").addEventListener("click", (evt) => {
-            wrapper.classList.remove("participant") 
-            wrapper.classList.add("editor") 
-            document.getElementById("pan-button").removeAttribute("hidden")
-            document.getElementById("create-button").removeAttribute("hidden")
-            document.getElementById("delete-button").removeAttribute("hidden")
-        })
+        wrapper.classList.add("participant")
         
-        document.getElementById("participant-button").addEventListener("click", (evt) => {
-            wrapper.classList.remove("editor") 
-            wrapper.classList.add("participant") 
-            mouseMode = "pan"
-            document.getElementById("pan-button").setAttribute("hidden", "true")
-            document.getElementById("create-button").setAttribute("hidden", "true")
-            document.getElementById("delete-button").setAttribute("hidden", "true")
-        })
+        // debug mode if we entered page as participant but there is no svg loaded
+        if (!visualContainer.firstElementChild) {
+            // debug mode set up
+            document.getElementById("editor-button").removeAttribute("hidden")
+            document.getElementById("participant-button").removeAttribute("hidden")
+
+            // make buttons functional
+            document.getElementById("editor-button").addEventListener("click", (evt) => {
+                wrapper.classList.remove("participant") 
+                wrapper.classList.add("editor") 
+                document.getElementById("pan-button").removeAttribute("hidden")
+                document.getElementById("create-button").removeAttribute("hidden")
+                document.getElementById("delete-button").removeAttribute("hidden")
+            })
+
+            document.getElementById("participant-button").addEventListener("click", (evt) => {
+                wrapper.classList.remove("editor") 
+                wrapper.classList.add("participant") 
+                mouseMode = "pan"
+                document.getElementById("pan-button").setAttribute("hidden", "true")
+                document.getElementById("create-button").setAttribute("hidden", "true")
+                document.getElementById("delete-button").setAttribute("hidden", "true")
+            })
+        }
     }
     
     const uploader = document.getElementById("svg-uploader");

@@ -37,10 +37,40 @@ app.get('/', function(req,res,next) {
 })
 
 // endpoint to load specific visualization
-app.get('/{id}', function(req,res,next) {
-    res.render("visualizer")
+app.get('/{id}', async function(req,res,next) {
+    try {
+        const response = await api.get(`/${req.params.id}`)
+        if (req.query.editor) {
+            res.render("visualizer", {
+                role: "editor",
+                svg: response.data.svg
+            })
+        } else {
+            res.render("visualizer", {
+                svg: response.data.svg
+            })
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
+// catch-all
+app.use('*', function (req, res, next) {
+    res.status(404).send({
+        error: "Requested resource " + req.originalUrl + " does not exist"
+    })
+})
+
+// error case
+app.use('*', function (err, req, res, next) {
+    console.error("== Error:", err)
+    res.status(500).send({
+        error: "Server error.  Please try again later."
+    })
+})
+
+// start server
 const port = 8000
 app.listen(port, function () {
     console.log("== Server is running on port", port)
