@@ -43,6 +43,7 @@ addEventListener("DOMContentLoaded", () => {
 
             document.getElementById("editor-button").removeAttribute("hidden")
             document.getElementById("participant-button").removeAttribute("hidden")
+            document.getElementById("save-svg").removeAttribute("hidden")
 
             // make buttons functional
             document.getElementById("editor-button").addEventListener("click", (evt) => {
@@ -60,33 +61,33 @@ addEventListener("DOMContentLoaded", () => {
                 document.getElementById("pan-button").setAttribute("hidden", "true")
                 document.getElementById("create-button").setAttribute("hidden", "true")
                 document.getElementById("delete-button").setAttribute("hidden", "true")
-
-                //Locally saves the current .SVG file being displayed
-                document.getElementById("save-svg").addEventListener("click", () => {
-                    // we don't want to save modified scale and position
-                    visualizationElement.resetScaleAndPosition()
-
-                    // 1) Convert the current <svg> to a string
-                    //    Using XMLSerializer preserves all attributes and nested elements
-                    const serializer = new XMLSerializer();
-                    const svgString = serializer.serializeToString(svgElement);
-                
-                    // 2) Create a Blob from the string, then a URL from the Blob
-                    const blob = new Blob([svgString], { type: "image/svg+xml" });
-                    const url = URL.createObjectURL(blob);
-                
-                    // 3) Create a temporary link element
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.download = "edited-visual.svg"; // default file name in download dialog
-                    document.body.appendChild(link);
-                
-                    // 4) Programmatically click it to start the download, then clean up
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                });
             })
+
+            //Locally saves the current .SVG file being displayed
+            document.getElementById("save-svg").addEventListener("click", () => {
+                // we don't want to save modified scale and position
+                visualizationElement.resetScaleAndPosition()
+
+                // 1) Convert the current <svg> to a string
+                //    Using XMLSerializer preserves all attributes and nested elements
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svgElement);
+            
+                // 2) Create a Blob from the string, then a URL from the Blob
+                const blob = new Blob([svgString], { type: "image/svg+xml" });
+                const url = URL.createObjectURL(blob);
+            
+                // 3) Create a temporary link element
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "edited-visual.svg"; // default file name in download dialog
+                document.body.appendChild(link);
+            
+                // 4) Programmatically click it to start the download, then clean up
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            });
         }
     }
 
@@ -144,8 +145,7 @@ function loadSvgFromText(svgText) {
     visualizationElement = new VisualizationElement(svgElement)
     console.log("Visualization Element Object:", visualizationElement);
 
-    if (!debug) {
-        console.log(svgElement.outerHTML)
+    if (!debug && firstUpload) {
         fetch(window.location.href, { 
             method: "POST",
             body: JSON.stringify({

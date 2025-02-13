@@ -40,6 +40,7 @@ app.get('/', function(req,res,next) {
 app.post('/', async function(req,res,next) {
     try {
         const response = await api.post(req.originalUrl, req.body)
+        console.log("visualization ID: ", response.data.id)
     } catch (e) {
         next(e)
     }
