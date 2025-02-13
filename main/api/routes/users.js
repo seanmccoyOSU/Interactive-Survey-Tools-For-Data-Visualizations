@@ -23,7 +23,7 @@ router.get('/', requireAuthentication, async (req, res, next) => {
 })
 
 // Get visualizations belonging to user
-router.get('/{id}/visualizations', requireAuthentication, async (req, res, next) => {
+router.get('/:id/visualizations', requireAuthentication, async (req, res, next) => {
 	// verify correct id
 	if (req.userid != req.params.id) {
 		res.status(401).send({
