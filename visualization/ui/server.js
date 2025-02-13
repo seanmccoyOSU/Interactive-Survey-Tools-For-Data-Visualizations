@@ -25,7 +25,15 @@ app.set("view engine", "handlebars")
 
 // default/debug endpoint
 app.get('/', function(req,res,next) {
-    res.render("visualizer")
+    // role must be editor to load default page
+    if (req.query.editor) {
+        res.render("visualizer", {
+            role: "editor"
+        })
+    } else {
+        console.log("loading debug page")
+        res.render("visualizer")
+    }
 })
 
 // endpoint to load specific visualization

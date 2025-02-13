@@ -6,23 +6,6 @@ let svgElement
 const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 const visualContainer = document.getElementById("visual-container")     // container for the visual
 
-document.getElementById("editor-button").addEventListener("click", (evt) => {
-    wrapper.classList.remove("participant") 
-    wrapper.classList.add("editor") 
-    document.getElementById("pan-button").removeAttribute("hidden")
-    document.getElementById("create-button").removeAttribute("hidden")
-    document.getElementById("delete-button").removeAttribute("hidden")
-})
-
-document.getElementById("participant-button").addEventListener("click", (evt) => {
-    wrapper.classList.remove("editor") 
-    wrapper.classList.add("participant") 
-    mouseMode = "pan"
-    document.getElementById("pan-button").setAttribute("hidden", "true")
-    document.getElementById("create-button").setAttribute("hidden", "true")
-    document.getElementById("delete-button").setAttribute("hidden", "true")
-})
-
 document.getElementById("pan-button").addEventListener("click", (evt) => {
     mouseMode = "pan" 
     wrapper.style.cursor = "grab"
@@ -45,7 +28,35 @@ document.getElementById("delete-button").addEventListener("click", (evt) => {
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
-    wrapper.classList.add("participant") 
+    if (wrapper.classList.contains("editor")) {
+        document.getElementById("pan-button").removeAttribute("hidden")
+        document.getElementById("create-button").removeAttribute("hidden")
+        document.getElementById("delete-button").removeAttribute("hidden")
+    } else {
+        // debug mode set up
+        wrapper.classList.add("participant") 
+        document.getElementById("editor-button").removeAttribute("hidden")
+        document.getElementById("participant-button").removeAttribute("hidden")
+
+        // make buttons functional
+        document.getElementById("editor-button").addEventListener("click", (evt) => {
+            wrapper.classList.remove("participant") 
+            wrapper.classList.add("editor") 
+            document.getElementById("pan-button").removeAttribute("hidden")
+            document.getElementById("create-button").removeAttribute("hidden")
+            document.getElementById("delete-button").removeAttribute("hidden")
+        })
+        
+        document.getElementById("participant-button").addEventListener("click", (evt) => {
+            wrapper.classList.remove("editor") 
+            wrapper.classList.add("participant") 
+            mouseMode = "pan"
+            document.getElementById("pan-button").setAttribute("hidden", "true")
+            document.getElementById("create-button").setAttribute("hidden", "true")
+            document.getElementById("delete-button").setAttribute("hidden", "true")
+        })
+    }
+    
     const uploader = document.getElementById("svg-uploader");
     uploader.addEventListener("change", handleSvgUpload);
 });
