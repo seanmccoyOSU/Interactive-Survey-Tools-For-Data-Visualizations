@@ -8,23 +8,24 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body id="body">
-    <div id="wrapper">
+    <div id="wrapper" class={{role}}>
       <button id = "zoom-in">+</button>
       <button id = "zoom-out">-</button>
-      <button id = "editor-button">editor mode</button>
-      <button id = "participant-button">participant mode</button>
+      <button id = "editor-button" hidden>editor mode</button>
+      <button id = "participant-button" hidden>participant mode</button>
       <input 
         type="file" 
         id="svg-uploader" 
         accept=".svg" 
         style="margin: 10px;"
+        hidden
       />
-      <button id="save-svg">Save SVG</button>
+      <button id="save-svg" hidden>Save SVG</button>
       <button id="pan-button" hidden>Pan/Select</button>
       <!-- <button id="select-button" hidden>Select</button> -->
       <button id="create-button" hidden>Create</button>
       <button id="delete-button" hidden>Delete</button>
-      <div id="visual-container"></div>
+      <div id="visual-container">{{{svg}}}</div>
       
     </div>
     
