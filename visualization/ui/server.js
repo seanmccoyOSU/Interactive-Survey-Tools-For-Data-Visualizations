@@ -41,6 +41,15 @@ app.post('/', async function(req,res,next) {
     }
 })
 
+// ui put
+app.put('/:id', async function(req,res,next) {
+    try {
+        const response = await api.put(req.originalUrl, req.body)
+    } catch (e) {
+        next(e)
+    }
+})
+
 // endpoint to load specific visualization
 app.get('/:id', async function(req,res,next) {
     try {

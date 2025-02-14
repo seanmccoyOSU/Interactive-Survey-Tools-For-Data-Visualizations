@@ -147,9 +147,9 @@ function loadSvgFromText(svgText) {
     visualizationElement = new VisualizationElement(svgElement)
     console.log("Visualization Element Object:", visualizationElement);
 
-    if (!debug && firstUpload) {
+    if (!debug) {
         fetch(window.location.href, { 
-            method: "POST",
+            method: "PUT",
             body: JSON.stringify({
                 svg: svgElement.outerHTML
             }),

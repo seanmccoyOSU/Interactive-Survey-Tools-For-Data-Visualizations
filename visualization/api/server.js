@@ -15,7 +15,11 @@ app.get('/:id', async (req, res, next) => {
     try {
 		// find visualization with matching id and return info
 		const visualization = await Visualization.findOne({ where: { id: req.params.id } })
-		res.status(200).send({ svg: visualization.svg })
+        if (visualization) {
+            res.status(200).send({ svg: visualization.svg })
+        } else {
+            next()
+        }
 	} catch (e) {
 		next(e)
 	}
@@ -26,6 +30,30 @@ app.post('/', async (req, res, next) => {
     try {
         const visualization = await Visualization.create(req.body, VisualClientFields)
         res.status(201).send({id: visualization.id})
+    } catch (e) {
+        if (e instanceof ValidationError) {
+            // attempted to create a bad visualization
+            res.status(400).send({
+                msg: "Invalid input"
+            })
+        } else {
+            next(e)
+        }
+    }
+})
+
+// replace visualization content
+app.put('/:id', async (req, res, next) => {
+    try {
+        const result = await Visualization.update(req.body, {
+            where: { id: req.params.id },
+            fields: VisualClientFields
+          })
+          if (result[0] > 0) {
+            res.status(204).send()
+          } else {
+            next()
+          }
     } catch (e) {
         if (e instanceof ValidationError) {
             // attempted to create a bad visualization
