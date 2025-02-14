@@ -23,17 +23,12 @@ app.engine("handlebars", exphbs.engine({
 }))
 app.set("view engine", "handlebars")
 
-// default/debug endpoint
+// debug endpoint
 app.get('/', function(req,res,next) {
-    // role must be editor to load default page
-    if (req.query.editor) {
-        res.render("visualizer", {
-            role: "editor"
-        })
-    } else {
-        console.log("loading debug page")
-        res.render("visualizer")
-    }
+    console.log("loading debug page")
+    res.render("visualizer", {
+        role: "debug"
+    })
 })
 
 // ui post

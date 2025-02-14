@@ -33,13 +33,20 @@ addEventListener("DOMContentLoaded", () => {
         document.getElementById("pan-button").removeAttribute("hidden")
         document.getElementById("create-button").removeAttribute("hidden")
         document.getElementById("delete-button").removeAttribute("hidden")
+        const uploader = document.getElementById("svg-uploader");
+        uploader.removeAttribute("hidden")
+        uploader.addEventListener("change", handleSvgUpload);  
     } else {
         wrapper.classList.add("participant")
         
-        // debug mode if we entered page as participant but there is no svg loaded
-        if (!visualContainer.firstElementChild) {
+        // debug mode
+        if (wrapper.classList.contains("debug")) {
             // debug mode set up
             debug = true
+
+            const uploader = document.getElementById("svg-uploader");
+            uploader.removeAttribute("hidden")
+            uploader.addEventListener("change", handleSvgUpload);  
 
             document.getElementById("editor-button").removeAttribute("hidden")
             document.getElementById("participant-button").removeAttribute("hidden")
@@ -96,12 +103,7 @@ addEventListener("DOMContentLoaded", () => {
         visualizationElement = new VisualizationElement(svgElement)
         OnLoadSvg();
         OnFirstUpload();
-    } else {
-        const uploader = document.getElementById("svg-uploader");
-        uploader.removeAttribute("hidden")
-        uploader.addEventListener("change", handleSvgUpload);  
-    }
-    
+    } 
     
 });
 
