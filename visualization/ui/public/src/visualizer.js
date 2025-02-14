@@ -33,9 +33,25 @@ addEventListener("DOMContentLoaded", () => {
         document.getElementById("pan-button").removeAttribute("hidden")
         document.getElementById("create-button").removeAttribute("hidden")
         document.getElementById("delete-button").removeAttribute("hidden")
+        
         const uploader = document.getElementById("svg-uploader");
         uploader.removeAttribute("hidden")
         uploader.addEventListener("change", handleSvgUpload);  
+
+        document.getElementById("save-svg").removeAttribute("hidden")
+
+        // save changes to database
+        document.getElementById("save-svg").addEventListener("click", () => {
+            fetch(window.location.href, { 
+                method: "PUT",
+                body: JSON.stringify({
+                    svg: svgElement.outerHTML
+                }),
+                headers: {
+                    "Content-type": "application/json",
+                },    
+            })
+        })
     } else {
         wrapper.classList.add("participant")
         
