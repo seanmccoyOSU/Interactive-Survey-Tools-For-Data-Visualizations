@@ -60,6 +60,10 @@ app.get('/', async (req, res, next) => {
         }
     }
 
+    /*
+    * TODO BELOW FOR SURVEY DESIGNS: get user survey designs, then render them to the dashboard page (requires editing dashboard.handlebars)
+    */
+
     // if logged in, display user dashboard
     if (user) {
         try {
