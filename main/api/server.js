@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const userRoutes = require('./routes/users');
+const visualRoutes = require('./routes/visualizations');
 const sequelize = require('./lib/sequelize')
 
 const express = require('express');
@@ -9,6 +10,7 @@ app.use(express.json());
 
 // API routes
 app.use('/users', userRoutes);
+app.use('/visualizations', visualRoutes);
 
 // catch-all for any undefined API endpoint
 app.use('*', function (req, res, next) {

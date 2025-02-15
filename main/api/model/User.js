@@ -2,6 +2,8 @@ const { DataTypes } = require('sequelize')
 const sequelize = require('../lib/sequelize')
 const bcrypt = require('bcryptjs')
 
+const { Visualization } = require('./Visualization')
+
 const User = sequelize.define('user', {
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
   password: { 
@@ -12,6 +14,12 @@ const User = sequelize.define('user', {
     }
   }
 })
+
+/*
+* Set up one-to-many relationship between User and Visualization.
+*/
+User.hasMany(Visualization, { foreignKey: { allowNull: false } })
+Visualization.belongsTo(Visualization)
 
 exports.User = User
 

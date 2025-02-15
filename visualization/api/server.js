@@ -66,6 +66,11 @@ app.put('/:id', async (req, res, next) => {
     }
 })
 
+// Remove visualization from database
+app.delete('/:id', async (req, res, next) => { 
+    // TODO
+})
+
 // catch-all for any undefined API endpoint
 app.use('*', function (req, res, next) {
     res.status(404).send({
