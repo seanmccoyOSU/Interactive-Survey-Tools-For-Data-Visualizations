@@ -69,6 +69,18 @@ app.put('/:id', async (req, res, next) => {
 // Remove visualization from database
 app.delete('/:id', async (req, res, next) => { 
     // TODO
+    try {
+        const result = await Visualization.destroy({
+            where: { id: req.params.id }
+        })
+        if (result > 0) {
+            res.status(204).send()
+        }   else {
+            next()
+        }
+    }   catch(e) {
+        next(e)
+    }
 })
 
 // catch-all for any undefined API endpoint
