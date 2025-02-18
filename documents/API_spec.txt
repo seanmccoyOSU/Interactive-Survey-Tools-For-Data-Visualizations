@@ -1,0 +1,596 @@
+# View by selecting all text and copy/pasting to https://editor.swagger.io
+
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Interactive Survey Tools for Data Visualization
+  description: none
+
+paths:
+  /users:
+    post:
+      summary: Register a new User.
+      description: >
+        Creates a new User with specified data and adds it to the database.
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        description: A User object.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: New User successfully added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: >
+                      Unique ID of the created User.
+                    example: "123"
+        '400':
+          description: >
+            Missing or invalid request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/login:
+    post:
+      summary: Log in a User.
+      description: >
+        Authenticate a specific User with their email address and password.
+      operationId: authenticateUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        description: A User object.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Success
+
+        '400':
+          description: >
+            Missing or invalid request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            
+        '401':
+          description: >
+            Invalid credentials.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: >
+          Unique ID of a User.
+        schema:
+          oneOf:
+            - type: integer
+        example: "123"
+        required: true
+      
+
+    get:
+      summary: Get info of a specific User.
+      description: >
+        Returns user info. Only an authenticated User whose ID matches `id` is authorized to access this data.
+      operationId: getUserById
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: >
+                      username
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+    patch:
+      summary: Update info of a specific User.
+      description: >
+        Updates user info. Only an authenticated User whose ID matches `id` is authorized to access this data.
+      operationId: updateUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Success
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+          
+    delete:
+      summary: Delete a specific User.
+      description: >
+        Removes user from database. Only an authenticated User whose ID matches `id` is authorized to access this data.
+      operationId: deleteUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Success
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+  /users/{id}/visualizations:
+    parameters:
+      - name: id
+        in: path
+        description: >
+          Unique ID of a User.
+        schema:
+          oneOf:
+            - type: integer
+        example: "123"
+        required: true
+      - name: page
+        in: query
+        description: >
+          Page of Visualizations to fetch.
+        schema:
+          type: integer
+          example: 3
+          default: 1
+
+    get:
+      summary: Get Visualizations of a specific User.
+      description: >
+        Returns paginated list of Visualizations belonging to User with `id`.
+        Only an authenticated User whose ID matches `id` is authorized to access
+        this data.
+      operationId: getVisualizationsOfUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  visualizations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Visualization'
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+  /users/{id}/surveyDesigns:
+    parameters:
+      - name: id
+        in: path
+        description: >
+          Unique ID of a User.
+        schema:
+          oneOf:
+            - type: integer
+        example: "123"
+        required: true
+      - name: page
+        in: query
+        description: >
+          Page of Survey Designs to fetch.
+        schema:
+          type: integer
+          example: 3
+          default: 1
+
+    get:
+      summary: Get Surevey Designs of a specific User.
+      description: >
+        Returns paginated list of Survey Designs belonging to User with `id`.
+        Only an authenticated User whose ID matches `id` is authorized to access
+        this data.
+      operationId: getSurveyDesignsOfUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  surveyDesigns:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SurveyDesign'
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+  /users/{id}/publishedSurveys:
+    parameters:
+      - name: id
+        in: path
+        description: >
+          Unique ID of a User.
+        schema:
+          oneOf:
+            - type: integer
+        example: "123"
+        required: true
+      - name: page
+        in: query
+        description: >
+          Page of Published Surveys to fetch.
+        schema:
+          type: integer
+          example: 3
+          default: 1
+
+    get:
+      summary: Get Published Surveys of a specific User.
+      description: >
+        Returns paginated list of Published Surveys belonging to User with `id`.
+        Only an authenticated User whose ID matches `id` is authorized to access
+        this data.
+      operationId: getPublishedSurveysOfUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publishedSurveys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PublishedSurvey'
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+
+    
+    
+
+  /visualizations:
+    post:
+      summary: Create a new Visualization.
+      description: >
+        Creates a new Visualization with specified data and adds it to the database.  Only an authenticated User can create a new Visualization.
+      operationId: createVisualization
+      tags:
+        - Visualizations
+      responses:
+        '201':
+          description: New Visualization successfully added
+        '400':
+          description: >
+            Missing or invalid request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: >
+            User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+components:
+  schemas:
+    User:
+      description: >
+        An object representing information about a User.
+      type: object
+      properties:
+        name:
+          type: string
+          description: username
+          example: Joe Visualization
+        password:
+          type: string
+          description: >
+            The User's plain-text password.  This is required when creating a new User and when logging in.
+          example: AVerySecurePassword
+    
+    Visualization:
+      description: >
+        An object representing information in reference to a visualization in the visualization engine database.
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: >
+            ID of the User who created the Visualization
+          example: 123
+        name:
+          type: string
+          description: >
+            User-defined name. Cannot be the same as any Visualization belonging to the same User. 
+          example: My visualization
+        contentId:
+          type: integer
+          description: >
+            The ID of the visualization in the visualization engine database that this object is referencing
+          example: 123
+          
+    SurveyDesign:
+      description: >
+        An object representing a Survey Design.
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: >
+            ID of the User who created the Survey Design
+          example: 123
+        name:
+          type: string
+          description: >
+            User-defined name. Cannot be the same as any Survey Design belonging to the same User. 
+          example: My survey
+        title:
+          type: string
+          description: >
+            Title that the survey participant will see. 
+          example: Welcome to my survey!
+        introText:
+          type: string
+          description: >
+            Text survey participant sees when first opening the survey. MySQL type TEXT. 
+          example: This survey is very cool!
+        conclusionText:
+          type: string
+          description: >
+            Text survey participant sees after finishing the survey. MySQL type TEXT. 
+          example: Thank you!
+    
+    Question:
+      description: >
+        An object representing a Question in a Survey Design.
+      type: object
+      properties:
+        surveyDesignId:
+          type: integer
+          description: >
+            ID of the Survey Design this question belongs to.
+          example: 123
+        number:
+          type: integer
+          description: >
+            Question number for ordering.
+          example: 2
+        text:
+          type: string
+          description: >
+            The text of the question being asked. MySQL type TEXT.
+          example: What is your name?
+        type:
+          type: string
+          description: >
+            Pre-defined string representing expected type of response from the survey participant.
+          example: Multiple Choice
+        required:
+          type: boolean
+          description: >
+            Survey Participant is required to answer question if true.
+          example: true
+        allowComment:
+          type: boolean
+          description: >
+            Survey Participant can leave on comment on the question.
+          example: true
+        min:
+          type: integer
+          description: >
+            Minimum required response input from survey participant. How this value is used depends on responseType (ex: if Multiple Choice, user must check `min` boxes) 
+          example: 2
+        max:
+          type: integer
+          description: >
+            Maximum allowed response input from survey participant. How this value is used depends on responseType (ex: if Multiple Choice, user can check up to `max` boxes) 
+          example: 5
+        choices:
+          type: string
+          description: >
+            String representing possible choices. Used only for "Multiple Choices" type. The character '|' separates the choices
+          example: red|orange|green
+        visualizationId:
+          type: integer
+          description: >
+            Optional ID of a Visualization.
+          example: 123
+      
+    PublishedSurvey:
+      description: >
+        An object representing a Published Survey.
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: >
+            ID of the User who published this survey.
+          example: 123
+        openDateTime:
+          type: string
+          format: date-time
+          description: >
+            Date and time this survey opens. MySQL type DATE.
+          example: "2022-06-14T17:00:00-07:00"
+        closeDateTime:
+          type: string
+          format: date-time
+          description: >
+            Date and time this survey closes. MySQL type DATE.
+          example: "2022-06-14T17:00:00-07:00"
+        link:
+          type: string
+          description: >
+            Sharable link to survey
+          example: /surveys/89FAFB902
+        surveyDesign:
+          type: object
+          description: >
+            A Survey Design object. MySQL type JSON.
+        questions:
+          type: object
+          description: >
+            Array of Question objects from the Survey Design. MySQL type JSON.
+        results:
+          type: object
+          description: >
+            Downloadable data that compiles all Answers left by all Participants.
+        
+          
+    Participant:
+      description: >
+          An object representing a survey participant.
+      type: object
+      properties:
+        publishedSurveyId:
+            type: integer
+            description: >
+              ID of the Published Survey this participant responded to.
+            example: 123
+      
+    
+    Answer:
+      description: >
+        An object representing an answer to a question by a Participant.
+      type: object
+      properties:
+        participantId:
+          type: integer
+          description: >
+            ID of the Participant this answer was made by.
+          example: 123
+        questionNumber:
+          type: integer
+          description: >
+            Question number this answer is for.
+          example: 2
+        timeElasped:
+          type: string
+          format: date-time
+          description: >
+            How much time participant spent on the answer.
+          example: "2022-06-14T17:00:00-07:00"
+        response:
+          type: string
+          description: >
+            The response given by the participant. Format depends on the question type.
+        comment:
+          type: string
+          description: >
+            Comment left by the participant.
+          
+    Error:
+      description: >
+        An object representing an API error response.
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message.
+          
+
+tags:
+  - name: Users
+    description: >
+      API endpoints related to Users.
+  - name: Visualizations
+    description: >
+      API endpoints related to Visualizations.
