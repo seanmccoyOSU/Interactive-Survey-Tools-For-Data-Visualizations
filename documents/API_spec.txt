@@ -11,8 +11,22 @@ info:
   version: 1.0.0
   title: Interactive Survey Tools for Data Visualization
   description: none
+  
+  
+
+################################################################################
+#
+#         ENDPOINTS
+#
+################################################################################
 
 paths:
+
+
+  #=============================================================================
+  #         /users
+  #=============================================================================
+  
   /users:
     post:
       summary: Register a new User.
@@ -22,32 +36,12 @@ paths:
       tags:
         - Users
       requestBody:
-        required: true
-        description: A User object.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
+        $ref: '#/components/requestBodies/userCredentials'
       responses:
         '201':
-          description: New User successfully added
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    description: >
-                      Unique ID of the created User.
-                    example: "123"
+          $ref: '#/components/responses/201Response'
         '400':
-          description: >
-            Missing or invalid request body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/400Error'
 
   /users/login:
     post:
@@ -58,45 +52,18 @@ paths:
       tags:
         - Users
       requestBody:
-        required: true
-        description: A User object.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
+        $ref: '#/components/requestBodies/userCredentials'
       responses:
         '200':
           description: Success
-
         '400':
-          description: >
-            Missing or invalid request body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-            
+          $ref: '#/components/responses/400Error'
         '401':
-          description: >
-            Invalid credentials.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-            
+          $ref: '#/components/responses/401Error'
 
   /users/{id}:
     parameters:
-      - name: id
-        in: path
-        description: >
-          Unique ID of a User.
-        schema:
-          oneOf:
-            - type: integer
-        example: "123"
-        required: true
-      
+      - $ref: '#/components/parameters/id'
 
     get:
       summary: Get info of a specific User.
@@ -118,18 +85,9 @@ paths:
                     description: >
                       username
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
     patch:
       summary: Update info of a specific User.
@@ -139,29 +97,14 @@ paths:
       tags:
         - Users
       requestBody:
-        required: true
-        description: A User object.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
+        $ref: '#/components/requestBodies/userCredentials'
       responses:
         '200':
           description: Success
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          
+          $ref: '#/components/responses/404Error'
           
     delete:
       summary: Delete a specific User.
@@ -174,38 +117,14 @@ paths:
         '200':
           description: Success
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
   /users/{id}/visualizations:
     parameters:
-      - name: id
-        in: path
-        description: >
-          Unique ID of a User.
-        schema:
-          oneOf:
-            - type: integer
-        example: "123"
-        required: true
-      - name: page
-        in: query
-        description: >
-          Page of Visualizations to fetch.
-        schema:
-          type: integer
-          example: 3
-          default: 1
+      - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/page'
 
     get:
       summary: Get Visualizations of a specific User.
@@ -229,38 +148,14 @@ paths:
                     items:
                       $ref: '#/components/schemas/Visualization'
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
   /users/{id}/surveyDesigns:
     parameters:
-      - name: id
-        in: path
-        description: >
-          Unique ID of a User.
-        schema:
-          oneOf:
-            - type: integer
-        example: "123"
-        required: true
-      - name: page
-        in: query
-        description: >
-          Page of Survey Designs to fetch.
-        schema:
-          type: integer
-          example: 3
-          default: 1
+      - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/page'
 
     get:
       summary: Get Surevey Designs of a specific User.
@@ -284,38 +179,14 @@ paths:
                     items:
                       $ref: '#/components/schemas/SurveyDesign'
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
   /users/{id}/publishedSurveys:
     parameters:
-      - name: id
-        in: path
-        description: >
-          Unique ID of a User.
-        schema:
-          oneOf:
-            - type: integer
-        example: "123"
-        required: true
-      - name: page
-        in: query
-        description: >
-          Page of Published Surveys to fetch.
-        schema:
-          type: integer
-          example: 3
-          default: 1
+      - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/page'
 
     get:
       summary: Get Published Surveys of a specific User.
@@ -339,22 +210,14 @@ paths:
                     items:
                       $ref: '#/components/schemas/PublishedSurvey'
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
-
-    
-    
+  
+  #=============================================================================
+  #         /visualizations  (MAIN PAGE ENDPOINTS)
+  #=============================================================================
 
   /visualizations:
     post:
@@ -365,45 +228,18 @@ paths:
       tags:
         - Visualizations
       requestBody:
-        required: true
-        description: The name of the visualization.
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
+        $ref: '#/components/requestBodies/name'
       responses:
         '201':
-          description: New Visualization successfully added
+          $ref: '#/components/responses/201Response'
         '400':
-          description: >
-            Missing or invalid request body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/400Error'
         '403':
-          description: >
-            User is not authenticated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
   
   /visualizations/{id}:
     parameters:
-      - name: id
-        in: path
-        description: >
-          Unique ID of a Visualization.
-        schema:
-          oneOf:
-            - type: integer
-        example: "123"
-        required: true
-      
+      - $ref: '#/components/parameters/id'
 
     get:
       summary: Get info of a specific Visualization.
@@ -420,18 +256,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Visualization'
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
     patch:
       summary: Rename a Visualization.
@@ -441,31 +268,14 @@ paths:
       tags:
         - Visualizations
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
+        $ref: '#/components/requestBodies/name'
       responses:
         '200':
           description: Success
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          
+          $ref: '#/components/responses/404Error'
           
     delete:
       summary: Delete a specific Visualization.
@@ -478,18 +288,14 @@ paths:
         '200':
           description: Success
         '403':
-          description: >
-            User is not authenticated or is not authorized to access this data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/403Error'
         '404':
-          description: Specified `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
+          
+          
+  #=============================================================================
+  #         VISUALIZATION ENGINE ENDPOINTS
+  #=============================================================================
                 
   /:
     post:
@@ -509,27 +315,13 @@ paths:
               
       responses:
         '201':
-          description: New Visualization successfully added
+          $ref: '#/components/responses/201Response'
         '400':
-          description: >
-            Missing or invalid request body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/400Error'
   
   /{id}:
     parameters:
-      - name: id
-        in: path
-        description: >
-          Unique ID of Visualization content.
-        schema:
-          oneOf:
-            - type: integer
-        example: "123"
-        required: true
-      
+      - $ref: '#/components/parameters/id'
 
     get:
       summary: Get content of a specific Visualization.
@@ -546,11 +338,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/VisualizationContent'
         '404':
-          description: Specified User `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
           
     patch:
       summary: Update Visualization Content.
@@ -569,11 +357,7 @@ paths:
         '200':
           description: Success
         '404':
-          description: Specified `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/404Error'
     
     put:
       summary: Replace Visualization Content.
@@ -592,12 +376,7 @@ paths:
         '200':
           description: Success
         '404':
-          description: Specified `id` not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          
+          $ref: '#/components/responses/404Error'
           
     delete:
       summary: Delete Visualization Content.
@@ -610,11 +389,209 @@ paths:
         '200':
           description: Success
         '404':
-          description: Specified `id` not found.
+          $ref: '#/components/responses/404Error'
+          
+  
+  #=============================================================================
+  #         /surveyDesigns
+  #=============================================================================
+
+  /surveyDesigns:
+    post:
+      summary: Create a new Survey Design.
+      description: >
+        Creates a new Survey Design with a user-defined name and adds it to the database. Only an authenticated User can create a new Survey Design.
+      operationId: createSurveyDesign
+      tags:
+        - Survey Designs
+      requestBody:
+        $ref: '#/components/requestBodies/name'
+      responses:
+        '201':
+          $ref: '#/components/responses/201Response'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '403':
+          $ref: '#/components/responses/403Error'
+  
+  /surveyDesigns/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+
+    get:
+      summary: Get info of a specific Survey Design.
+      description: >
+        Returns Survey Design info. Only an authenticated User whose ID matches the visualization's `userId` is authorized to access this data.
+      operationId: getSurveyDesignById
+      tags:
+        - Survey Designs
+      responses:
+        '200':
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/SurveyDesign'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+          
+    patch:
+      summary: Rename a Survey Design.
+      description: >
+        Rename the Visualization. Only an authenticated User whose ID matches the `userId` property is authorized to access this data.
+      operationId: updateSurveyDesign
+      tags:
+        - Survey Designs
+      requestBody:
+        $ref: '#/components/requestBodies/name'
+      responses:
+        '200':
+          description: Success
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+          
+    delete:
+      summary: Delete a specific Survey Design.
+      description: >
+        Removes Survey Design from database. Deletes all Questions that belong to it as well. Only an authenticated User whose ID matches the `userId` property is authorized to access this data.
+      operationId: deleteSurveyDesign
+      tags:
+        - Survey Designs
+      responses:
+        '200':
+          description: Success
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+    
+  /surveyDesigns/{id}/questions:
+    parameters:
+      - $ref: '#/components/parameters/id'
+      
+    post:
+      summary: Create a new Question for the specific Survey Design.
+      description: >
+        Creates a new Question and adds it to the database. Only an authenticated User whose ID matches the Survey Design's `userId` property is authorized to access this data.
+      operationId: createSurveyQuestion
+      tags:
+        - Survey Designs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+              
+      responses:
+        '201':
+          $ref: '#/components/responses/201Response'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+
+    get:
+      summary: Get list of Questions of a specific Survey Design.
+      description: >
+        Returns Questions of the specific Survey Design. Only an authenticated User whose ID matches the Survey Design's `userId` is authorized to access this data.
+      operationId: getSurveyDesignQuestions
+      tags:
+        - Survey Designs
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  questions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Question'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+  
+  
+  #=============================================================================
+  #         /questions
+  #=============================================================================
+
+  /questions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+
+    get:
+      summary: Get info of a Question.
+      description: >
+        Returns Question info. Only an authenticated User whose ID matches the corresponding Survey Design's `userId` is authorized to access this data.
+      operationId: getQuestionById
+      tags:
+        - Questions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+          
+    patch:
+      summary: Update info of a Question.
+      description: >
+        Edit the Visualization. Only an authenticated User whose ID matches the corresponding Survey Design's `userId` is authorized to access this data.
+      operationId: updateQuestion
+      tags:
+        - Questions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/400Error'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+          
+    delete:
+      summary: Delete a specific Question.
+      description: >
+        Removes Question from database. Only an authenticated User whose ID matches the corresponding Survey Design's `userId` is authorized to access this data.
+      operationId: deleteQuestion
+      tags:
+        - Questions
+      responses:
+        '200':
+          description: Success
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+  
+  
+  
+################################################################################
+#
+#         SCHEMAS
+#
+################################################################################
   
 components:
   schemas:
@@ -857,7 +834,118 @@ components:
         error:
           type: string
           description: Error message.
-          
+     
+     
+  ################################################################################
+  #
+  #         PARAMETER TEMPLATES
+  #
+  ################################################################################     
+  parameters:
+    id:
+      name: id
+      in: path
+      description: >
+        Unique ID of resource.
+      schema:
+        oneOf:
+          - type: integer
+      example: "123"
+      required: true
+    page:
+      name: page
+      in: query
+      description: >
+        Page of resources from collection to fetch.
+      schema:
+        type: integer
+        example: 3
+        default: 1
+    
+    
+    
+  ################################################################################
+  #
+  #         REQUEST BODY TEMPLATES
+  #
+  ################################################################################
+  
+  requestBodies:
+    userCredentials:
+      required: true
+      description: Credentials of a User.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    name:
+      required: true
+      description: A custom name for the resource.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+  
+  
+  
+  ################################################################################
+  #
+  #         RESPONSE BODY TEMPLATES
+  #
+  ################################################################################  
+  
+  responses:
+    201Response:
+      description: New resource successfully added to database
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: >
+                  Unique ID of new resource.
+                example: "123"
+    400Error:
+      description: >
+            Missing or invalid request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401Error:
+      description: >
+            Invalid credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    403Error:
+      description: >
+            User is not authenticated or is not authorized to access this data.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404Error:
+      description: >
+            Specified resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            
+      
+      
+################################################################################
+#
+#         ENDPOINT CATEGORIES
+#
+################################################################################
 
 tags:
   - name: Users
@@ -872,3 +960,6 @@ tags:
   - name: Survey Designs
     description: >
       API endpoints related to Survey Designs.
+  - name: Questions
+    description: >
+      API endpoints related to Questions of a Survey Design.
