@@ -1,4 +1,10 @@
+################################################################################
+#
+# This defines all API endpoints and schema for database tables
+#
 # View by selecting all text and copy/pasting to https://editor.swagger.io
+#
+################################################################################
 
 openapi: 3.0.3
 info:
@@ -132,6 +138,13 @@ paths:
       operationId: updateUser
       tags:
         - Users
+      requestBody:
+        required: true
+        description: A User object.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: Success
@@ -347,10 +360,20 @@ paths:
     post:
       summary: Create a new Visualization.
       description: >
-        Creates a new Visualization with specified data and adds it to the database.  Only an authenticated User can create a new Visualization.
+        Creates a new Visualization with a user-defined name and adds it to the database. Calls `POST /` to visualization engine API to generate `contentId` property. Only an authenticated User can create a new Visualization.
       operationId: createVisualization
       tags:
         - Visualizations
+      requestBody:
+        required: true
+        description: The name of the visualization.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
       responses:
         '201':
           description: New Visualization successfully added
@@ -364,6 +387,230 @@ paths:
         '403':
           description: >
             User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /visualizations/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: >
+          Unique ID of a Visualization.
+        schema:
+          oneOf:
+            - type: integer
+        example: "123"
+        required: true
+      
+
+    get:
+      summary: Get info of a specific Visualization.
+      description: >
+        Returns Visualization info. Only an authenticated User whose ID matches the visualization's `userId` is authorized to access this data.
+      operationId: getVisualizationById
+      tags:
+        - Visualizations
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visualization'
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+    patch:
+      summary: Rename a Visualization.
+      description: >
+        Rename the Visualization. Only an authenticated User whose ID matches the `userId` property is authorized to access this data.
+      operationId: updateVisualization
+      tags:
+        - Visualizations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Success
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+          
+    delete:
+      summary: Delete a specific Visualization.
+      description: >
+        Removes Visualization from database. Also calls visualization engine API to delete content corresponding to the `contentId` property. Only an authenticated User whose ID matches the `userId` property is authorized to access this data.
+      operationId: deleteVisualization
+      tags:
+        - Visualizations
+      responses:
+        '200':
+          description: Success
+        '403':
+          description: >
+            User is not authenticated or is not authorized to access this data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Specified `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /:
+    post:
+      summary: Create a new Visualization Content.
+      description: >
+        Creates a new Visualization and adds it to the database.
+      operationId: createVisualizationContent
+      tags:
+        - Visualization Engine API Endpoints
+      requestBody:
+        required: false
+        description: Optional SVG DOM element.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisualizationContent'
+              
+      responses:
+        '201':
+          description: New Visualization successfully added
+        '400':
+          description: >
+            Missing or invalid request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /{id}:
+    parameters:
+      - name: id
+        in: path
+        description: >
+          Unique ID of Visualization content.
+        schema:
+          oneOf:
+            - type: integer
+        example: "123"
+        required: true
+      
+
+    get:
+      summary: Get content of a specific Visualization.
+      description: >
+        Returns Visualization SVG DOM elmennt.
+      operationId: getVisualizationContentById
+      tags:
+        - Visualization Engine API Endpoints
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisualizationContent'
+        '404':
+          description: Specified User `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+    patch:
+      summary: Update Visualization Content.
+      description: >
+        Updates the Visualization.
+      operationId: updateVisualizationContent
+      tags:
+        - Visualization Engine API Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisualizationContent'
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: Specified `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      summary: Replace Visualization Content.
+      description: >
+        Replaces SVG DOM elment of the Visualization with a new one. Functionally it should work the same as the PATCH endpoint, but this is used specifically to indicate replacement, such as when the user uploads a new base file.
+      operationId: replaceVisualizationContent
+      tags:
+        - Visualization Engine API Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisualizationContent'
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: Specified `id` not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+          
+    delete:
+      summary: Delete Visualization Content.
+      description: >
+        Removes Visualization from database.
+      operationId: deleteVisualizationContent
+      tags:
+        - Visualization Engine API Endpoints
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: Specified `id` not found.
           content:
             application/json:
               schema:
@@ -388,7 +635,7 @@ components:
     
     Visualization:
       description: >
-        An object representing information in reference to a visualization in the visualization engine database.
+        An object in the main page database representing information in reference to a visualization in the visualization engine database.
       type: object
       properties:
         userId:
@@ -406,6 +653,16 @@ components:
           description: >
             The ID of the visualization in the visualization engine database that this object is referencing
           example: 123
+          
+    VisualizationContent:
+      description: >
+        An object representing a visualization in the visualization engine database.
+      type: object
+      properties:
+        svg:
+          type: string
+          description: >
+            SVG DOM element of the visualization including all children. MySQL type TEXT.
           
     SurveyDesign:
       description: >
@@ -488,10 +745,20 @@ components:
           description: >
             String representing possible choices. Used only for "Multiple Choices" type. The character '|' separates the choices
           example: red|orange|green
-        visualizationId:
+        disableZoom:
+          type: boolean
+          description: >
+            If enabled, survey participant will not be allowed to zoom the visualization for this question.
+          example: false
+        disablePan:
+          type: boolean
+          description: >
+            If enabled, survey participant will not be allowed to pan the visualization for this question.
+          example: false
+        visualizationContentId:
           type: integer
           description: >
-            Optional ID of a Visualization.
+            Optional ID matching a Visualization in the visualization engine database.
           example: 123
       
     PublishedSurvey:
@@ -516,11 +783,16 @@ components:
           description: >
             Date and time this survey closes. MySQL type DATE.
           example: "2022-06-14T17:00:00-07:00"
-        link:
+        status:
           type: string
           description: >
-            Sharable link to survey
-          example: /surveys/89FAFB902
+            Status of the survey. May be "open", "closed", or "pending".
+          example: open
+        linkHash:
+          type: string
+          description: >
+            Hash generated for this survey's sharable link.
+          example: 89FAFB902
         surveyDesign:
           type: object
           description: >
@@ -593,4 +865,10 @@ tags:
       API endpoints related to Users.
   - name: Visualizations
     description: >
-      API endpoints related to Visualizations.
+      API endpoints related to Visualizations representations in the main page database.
+  - name: Visualization Engine API Endpoints
+    description: >
+      API endpoints for the visualization engine.
+  - name: Survey Designs
+    description: >
+      API endpoints related to Survey Designs.
