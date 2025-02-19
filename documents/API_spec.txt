@@ -9,7 +9,7 @@
 openapi: 3.0.3
 info:
   version: 1.0.0
-  title: Interactive Survey Tools for Data Visualization
+  title: Interactive Survey Tools for Data Visualization API
   description: none
   
   
