@@ -10,7 +10,7 @@
     "dev-visual": "concurrently \"npm run dev-visual-api\" \"npm run dev-visual-ui\"",
     "dev-main-api": "nodemon main/api/server.js",
     "dev-main-ui": "nodemon main/ui/server.js",
-    "dev-main": "concurrently \"npm run dev-main-api\" \"npm run dev-main-ui\""
+    "dev-main": "concurrently \"npm run dev-visual\" \"npm run dev-main-api\" \"npm run dev-main-ui\""
   },
   "author": "",
   "license": "ISC",
