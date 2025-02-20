@@ -79,6 +79,7 @@ router.delete('/:id', requireAuthentication, async (req, res, next) => {
 		// TODO
 		const visualization = await Visualization.findOne({ where : { id: req.params.id }})
 		if (visualization) {
+			const engineResponse = await visualApi.delete(`/${visualization.contentId}`)
 			await visualization.destroy();
 			res.status(200).send({ 
 				msg: "Visualization deleted"

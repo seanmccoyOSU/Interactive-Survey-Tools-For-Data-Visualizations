@@ -97,7 +97,7 @@ app.get('/login', (req, res) => {
 });
 
 // handles what to do on ui create visualization
-app.post('/visualizations(/*)?', async (req, res, next) => {
+app.post('/visualizations', async (req, res, next) => {
     try {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
@@ -105,6 +105,16 @@ app.post('/visualizations(/*)?', async (req, res, next) => {
         // on success, refresh page
         res.redirect(req.protocol + "://" + req.get("host"))
 
+    } catch (error) {
+        next(error)
+    }
+})
+
+// handles what to do on ui delete visualization
+app.delete('/visualizations/:id', async (req, res, next) => {
+    try {
+        // relay delete request to api
+        const response = await api.delete(req.originalUrl, req.body)
     } catch (error) {
         next(error)
     }
