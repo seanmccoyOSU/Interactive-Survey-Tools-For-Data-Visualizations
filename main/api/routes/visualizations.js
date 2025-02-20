@@ -12,6 +12,13 @@ const router = express.Router();
 const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
+// setup axios API interface for visualization engine
+const API_URL = "http://localhost:8080"
+const axios = require('axios');
+const visualApi = axios.create({
+    baseURL: API_URL
+})
+
 // Create new visualization
 router.post('/', requireAuthentication, async (req, res, next) => {
 	try {
@@ -22,10 +29,13 @@ router.post('/', requireAuthentication, async (req, res, next) => {
 		// 			visualData[field] = req.body[field];
 		// 		}
 		// 	}
+
+		const visualResponse = await visualApi.post('/')
+
 		const visualData = {
 			userId: req.userid,
 			name: req.body.name,
-			contentId: 23213
+			contentId: visualResponse.data.id
 		}
 
 		const visualization = await Visualization.create(visualData, VisualClientFields);
