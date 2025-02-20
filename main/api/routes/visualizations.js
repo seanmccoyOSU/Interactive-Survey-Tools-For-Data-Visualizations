@@ -40,9 +40,10 @@ router.get('/:id', requireAuthentication, async (req, res, next) => {
 		// TODO
 		const visualization = await Visualization.findOne({ where : { id: req.params.id }})
 
+		console.log(visualization)
+
 		if (visualization) {
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.status(200).send(visualization.svg);
+			res.status(200).json(visualization);
 		} else {
 			res.status(404).send({ 
 				msg: "Visualization not found"

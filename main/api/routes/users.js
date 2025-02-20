@@ -1,5 +1,6 @@
 // database imports
 const { ValidationError } = require('sequelize')
+const { Visualization } = require('../model/Visualization')
 const { User, UserClientFields, validateCredentials } = require('../model/User')
 const { generateAuthToken, requireAuthentication } = require('../lib/auth')
 

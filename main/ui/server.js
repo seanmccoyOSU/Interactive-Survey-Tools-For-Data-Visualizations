@@ -4,6 +4,8 @@ require('dotenv').config()
 const express = require('express');
 const app = express();
 app.use(express.json());
+const path = require('path');
+app.use(express.static(path.join(__dirname, "public")))
 
 // setup required for processing cookies
 const { wrapper } = require('axios-cookiejar-support')
@@ -26,7 +28,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // express-handlebars setup
 // this dynamically renders pages
-const path = require('path');
 app.set('views', path.join(__dirname, 'views'));
 const exphbs = require('express-handlebars');
 app.engine("handlebars", exphbs.engine({
@@ -71,6 +72,11 @@ app.get('/', async (req, res, next) => {
             const response = await api.get(`/users/${user.id}/visualizations`)
             
             // TODO: implement user visualizations
+
+            res.render("dashboard", {
+                name: user.name,
+                visualizations: response.data
+            })
     
         } catch (error) {
             res.render("dashboard", {
