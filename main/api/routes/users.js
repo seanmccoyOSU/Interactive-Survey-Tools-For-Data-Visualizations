@@ -43,6 +43,24 @@ router.get('/:id/visualizations', requireAuthentication, async (req, res, next) 
 
 })
 
+// Get survey designs belonging to user
+router.get('/:id/surveyDesigns', requireAuthentication, async (req, res, next) => {
+	// verify correct id
+	if (req.userid != req.params.id) {
+		res.status(401).send({
+			error: "You are not allowed to access this resource"
+		})
+	} else {
+		try {
+			// TODO: get user's survey designs
+
+			next()	// goes to 404 right now
+		} catch (e) {
+			next(e)
+		}
+	}
+})
+
 // Register a new user
 router.post('/', async (req, res, next) => {
 	try {
