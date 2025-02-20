@@ -70,8 +70,6 @@ app.get('/', async (req, res, next) => {
         try {
             // get user visualizations
             const response = await api.get(`/users/${user.id}/visualizations`)
-            
-            // TODO: implement user visualizations
 
             res.render("dashboard", {
                 name: user.name,
@@ -97,6 +95,21 @@ app.get('/register', (req, res) => {
 app.get('/login', (req, res) => {
     res.render("login")
 });
+
+// handles what to do on ui create visualization
+app.post('/visualizations(/*)?', async (req, res, next) => {
+    try {
+        // relay post request to api
+        const response = await api.post(req.originalUrl, req.body)
+
+        // on success, refresh page
+        res.redirect(req.protocol + "://" + req.get("host"))
+
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 // handles what to do on ui registration, login, or logout
 app.post('/users(/*)?', async (req, res, next) => {

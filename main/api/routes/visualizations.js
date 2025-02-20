@@ -8,18 +8,27 @@ const express = require('express');
 const { Visualization, VisualClientFields } = require('../model/Visualization');
 const router = express.Router();
 
+// setup cookie parser
+const cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
 // Create new visualization
 router.post('/', requireAuthentication, async (req, res, next) => {
 	try {
 		// TODO
-		const visualData = {};
-			for (const field of VisualClientFields) {
-				if (req.body[field]) {
-					visualData[field] = req.body[field];
-				}
-			}
-		
-		const visualization = await Visualization.create(visualData);
+		// const visualData = {};
+		// 	for (const field of VisualClientFields) {
+		// 		if (req.body[field]) {
+		// 			visualData[field] = req.body[field];
+		// 		}
+		// 	}
+		const visualData = {
+			userId: req.userid,
+			name: req.body.name,
+			contentId: 23213
+		}
+
+		const visualization = await Visualization.create(visualData, VisualClientFields);
 		res.status(201).send({
 			id: visualization.id
 		});

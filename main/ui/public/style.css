@@ -28,11 +28,3 @@
     text-decoration: none; 
     border-radius: 3px;
 }
-
-button, a {
-    padding: 10px 20px; 
-    background-color: #007BFF; 
-    color: #fff; 
-    text-decoration: none; 
-    border-radius: 5px;
-}
