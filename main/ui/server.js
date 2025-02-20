@@ -96,6 +96,23 @@ app.get('/login', (req, res) => {
     res.render("login")
 });
 
+// page of specific visualization
+app.get('/visualizations/:id', async (req, res, next) => {
+    try {
+        // relay post request to api
+        const response = await api.get(req.originalUrl)
+
+        // on success, refresh page
+        res.render("visualization", {
+            name: response.data.name,
+            id: response.data.contentId
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
 // handles what to do on ui create visualization
 app.post('/visualizations', async (req, res, next) => {
     try {
@@ -115,6 +132,8 @@ app.delete('/visualizations/:id', async (req, res, next) => {
     try {
         // relay delete request to api
         const response = await api.delete(req.originalUrl, req.body)
+
+        res.redirect(req.get("Referrer"))
     } catch (error) {
         next(error)
     }
