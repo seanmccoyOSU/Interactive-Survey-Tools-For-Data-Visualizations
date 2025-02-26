@@ -12,12 +12,6 @@ exports.generateAuthToken = function (userId) {
 exports.requireAuthentication = function (req, res, next) {
   let token = req.cookies.access_token
 
-  // if (!token) {
-  //   const authHeader = req.get("Authorization") || ""
-  //   const authHeaderParts = authHeader.split(" ")
-  //   token = authHeaderParts[0] === "Bearer" ? authHeaderParts[1] : null
-  // }
-
   try {
     const payload = jwt.verify(token, secretKey)
     req.userid = payload.sub
@@ -31,12 +25,6 @@ exports.requireAuthentication = function (req, res, next) {
 
 exports.checkAuthentication = function (req, res, next) {
   let token = req.cookies.access_token
-
-  // if (!token) {
-  //   const authHeader = req.get("Authorization") || ""
-  //   const authHeaderParts = authHeader.split(" ")
-  //   token = authHeaderParts[0] === "Bearer" ? authHeaderParts[1] : null
-  // }
 
   try {
     const payload = jwt.verify(token, secretKey)

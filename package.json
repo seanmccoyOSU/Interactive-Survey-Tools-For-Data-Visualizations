@@ -4,34 +4,34 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev-visual": "nodemon server.js",
-    "main": "node Login/app.js",
-    "dev-main": "nodemon Login/app.js"
+    "start": "node visualization/ui/server.js",
+    "dev-visual-api": "nodemon visualization/api/server.js",
+    "dev-visual-ui": "nodemon visualization/ui/server.js",
+    "dev-visual": "concurrently \"npm run dev-visual-api\" \"npm run dev-visual-ui\"",
+    "dev-main-api": "nodemon main/api/server.js",
+    "dev-main-ui": "nodemon main/ui/server.js",
+    "dev-main": "concurrently \"npm run dev-main-api\" \"npm run dev-main-ui\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.9",
+    "axios-cookiejar-support": "^5.0.5",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-handlebars": "^8.0.1",
-    "express-session": "^1.18.1",
     "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.6",
     "mysql2": "^3.12.0",
-    "passport": "^0.7.0",
-    "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^8.0.0",
-    "sequelize": "^6.37.5"
+    "sequelize": "^6.37.5",
+    "tough-cookie": "^5.1.1"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.9"
   },
   "description": ""
