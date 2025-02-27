@@ -16,7 +16,7 @@ jest.mock('../../../main/api/lib/sequelize', () => {
 const sequelize = require('../../../main/api/lib/sequelize')
 const { User } = require('../../../main/api/model/User')
 
-beforeAll(async () => {
+beforeEach(async () => {
     await sequelize.sync({ force: true })
 })
   
@@ -42,12 +42,31 @@ describe("POST /users - registers user", () => {
 
 describe("POST /users/login - logs user in", () => {
     test("sends 200 status code", async () => {
+        await request(api).post('/users').send({ name:"testUser", password:"testPassword" })
         const res = await request(api).post('/users/login').send({ name:"testUser", password:"testPassword" })    
         expect(res.statusCode).toBe(200)
     })
     
     test("sends 401 status code and error on bad credentials", async () => {
-        const res = await request(api).post('/users/login').send({ name:"testUser", password:"testPasswordWRONG" })    
+        const res = await request(api).post('/users/login').send({ name:"", password:"" })    
+        expect(res.statusCode).toBe(401)
+        expect(res.body).toHaveProperty('error')
+    })
+})
+
+describe("GET /users - get user info", () => {
+    test("sends name, id, and 200 status code", async () => {
+        await request(api).post('/users').send({ name:"testUser", password:"testPassword" })
+        const loginRes = await request(api).post('/users/login').send({ name:"testUser", password:"testPassword" })
+        const { header } = loginRes    
+        const res = await request(api).get('/users').set("Cookie", [...header["set-cookie"]])
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveProperty('name', "testUser")
+        expect(res.body).toHaveProperty('id')
+    })
+    
+    test("sends 401 status code and errror when not logged in", async () => {
+        const res = await request(api).get('/users')     
         expect(res.statusCode).toBe(401)
         expect(res.body).toHaveProperty('error')
     })
