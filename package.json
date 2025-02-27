@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node visualization/ui/server.js",
     "dev-visual-api": "nodemon visualization/api/server.js",
     "dev-visual-ui": "nodemon visualization/ui/server.js",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.9"
   },
   "description": ""
