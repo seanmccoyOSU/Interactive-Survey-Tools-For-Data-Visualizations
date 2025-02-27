@@ -67,12 +67,12 @@ router.post('/', async (req, res, next) => {
 	try {
 		// create new user entry in database
 		const user = await User.create(req.body, UserClientFields)
-		res.status(201).send()
+		res.status(201).send({ id: user.id })
 	} catch (e) {
 		if (e instanceof ValidationError) {
 			// user entered bad credentials for registration
 			res.status(400).send({
-				msg: "Invalid input or user already exists"
+				error: "Invalid input or user already exists"
 			})
 		} else {
 			next(e)
