@@ -65,8 +65,29 @@ describe("GET /users - get user info", () => {
         expect(res.body).toHaveProperty('id')
     })
     
-    test("sends 401 status code and errror when not logged in", async () => {
+    test("sends 401 status code and error when not logged in", async () => {
         const res = await request(api).get('/users')     
+        expect(res.statusCode).toBe(401)
+        expect(res.body).toHaveProperty('error')
+    })
+})
+
+describe("GET /users/{id}/visualizations - get visualizations of user", () => {
+    test("sends array of visualizations and 200 status code", async () => {
+        const registerRes = await request(api).post('/users').send({ name:"testUser", password:"testPassword" })
+        const myId = registerRes.body.id
+        const loginRes = await request(api).post('/users/login').send({ name:"testUser", password:"testPassword" })
+        const { header } = loginRes    
+        const res = await request(api).get(`/users/${myId}/visualizations`).set("Cookie", [...header["set-cookie"]])  
+        expect(res.statusCode).toBe(200)
+    })
+    
+    test("sends 401 status code and error when logged in as incorrect user", async () => {
+        const registerRes = await request(api).post('/users').send({ name:"testUser", password:"testPassword" })
+        const myId = registerRes.body.id
+        const loginRes = await request(api).post('/users/login').send({ name:"testUser", password:"testPassword" })
+        const { header } = loginRes    
+        const res = await request(api).get(`/users/${myId+1}/visualizations`).set("Cookie", [...header["set-cookie"]])    
         expect(res.statusCode).toBe(401)
         expect(res.body).toHaveProperty('error')
     })
