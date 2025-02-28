@@ -8,10 +8,15 @@ const { requireAuthentication } = require('../lib/auth')
 const express = require('express');
 const router = express.Router();
 
+// setup cookie parser
+const cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
 // Create new survey design
 router.post('/', requireAuthentication, async (req, res, next) => {
 	try {
 		// TODO
+		next() // 404
 	} catch (e) {
 		next(e)
 	}
@@ -21,6 +26,7 @@ router.post('/', requireAuthentication, async (req, res, next) => {
 router.get('/:id', requireAuthentication, async (req, res, next) => {
 	try {
 		// TODO
+		next() // 404
 	} catch (e) {
 		next(e)
 	}
@@ -30,6 +36,7 @@ router.get('/:id', requireAuthentication, async (req, res, next) => {
 router.delete('/:id', requireAuthentication, async (req, res, next) => {
 	try {
 		// TODO
+		next() // 404
 	} catch (e) {
 		next(e)
 	}

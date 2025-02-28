@@ -1,11 +1,10 @@
 // database imports
 const { ValidationError } = require('sequelize')
-const { User } = require('../model/User')
+const { Visualization, VisualClientFields } = require('../model/Visualization');
 const { requireAuthentication } = require('../lib/auth')
 
 // setup express router
 const express = require('express');
-const { Visualization, VisualClientFields } = require('../model/Visualization');
 const router = express.Router();
 
 // setup cookie parser
@@ -22,14 +21,6 @@ const visualApi = axios.create({
 // Create new visualization
 router.post('/', requireAuthentication, async (req, res, next) => {
 	try {
-		// TODO
-		// const visualData = {};
-		// 	for (const field of VisualClientFields) {
-		// 		if (req.body[field]) {
-		// 			visualData[field] = req.body[field];
-		// 		}
-		// 	}
-
 		const visualResponse = await visualApi.post('/')
 
 		const visualData = {
@@ -56,7 +47,6 @@ router.post('/', requireAuthentication, async (req, res, next) => {
 // Get info of specific visualization
 router.get('/:id', requireAuthentication, async (req, res, next) => {
 	try {
-		// TODO
 		const visualization = await Visualization.findOne({ where : { id: req.params.id }})
 
 		if (visualization) {
@@ -80,7 +70,6 @@ router.get('/:id', requireAuthentication, async (req, res, next) => {
 // Delete specific visualization
 router.delete('/:id', requireAuthentication, async (req, res, next) => {
 	try {
-		// TODO
 		const visualization = await Visualization.findOne({ where : { id: req.params.id }})
 		if (visualization) {
 			const engineResponse = await visualApi.delete(`/${visualization.contentId}`)
