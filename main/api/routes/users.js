@@ -35,7 +35,7 @@ router.get('/:id/visualizations', requireAuthentication, async (req, res, next) 
 			// TODO: get user's visualizations (fin)
 			const visualizations = await Visualization.findAll({ where: { userId: req.params.id} })	
 
-			res.status(200).json(visualizations);	// sending as json response
+			res.status(200).send({visualizations: visualizations});	// sending as json response
 		} catch (e) {
 			next(e)
 		}

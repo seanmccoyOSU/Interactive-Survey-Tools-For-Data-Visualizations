@@ -45,7 +45,7 @@ router.post('/', requireAuthentication, async (req, res, next) => {
 	} catch (e) {
 		if (e instanceof ValidationError) {
 			res.status(400).send({
-				msg: "Invalid input"
+				error: "Invalid input"
 			});
 		} else {
 			next(e)
@@ -59,13 +59,17 @@ router.get('/:id', requireAuthentication, async (req, res, next) => {
 		// TODO
 		const visualization = await Visualization.findOne({ where : { id: req.params.id }})
 
-		console.log(visualization)
-
 		if (visualization) {
-			res.status(200).json(visualization);
+			if (req.userid == visualization.userId) {
+				res.status(200).json(visualization);
+			} else {
+				res.status(401).send({ 
+					error: "You do not have access to this resource"
+				})
+			}
 		} else {
 			res.status(404).send({ 
-				msg: "Visualization not found"
+				error: "Visualization not found"
 			})
 		}
 	} catch (e) {

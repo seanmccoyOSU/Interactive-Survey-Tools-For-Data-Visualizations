@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize')
 const sequelize = require('../lib/sequelize')
 
 const Visualization = sequelize.define('visualization', {
-  name: { type: DataTypes.STRING, allowNull: false, unique: true },
+  name: { type: DataTypes.STRING, allowNull: false, unique: false },
   contentId: { type: DataTypes.INTEGER, allowNull: false, unique: false } // this is the ID of the corresponding visualization from the visualization engine database
 })
 

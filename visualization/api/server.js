@@ -98,6 +98,8 @@ app.use('*', function (err, req, res, next) {
     })
 })
 
+module.exports = app
+
 // start API server
 const PORT = 8080;
 sequelize.sync().then(function () {
