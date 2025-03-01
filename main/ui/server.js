@@ -39,9 +39,7 @@ app.set("view engine", "handlebars")
 // map certain API endpoints to name of page to render
 const apiPageNames = {
     '/users': 'register',
-    '/users/login': 'login',
-
-    'surveyDesigns': 'createsurvey',
+    '/users/login': 'login'
 }
 
 // Default path
@@ -61,10 +59,6 @@ app.get('/', async (req, res, next) => {
             next(error)
         }
     }
-
-    /*
-    * TODO BELOW FOR SURVEY DESIGNS: get user survey designs, then render them to the dashboard page (requires editing dashboard.handlebars)
-    */
 
     // if logged in, display user dashboard
     if (user) {
@@ -115,24 +109,6 @@ app.post('/users(/*)?', async (req, res, next) => {
 
     }
 })
-
-app.get('/surveyDesigns', function (req, res) {
-    res.render('createsurvey')
-})
-
-app.post('/surveyDesigns', async function(req, res) {
-    console.log(req.originalUrl)
-    console.log(req.body)
-    console.log("HELLOOO")
-
-    // This doesn't work?
-    // const response = await api.post(req.originalUrl, req.body)
-    // console.log(response);
-
-    res.redirect(req.protocol + "://" + req.get("host"))
-})
-
-
 
 // anything else is 404
 app.use('*', function (req, res, next) {
