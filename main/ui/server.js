@@ -4,6 +4,8 @@ require('dotenv').config()
 const express = require('express');
 const app = express();
 app.use(express.json());
+const path = require('path');
+app.use(express.static(path.join(__dirname, "public")))
 
 // setup required for processing cookies
 const { wrapper } = require('axios-cookiejar-support')
@@ -26,7 +28,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // express-handlebars setup
 // this dynamically renders pages
-const path = require('path');
 app.set('views', path.join(__dirname, 'views'));
 const exphbs = require('express-handlebars');
 app.engine("handlebars", exphbs.engine({
@@ -60,13 +61,20 @@ app.get('/', async (req, res, next) => {
         }
     }
 
+    /*
+    * TODO BELOW FOR SURVEY DESIGNS: get user survey designs, then render them to the dashboard page (requires editing dashboard.handlebars)
+    */
+
     // if logged in, display user dashboard
     if (user) {
         try {
             // get user visualizations
             const response = await api.get(`/users/${user.id}/visualizations`)
-            
-            // TODO: implement user visualizations
+
+            res.render("dashboard", {
+                name: user.name,
+                visualizations: response.data
+            })
     
         } catch (error) {
             res.render("dashboard", {
@@ -87,6 +95,50 @@ app.get('/register', (req, res) => {
 app.get('/login', (req, res) => {
     res.render("login")
 });
+
+// page of specific visualization
+app.get('/visualizations/:id', async (req, res, next) => {
+    try {
+        // relay post request to api
+        const response = await api.get(req.originalUrl)
+
+        // on success, refresh page
+        res.render("visualization", {
+            name: response.data.name,
+            id: response.data.contentId
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
+// handles what to do on ui create visualization
+app.post('/visualizations', async (req, res, next) => {
+    try {
+        // relay post request to api
+        const response = await api.post(req.originalUrl, req.body)
+
+        // on success, refresh page
+        res.redirect(req.protocol + "://" + req.get("host"))
+
+    } catch (error) {
+        next(error)
+    }
+})
+
+// handles what to do on ui delete visualization
+app.delete('/visualizations/:id', async (req, res, next) => {
+    try {
+        // relay delete request to api
+        const response = await api.delete(req.originalUrl, req.body)
+
+        res.redirect(req.get("Referrer"))
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 // handles what to do on ui registration, login, or logout
 app.post('/users(/*)?', async (req, res, next) => {
