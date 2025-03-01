@@ -134,3 +134,36 @@ describe("GET /users/{id}/surveyDesigns - get survey designs of user", () => {
     })
 })
 
+describe("DELETE /surveyDesigns/{id} - delete survey design", () => {
+    test("removes from database, sends 200 status code", async () => {
+        const loginDetails = await registerAndLogin(TEST_USER)  
+        const createRes = await request(api).post('/surveyDesigns').set("Cookie", [...loginDetails.header["set-cookie"]]).send(DESIGN_POST_REQ_BODY) 
+
+        const res = await request(api).delete(`/surveyDesigns/${createRes.body.id}`).set("Cookie", [...loginDetails.header["set-cookie"]])
+
+        expect(res.statusCode).toBe(200)
+        const deletedDesign = await SurveyDesign.findOne({ where: {id: createRes.body.id} })
+        expect(deletedDesign).toBeFalsy()
+    })
+
+    test("sends 404 status code and error when resource with specified id does not exist", async () => {
+        const loginDetails = await registerAndLogin(TEST_USER)  
+
+        const res = await request(api).delete('/surveyDesigns/1').set("Cookie", [...loginDetails.header["set-cookie"]])
+
+        expect(res.statusCode).toBe(404)
+        expect(res.body).toHaveProperty('error')
+    })
+
+    test("sends 401 status code and error when logged in as incorrect user", async () => {
+        const loginDetails = await registerAndLogin(TEST_USER)  
+        const createRes = await request(api).post('/surveyDesigns').set("Cookie", [...loginDetails.header["set-cookie"]]).send(DESIGN_POST_REQ_BODY)
+        const loginDetails2 = await registerAndLogin(TEST_USER2)  
+
+        const res = await request(api).delete(`/surveyDesigns/${createRes.body.id}`).set("Cookie", [...loginDetails2.header["set-cookie"]])  
+
+        expect(res.statusCode).toBe(401)
+        expect(res.body).toHaveProperty('error')
+    })
+})
+

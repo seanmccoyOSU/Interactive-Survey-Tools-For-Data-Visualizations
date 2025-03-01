@@ -72,14 +72,18 @@ router.delete('/:id', requireAuthentication, async (req, res, next) => {
 	try {
 		const visualization = await Visualization.findOne({ where : { id: req.params.id }})
 		if (visualization) {
-			const engineResponse = await visualApi.delete(`/${visualization.contentId}`)
-			await visualization.destroy();
-			res.status(200).send({ 
-				msg: "Visualization deleted"
-			})
+			if (req.userid == visualization.userId) {
+				const engineResponse = await visualApi.delete(`/${visualization.contentId}`)
+				await visualization.destroy();
+				res.status(200).send()
+			} else {
+				res.status(401).send({ 
+					error: "You do not have access to this resource"
+				})
+			}
 		} else {
 			res.status(404).send({ 
-				msg: "Visualization not found"
+				error: "Visualization not found"
 			})
 		}
 	} catch (e) {
