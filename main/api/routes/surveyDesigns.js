@@ -11,7 +11,9 @@ const router = express.Router();
 // Create new survey design
 router.post('/', requireAuthentication, async (req, res, next) => {
 	try {
-		// TODO
+		console.log(req.body)
+		// const user = await User.findOne({ where: { id: req.userid } })
+		res.status(200).send({body: req.body})
 	} catch (e) {
 		next(e)
 	}

@@ -39,7 +39,9 @@ app.set("view engine", "handlebars")
 // map certain API endpoints to name of page to render
 const apiPageNames = {
     '/users': 'register',
-    '/users/login': 'login'
+    '/users/login': 'login',
+
+    'surveyDesigns': 'createsurvey',
 }
 
 // Default path
@@ -113,6 +115,24 @@ app.post('/users(/*)?', async (req, res, next) => {
 
     }
 })
+
+app.get('/surveyDesigns', function (req, res) {
+    res.render('createsurvey')
+})
+
+app.post('/surveyDesigns', async function(req, res) {
+    console.log(req.originalUrl)
+    console.log(req.body)
+    console.log("HELLOOO")
+
+    // This doesn't work?
+    // const response = await api.post(req.originalUrl, req.body)
+    // console.log(response);
+
+    res.redirect(req.protocol + "://" + req.get("host"))
+})
+
+
 
 // anything else is 404
 app.use('*', function (req, res, next) {
