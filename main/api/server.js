@@ -1,6 +1,8 @@
 require('dotenv').config()
 
 const userRoutes = require('./routes/users');
+const visualRoutes = require('./routes/visualizations');
+const surveyDesignRoutes = require('./routes/surveyDesigns');
 const sequelize = require('./lib/sequelize')
 
 const express = require('express');
@@ -9,6 +11,8 @@ app.use(express.json());
 
 // API routes
 app.use('/users', userRoutes);
+app.use('/visualizations', visualRoutes);
+app.use('/surveyDesigns', surveyDesignRoutes);
 
 // catch-all for any undefined API endpoint
 app.use('*', function (req, res, next) {
@@ -24,6 +28,8 @@ app.use('*', function (err, req, res, next) {
         error: "Server error.  Please try again later."
     })
 })
+
+module.exports = app
 
 // start API server
 const PORT = 5050;

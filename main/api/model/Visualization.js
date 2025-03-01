@@ -2,7 +2,8 @@ const { DataTypes } = require('sequelize')
 const sequelize = require('../lib/sequelize')
 
 const Visualization = sequelize.define('visualization', {
-  svg: { type: DataTypes.TEXT('medium'), allowNull: true },
+  name: { type: DataTypes.STRING, allowNull: false, unique: false },
+  contentId: { type: DataTypes.INTEGER, allowNull: false, unique: false } // this is the ID of the corresponding visualization from the visualization engine database
 })
 
 exports.Visualization = Visualization
@@ -12,5 +13,7 @@ exports.Visualization = Visualization
  * on visualizations.
  */
 exports.VisualClientFields = [
-  'svg'
+  'userId',
+  'name',
+  'contentId'
 ]

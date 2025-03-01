@@ -62,7 +62,7 @@ const VisualizationElement = class {
         
         // on first time upload, mark all visual elements as selectable by default
         if (!this.svg.classList.contains(FIRST_TIME_MARK_LABEL)) {
-            this.setSelectableMultiple(this.visualElements)
+            this.setAllSelectable()
             this.svg.classList.add(FIRST_TIME_MARK_LABEL)
         }
     }
@@ -110,6 +110,14 @@ const VisualizationElement = class {
     }
 
     /**
+     * Marks element as not selectable
+     * @param {Element} element 
+     */
+    setNotSelectable(element) {
+        element.classList.remove(SELECTABLE_LABEL)
+    }
+
+    /**
      * Toggles selectability of element
      * @param {Element} element 
      */
@@ -133,6 +141,26 @@ const VisualizationElement = class {
     setSelectableMultiple(elements) {
         for (const element of elements) {
             this.setSelectable(element)
+        }
+    }
+
+    /**
+     * Marks all elements as selectable
+     * @param {Array} elements 
+     */
+    setAllSelectable() {
+        for (const element of this.visualElements) {
+            this.setSelectable(element)
+        }
+    }
+
+    /**
+     * Marks all elements as not selectable
+     * @param {Array} elements 
+     */
+    setAllNotSelectable() {
+        for (const element of this.visualElements) {
+            this.setNotSelectable(element)
         }
     }
 
