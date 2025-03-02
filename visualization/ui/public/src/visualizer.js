@@ -186,6 +186,19 @@ function OnLoadSvg() {
 }
 
 function OnFirstUpload() {
+    if (wrapper.classList.contains("editor") || debug) {
+        document.getElementById("set-all-selectable-button").removeAttribute("hidden")
+        document.getElementById("set-all-selectable-button").addEventListener("click", (evt) => {
+            visualizationElement.setAllSelectable()
+        })
+
+        document.getElementById("set-all-not-selectable-button").removeAttribute("hidden")
+        document.getElementById("set-all-not-selectable-button").addEventListener("click", (evt) => {
+            visualizationElement.setAllNotSelectable()
+        })
+    }
+    
+
     EnablePanning()
     EnableZoom()
     EnableBox()

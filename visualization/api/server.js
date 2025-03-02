@@ -66,6 +66,23 @@ app.put('/:id', async (req, res, next) => {
     }
 })
 
+// Remove visualization from database
+app.delete('/:id', async (req, res, next) => { 
+    // TODO
+    try {
+        const result = await Visualization.destroy({
+            where: { id: req.params.id }
+        })
+        if (result > 0) {
+            res.status(204).send()
+        }   else {
+            next()
+        }
+    }   catch(e) {
+        next(e)
+    }
+})
+
 // catch-all for any undefined API endpoint
 app.use('*', function (req, res, next) {
     res.status(404).send({
@@ -80,6 +97,8 @@ app.use('*', function (err, req, res, next) {
         error: "Server error.  Please try again later."
     })
 })
+
+module.exports = app
 
 // start API server
 const PORT = 8080;
