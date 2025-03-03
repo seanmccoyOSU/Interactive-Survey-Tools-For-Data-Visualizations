@@ -69,17 +69,20 @@ app.get('/', async (req, res, next) => {
     if (user) {
         try {
             // get user visualizations
-            const response = await api.get(`/users/${user.id}/visualizations`)
-
+            const userVisualizations = await api.get(`/users/${user.id}/visualizations`)
+            const userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
+                        
             res.render("dashboard", {
                 name: user.name,
-                visualizations: response.data
+                visualizations: userVisualizations.data.visualizations,
+                surveyDesigns: userSurveyDesigns.data.surveyDesigns,
             })
     
         } catch (error) {
             res.render("dashboard", {
                 name: user.name,
-                visError: "Unable to load visualizations."
+                visError: "Unable to load visualizations.",
+                surError: "Unable to load survey designs.",
             })
         }
     }
@@ -132,12 +135,64 @@ app.delete('/visualizations/:id', async (req, res, next) => {
     try {
         // relay delete request to api
         const response = await api.delete(req.originalUrl, req.body)
+        res.redirect(req.get("Referrer"))
 
+    } catch (error) {
+        next(error)
+    }
+})
+
+
+
+// Edit survey design
+app.get('/surveyDesigns/:id', async (req, res, next) => {
+    try {
+        const response = await api.get(req.originalUrl)
+        
+        res.render("editsurveydesign", {
+            name: response.data.name,
+            id: response.data.id
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
+app.post('/surveyDesigns/:id', async (req, res, next) => {
+    try {
+        const response = await api.post(req.originalUrl, req.body)
+        res.redirect(req.protocol + "://" + req.get("host"))
+    } catch (error) {
+        next(error)
+    }
+});
+
+
+// Deleting survey design
+app.delete('/surveyDesigns/:id', async (req, res, next) => {
+    try {
+        const response = await api.delete(req.originalUrl, req.body)
         res.redirect(req.get("Referrer"))
     } catch (error) {
         next(error)
     }
 })
+
+// Creating survey design
+app.post('/surveyDesigns', async (req, res, next) => {
+    try {
+        const response = await api.post(req.originalUrl, req.body)
+        res.redirect(req.protocol + "://" + req.get("host"))
+    } catch (error) {
+        next(error)
+    }
+})
+
+
+
+
+
 
 
 // handles what to do on ui registration, login, or logout

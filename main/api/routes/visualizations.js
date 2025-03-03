@@ -55,6 +55,7 @@ router.delete('/:id', requireAuthentication, handleErrors( async (req, res, next
 		const engineResponse = await visualApi.delete(`/${visualization.contentId}`)
 		await visualization.destroy();
 		res.status(200).send()
+		
 	} else {
 		res.status(401).send({ 
 			error: "You do not have access to this resource"
