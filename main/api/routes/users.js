@@ -10,6 +10,7 @@ const router = express.Router();
 
 // setup cookie parser
 const cookieParser = require('cookie-parser');
+const { SurveyDesign } = require('../model/SurveyDesign');
 router.use(cookieParser());
 
 // Get current user info
@@ -42,8 +43,9 @@ router.get('/:id/surveyDesigns', requireAuthentication, handleErrors( async (req
 		})
 	} else {
 		// TODO: get user's survey designs
-
-		next()	// goes to 404 right now
+		const surveyDesigns = await SurveyDesign.findAll({ where: { userId: req.params.id} })	
+		res.status(200).send({surveyDesigns: surveyDesigns});	// sending as json response
+		// next()	// goes to 404 right now
 	}
 }))
 
