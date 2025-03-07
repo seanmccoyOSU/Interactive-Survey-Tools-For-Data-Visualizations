@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest --forceExit",
     "start": "node visualization/ui/server.js",
+    "debug-main": "nodemon main/ui/server.js -debug",
     "dev-visual-api": "nodemon visualization/api/server.js",
     "dev-visual-ui": "nodemon visualization/ui/server.js",
     "dev-visual": "concurrently \"npm run dev-visual-api\" \"npm run dev-visual-ui\"",

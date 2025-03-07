@@ -13,13 +13,19 @@ const tough = require('tough-cookie');
 const cookieJar = new tough.CookieJar();
 
 // setup axios API interface
-const API_URL = "http://localhost:5050"
 const axios = require('axios');
-const api = wrapper(axios.create({
-    baseURL: API_URL,
-    jar: cookieJar,
-    withCredentials: true
-}))
+const api = (process.argv[2] == "-debug") ? (
+    // if running in debug mode, use fake debug API
+    require('./debugApi')
+) : (
+    // else, use the real API
+    wrapper(axios.create({
+        baseURL: process.env.MAIN_API_URL,
+        jar: cookieJar,
+        withCredentials: true
+    }))
+)
+
 
 // body-parser setup
 // needed to parse HTML form submissions for API requests
