@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(element.getAttribute("action"), { 
                 method: "DELETE"
             }).then(response => {
-                window.location.replace(window.location.href)
+                window.location.replace(window.location.href.split('#')[0])  // refreshes page
             })
         })
     }
