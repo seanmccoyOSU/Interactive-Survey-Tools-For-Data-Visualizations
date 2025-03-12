@@ -1,3 +1,15 @@
 <a href="visualizations/{{id}}">{{name}}</a>
 <button class="delete-button" action="visualizations/{{id}}">Delete</button>
+<a class="rename-button" href="#visualizationsRenamePopup{{id}}">Rename</a>
 <br>
+
+<!-- Rename popup -->
+<div class="popup rename-popup" id="visualizationsRenamePopup{{id}}">
+    <div class="popup-content">
+        <h2>Rename "{{name}}"</h2>
+        <input type="text" name="name" placeholder="new name" class="rename-input">
+        <p class="rename-error" hidden></p>
+        <button class="popup-rename-button" action="visualizations/{{id}}">Rename</button>
+        <a class="popup-cancel-button" href="#">Cancel</a>
+    </div>
+</div>

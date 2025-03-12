@@ -148,6 +148,18 @@ app.delete('/visualizations/:id', async (req, res, next) => {
     }
 })
 
+// handles what to do on ui patch visualization
+app.patch('/visualizations/:id', async (req, res, next) => {
+    try {
+        // relay patch request to api
+        const response = await api.patch(req.originalUrl, req.body)
+        res.redirect(req.get("Referrer"))
+
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 
 // Edit survey design
@@ -190,6 +202,18 @@ app.post('/surveyDesigns', async (req, res, next) => {
     try {
         const response = await api.post(req.originalUrl, req.body)
         res.redirect(req.protocol + "://" + req.get("host"))
+    } catch (error) {
+        next(error)
+    }
+})
+
+// handles what to do on ui patch survey design
+app.patch('/surveyDesigns/:id', async (req, res, next) => {
+    try {
+        // relay patch request to api
+        const response = await api.patch(req.originalUrl, req.body)
+        res.redirect(req.get("Referrer"))
+
     } catch (error) {
         next(error)
     }
