@@ -167,15 +167,59 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
     }
 });
 
+// Edit survey question
+app.get('/questions/:id', async (req, res, next) => {
+    try {
+        const response = await api.get(req.originalUrl)
+
+        let selectedType
+
+        
+        res.render("editquestion", {
+            number: response.data.number,
+            id: response.data.id,
+            surveyId: response.data.surveyId,
+            text: response.data.text,
+            multipleChoice: response.data.type == "Multiple Choice" ? "selected" : "",
+            shortAnswer: response.data.type == "Short Answer" ? "selected" : "",
+            choices: response.data.choices,
+            min: response.data.min,
+            max: response.data.max,
+            required: response.data.required ? "checked" : "",
+            allowComment: response.data.allowComment ? "checked" : "",
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
+// handle ui button for saving questions
+app.post('/questions/:id/PATCH', async (req, res, next) => {
+    try {
+        // convert to boolean before send
+        req.body.allowComment = !!req.body.allowComment
+        req.body.required = !!req.body.required
+
+        const response = await api.patch(req.originalUrl, req.body)
+        res.redirect(req.get('Referrer'))
+    } catch (error) {
+        next(error)
+    }
+})
+
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
-app.use('/:resource', async (req, res, next) => {
+app.use('/:resource/:id/:method', async (req, res, next) => {
     let response
 
     try {
         // relay request to api
         switch (req.method) {
             case 'POST':
-                response = await api.post(req.originalUrl, req.body)
+                if (req.params.method == "PATCH")
+                    response = await api.patch(req.originalUrl, req.body)
+                else
+                    response = await api.post(req.originalUrl, req.body)
                 break;
             case 'PATCH':
                 response = await api.patch(req.originalUrl, req.body)
@@ -188,7 +232,7 @@ app.use('/:resource', async (req, res, next) => {
                 return
         }
 
-        if (req.body.name) {
+        if (req.body.name || req.params.method) {
             // creating a new object for the main user collections doesn't have its own redirect, this refreshes
             res.redirect(req.get('Referrer'))
         } else {
