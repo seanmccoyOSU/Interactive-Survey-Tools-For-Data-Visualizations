@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Visualizer</title>
+    
+    <script type="module" src="src/visualizer.js" charset="utf-8" defer></script>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body id="body">
+    <div id="wrapper" class={{role}}>
+      <button id = "zoom-in">+</button>
+      <button id = "zoom-out">-</button>
+      <button id = "editor-button" hidden>editor mode</button>
+      <button id = "participant-button" hidden>participant mode</button>
+      <input 
+        type="file" 
+        id="svg-uploader" 
+        accept=".svg" 
+        style="margin: 10px;"
+        hidden
+      />
+      <button id="save-svg" hidden>Save SVG</button>
+      <button id="pan-button" hidden>Pan/Select</button>
+      <!-- <button id="select-button" hidden>Select</button> -->
+      <button id="create-button" hidden>Create</button>
+      <button id="delete-button" hidden>Delete</button>
+      <button id="set-all-selectable-button" hidden>Make All Elements Selectable</button>
+      <button id="set-all-not-selectable-button" hidden>Make All Elements Not Selectable</button>
+      <div id="visual-container">{{{svg}}}</div>
+      
+    </div>
+    
+  </body>
+</html>
