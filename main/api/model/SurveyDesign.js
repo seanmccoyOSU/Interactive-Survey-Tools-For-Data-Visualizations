@@ -12,5 +12,6 @@ exports.SurveyDesign = SurveyDesign
  * on users.
  */
 exports.SurveyDesignClientFields = [
+  'userId',
   'name',
 ]

@@ -23,49 +23,7 @@ router.post('/', requireAuthentication, handleErrors( async (req, res, next) => 
 	// Create new survey design in database
 	const surveyDesign = await SurveyDesign.create(surveyData, SurveyDesignClientFields)
 	res.status(201).send({ id: surveyDesign.id })
-
-	// next() // 404
 }))
-
-
-
-// Edit survey design
-router.post('/:id', requireAuthentication, handleErrors( async (req, res, next) => {
-	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
-
-	// Check if the survey design exists
-	if (!surveyDesign) {
-		return res.status(404).send({ error: "Survey design not found" });
-	}
-
-	// Ensure the user is the owner of the survey design
-	if (surveyDesign.userId !== req.userid) {
-		return res.status(401).send({ error: "You do not have permission to edit this survey design" });
-	}
-
-	// Update the survey design's name using Sequelize update
-    const [updatedCount] = await SurveyDesign.update(
-        { name: req.body.name }, 
-        {
-            where: {
-                id: req.params.id,
-                userId: req.userid,
-            },
-        }
-    );
-
-    // Check if an update occurred
-    if (updatedCount === 0) {
-        return res.status(400).send({ error: "Survey design update failed, no changes made" });
-    }
-
-    // Respond with the ID of the updated survey design
-    res.status(200).send({ id: surveyDesign.id });
-
-	// next() // 404
-}))
-
-
 
 // Get specific survey design info
 router.get('/:id', requireAuthentication, handleErrors( async (req, res, next) => {
@@ -79,8 +37,6 @@ router.get('/:id', requireAuthentication, handleErrors( async (req, res, next) =
 			error: "You do not have access to this resource"
 		})
 	}
-
-	// next() // 404
 }))
 
 // Delete specific survey design
@@ -95,8 +51,26 @@ router.delete('/:id', requireAuthentication, handleErrors( async (req, res, next
 			error: "You do not have access to this resource"
 		})
 	}
+}))
 
-	// next() // 404
+// Update specific survey design
+router.patch('/:id', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+	
+	if (req.userid == surveyDesign.userId) {
+		const result = await SurveyDesign.update(req.body, {
+			where: { id: req.params.id },
+			fields: SurveyDesignClientFields.filter(
+			  field => field !== 'userId'
+			)
+		})
+
+		res.status(200).send()
+	} else {
+		res.status(401).send({ 
+			error: "You do not have access to this resource"
+		})
+	}
 }))
 
 

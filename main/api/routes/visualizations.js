@@ -63,4 +63,23 @@ router.delete('/:id', requireAuthentication, handleErrors( async (req, res, next
 	}
 }))
 
+router.patch('/:id', requireAuthentication, handleErrors( async (req, res, next) => {
+	const visualization = await getResourceById(Visualization, req.params.id)
+	
+	if (req.userid == visualization.userId) {
+		const result = await Visualization.update(req.body, {
+			where: { id: req.params.id },
+			fields: VisualClientFields.filter(
+			  field => field !== 'userId' && field !== 'contentId'
+			)
+		})
+
+		res.status(200).send()
+	} else {
+		res.status(401).send({ 
+			error: "You do not have access to this resource"
+		})
+	}
+}))
+
 module.exports = router;

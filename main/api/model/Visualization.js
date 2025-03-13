@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize')
+const { DataTypes, ValidationError } = require('sequelize')
 const sequelize = require('../lib/sequelize')
 
 const Visualization = sequelize.define('visualization', {

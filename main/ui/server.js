@@ -112,7 +112,6 @@ app.get('/login', (req, res) => {
 // handles what to do on ui registration, login, or logout
 app.post('/users(/*)?', async (req, res, next) => {
     try {
-        console.log("ATTEMPTING USERS")
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
 
@@ -154,7 +153,6 @@ app.use('/:resource', async (req, res, next) => {
     let response
 
     try {
-        console.log("ATTEMPTING MISC")
         // relay request to api
         switch (req.method) {
             case 'POST':
@@ -195,7 +193,6 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
 
 // anything else is 404
 app.use('*', function (req, res, next) {
-    console.log("attempting 404")
     res.render("404page")
 })
 
