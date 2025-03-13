@@ -34,6 +34,7 @@ const TEST_USER = { name:"testUser", password:"testPassword" }
 const TEST_USER2 = { name:"testUser2", password:"testPassword2" }
 const VISUAL_POST_REQ_BODY = { name:"visual" }
 const VISUAL_POST_REQ_BODY2 = { name:"visual2" }
+const VISUAL_PATCH_REQ_BODY = { name:"new visual" }
 const MOCK_VISUAL_API_POST_RES_BODY = { data: {id: 1} }
 const MOCK_VISUAL_API_POST_RES_BODY2 = { data: {id: 2} }
 
@@ -180,6 +181,39 @@ describe("DELETE /visualizations/{id} - delete visualization", () => {
         const loginDetails2 = await registerAndLogin(TEST_USER2)  
 
         const res = await request(api).delete(`/visualizations/${createRes.body.id}`).set("Cookie", [...loginDetails2.header["set-cookie"]])  
+
+        expect(res.statusCode).toBe(401)
+        expect(res.body).toHaveProperty('error')
+    })
+})
+
+describe("PATCH /visualizations/{id} - update visualization info", () => {
+    test("updates info, sends 200 status code", async () => {
+        const loginDetails = await registerAndLogin(TEST_USER)  
+        const createRes = await request(api).post('/visualizations').set("Cookie", [...loginDetails.header["set-cookie"]]).send(VISUAL_POST_REQ_BODY) 
+
+        const res = await request(api).patch(`/visualizations/${createRes.body.id}`).set("Cookie", [...loginDetails.header["set-cookie"]]).send(VISUAL_PATCH_REQ_BODY)  
+
+        expect(res.statusCode).toBe(200)
+        const updated = await Visualization.findOne({ where: {id: createRes.body.id} })
+        expect(updated).toMatchObject(VISUAL_PATCH_REQ_BODY)
+    })
+
+    test("sends 404 status code and error when resource with specified id does not exist", async () => {
+        const loginDetails = await registerAndLogin(TEST_USER)  
+
+        const res = await request(api).patch('/visualizations/1').set("Cookie", [...loginDetails.header["set-cookie"]]).send(VISUAL_PATCH_REQ_BODY)  
+
+        expect(res.statusCode).toBe(404)
+        expect(res.body).toHaveProperty('error')
+    })
+
+    test("sends 401 status code and error when logged in as incorrect user", async () => {
+        const loginDetails = await registerAndLogin(TEST_USER)  
+        const createRes = await request(api).post('/visualizations').set("Cookie", [...loginDetails.header["set-cookie"]]).send(VISUAL_POST_REQ_BODY)
+        const loginDetails2 = await registerAndLogin(TEST_USER2)  
+
+        const res = await request(api).patch(`/visualizations/${createRes.body.id}`).set("Cookie", [...loginDetails2.header["set-cookie"]]).send(VISUAL_PATCH_REQ_BODY)  
 
         expect(res.statusCode).toBe(401)
         expect(res.body).toHaveProperty('error')
