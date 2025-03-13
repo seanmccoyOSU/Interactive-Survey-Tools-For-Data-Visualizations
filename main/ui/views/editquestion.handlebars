@@ -1,0 +1,45 @@
+<h1>Question {{number}}</h1>
+<a class="new-button" href="/surveyDesigns/{{surveyId}}">Return to survey overview</a>
+<br>
+
+<form action="/questions/{{id}}/PATCH" method="POST">
+    <h5><label for="text">Question Text</label></h5>
+    <textarea type="text" id="text" name="text" rows="4" cols="50">{{text}}</textarea>
+    <br>
+
+    <h5>
+        <label for="type">Answer type: </label>
+        <select name="type" id="type">
+            <option value="Multiple Choice" {{multipleChoice}}>Multiple Choice</option>
+            <option value="Short Answer" {{shortAnswer}}>Short Answer</option>
+        </select>
+    </h5>
+
+    <section id="multiple-choice-section" hidden>
+        <br>
+        <h5><label for="choices">Choices: </label></h5>
+        <p>All possible choices for a multiple choice question. Separate Choices using the | character.</p>
+        <textarea type="text" id="choices" name="choices" rows="4" cols="50">{{choices}}</textarea>
+        <br>
+        <br>
+    </section>
+
+    <h5><label for="min" id="min-label">min: </label>
+    <input type="text" id="min" name="min" value="{{min}}">
+    </h5>
+
+    <h5><label for="max" id="max-label">max: </label>
+    <input type="text" id="max" name="max" value="{{max}}">
+    </h5>
+
+    <h5><label for="required">Required? </label>
+    <input type="checkbox" id="required" name="required" {{required}}>
+    </h5>
+
+    <h5><label for="allowComment">Allow comment? </label>
+    <input type="checkbox" id="allowComment" name="allowComment" value="true" {{allowComment}}>
+    </h5>
+
+    <br>
+    <button class="save-question-button" action="/questions/{{id}}">Save Changes</button>
+</form>
