@@ -26,7 +26,6 @@ const api = (process.argv[2] == "-debug") ? (
     }))
 )
 
-
 // body-parser setup
 // needed to parse HTML form submissions for API requests
 const bodyParser = require('body-parser');
@@ -49,6 +48,14 @@ const apiPageNames = {
     '/users/login': 'login'
 }
 
+// some browsers request this automatically, ignoring for now
+app.get('/favicon.ico', (req, res, next) => {
+    console.log("ignoring favicon request")
+    return
+})
+
+
+
 // Default path
 // when there is not path in the URL, go to generic homepage or user dashboard
 app.get('/', async (req, res, next) => {
@@ -66,10 +73,6 @@ app.get('/', async (req, res, next) => {
             next(error)
         }
     }
-
-    /*
-    * TODO BELOW FOR SURVEY DESIGNS: get user survey designs, then render them to the dashboard page (requires editing dashboard.handlebars)
-    */
 
     // if logged in, display user dashboard
     if (user) {
@@ -105,6 +108,30 @@ app.get('/login', (req, res) => {
     res.render("login")
 });
 
+
+// handles what to do on ui registration, login, or logout
+app.post('/users(/*)?', async (req, res, next) => {
+    try {
+        console.log("ATTEMPTING USERS")
+        // relay post request to api
+        const response = await api.post(req.originalUrl, req.body)
+
+        // on success, go back to home page
+        res.redirect(req.protocol + "://" + req.get("host"))
+
+    } catch (error) {
+        if (error.response) {
+            // on fail, re-render page with error message
+            res.render(apiPageNames[req.originalUrl], {
+                error: error.response.data.error
+            })
+        } else {
+            next(error)
+        }
+    }
+})
+
+
 // page of specific visualization
 app.get('/visualizations/:id', async (req, res, next) => {
     try {
@@ -122,45 +149,34 @@ app.get('/visualizations/:id', async (req, res, next) => {
     }
 });
 
-// handles what to do on ui create visualization
-app.post('/visualizations', async (req, res, next) => {
+// handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
+app.use('/:resource', async (req, res, next) => {
+    let response
+
     try {
-        // relay post request to api
-        const response = await api.post(req.originalUrl, req.body)
+        console.log("ATTEMPTING MISC")
+        // relay request to api
+        switch (req.method) {
+            case 'POST':
+                response = await api.post(req.originalUrl, req.body)
+                break;
+            case 'PATCH':
+                response = await api.patch(req.originalUrl, req.body)
+                break;
+            case 'DELETE':
+                response = await api.delete(req.originalUrl, req.body)
+                break;
+            default:
+                next()
+                return
+        }
 
-        // on success, refresh page
-        res.redirect(req.protocol + "://" + req.get("host"))
-
-    } catch (error) {
-        next(error)
-    }
-})
-
-// handles what to do on ui delete visualization
-app.delete('/visualizations/:id', async (req, res, next) => {
-    try {
-        // relay delete request to api
-        const response = await api.delete(req.originalUrl, req.body)
+        // refresh page
         res.redirect(req.get("Referrer"))
-
     } catch (error) {
         next(error)
     }
 })
-
-// handles what to do on ui patch visualization
-app.patch('/visualizations/:id', async (req, res, next) => {
-    try {
-        // relay patch request to api
-        const response = await api.patch(req.originalUrl, req.body)
-        res.redirect(req.get("Referrer"))
-
-    } catch (error) {
-        next(error)
-    }
-})
-
-
 
 // Edit survey design
 app.get('/surveyDesigns/:id', async (req, res, next) => {
@@ -177,78 +193,9 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
     }
 });
 
-app.post('/surveyDesigns/:id', async (req, res, next) => {
-    try {
-        const response = await api.post(req.originalUrl, req.body)
-        res.redirect(req.protocol + "://" + req.get("host"))
-    } catch (error) {
-        next(error)
-    }
-});
-
-
-// Deleting survey design
-app.delete('/surveyDesigns/:id', async (req, res, next) => {
-    try {
-        const response = await api.delete(req.originalUrl, req.body)
-        res.redirect(req.get("Referrer"))
-    } catch (error) {
-        next(error)
-    }
-})
-
-// Creating survey design
-app.post('/surveyDesigns', async (req, res, next) => {
-    try {
-        const response = await api.post(req.originalUrl, req.body)
-        res.redirect(req.protocol + "://" + req.get("host"))
-    } catch (error) {
-        next(error)
-    }
-})
-
-// handles what to do on ui patch survey design
-app.patch('/surveyDesigns/:id', async (req, res, next) => {
-    try {
-        // relay patch request to api
-        const response = await api.patch(req.originalUrl, req.body)
-        res.redirect(req.get("Referrer"))
-
-    } catch (error) {
-        next(error)
-    }
-})
-
-
-
-
-
-
-
-// handles what to do on ui registration, login, or logout
-app.post('/users(/*)?', async (req, res, next) => {
-    try {
-        // relay post request to api
-        const response = await api.post(req.originalUrl, req.body)
-
-        // on success, go back to home page
-        res.redirect(req.protocol + "://" + req.get("host"))
-
-    } catch (error) {
-        if (error.response) {
-            // on fail, re-render page with error message
-            res.render(apiPageNames[req.originalUrl], {
-                error: error.response.data.msg
-            })
-        } else {
-            next(error)
-        }
-
-    }
-})
-
 // anything else is 404
 app.use('*', function (req, res, next) {
+    console.log("attempting 404")
     res.render("404page")
 })
 

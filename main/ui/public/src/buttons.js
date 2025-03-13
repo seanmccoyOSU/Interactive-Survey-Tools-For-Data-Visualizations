@@ -24,16 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({name: input.value})
             }).then(response => {
-                if (!response.ok) {
-                    errorText.removeAttribute("hidden")
-                    if (response.status == 401) {
-                        errorText.textContent = "Bad input. Please enter a different name."
-                    } else {
-                        errorText.textContent = "ERROR: Unable to rename resource"
-                    }
-                } else {
-                    window.location.replace(window.location.href.split('#')[0])  // refreshes page
-                }
+                window.location.replace(window.location.href.split('#')[0])  // refreshes page
             })
         })
     }
