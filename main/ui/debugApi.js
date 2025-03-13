@@ -20,11 +20,13 @@ const LOCAL_JSON = {
     surveyDesigns: [
         {
             id: 0,
-            name: "debug design 1"
+            name: "debug design 1",
+            title: "debug design 1",
         },
         {
             id: 1,
-            name: "debug design 2"
+            name: "debug design 2",
+            title: "debug design 1",
         },
     ]
 }
@@ -115,9 +117,9 @@ class DebugApi {
             // here the id just matches the index
             if (collection[pathLevels[2]]) {                            // PATCH /{resource}/{id}
                 // replace the object, but keep the id
-                const id = collection[pathLevels[2]].id
-                collection[pathLevels[2]] = body
-                collection[pathLevels[2]].id = id
+                for (const property in body) {
+                    collection[pathLevels[2]][property] = body[property]
+                }
             } else {
                 // id does not exist
                 throw new Error()

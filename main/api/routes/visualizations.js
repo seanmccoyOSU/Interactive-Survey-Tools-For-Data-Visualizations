@@ -63,6 +63,7 @@ router.delete('/:id', requireAuthentication, handleErrors( async (req, res, next
 	}
 }))
 
+// Update specific visualization
 router.patch('/:id', requireAuthentication, handleErrors( async (req, res, next) => {
 	const visualization = await getResourceById(Visualization, req.params.id)
 	

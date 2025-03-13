@@ -1,9 +1,18 @@
-<h1>Edit Survey Design</h1>
+<h1>Editing Survey Design "{{name}}"</h1>
+<a class="new-button" href="/">go home</a>
 
-<form action="/surveyDesigns/{{id}}" method="POST">
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" value="{{name}}" required>
-    <button type="submit">Save</button>
-</form>
+<h2>Survey Title</h2>
+<p>This is the title that is visible to participants.</p>
+<input type="text" id="title" name="title" value="{{title}}">
 
-<a href="/">Cancel</a>
+<h2>Introduction Text</h2>
+<p>This is the text the participant sees before starting the survey.</p>
+<textarea type="text" id="introText" name="introText" rows="4" cols="50">{{introText}}</textarea>
+
+<h2>Conclusion Text</h2>
+<p>This is the text the participant sees after completing the survey.</p>
+<textarea type="text" id="conclusionText" name="conclusionText" rows="4" cols="50">{{conclusionText}}</textarea>
+
+<br>
+<br>
+<button class="save-survey-button" action="/surveyDesigns/{{id}}">Save Changes</button>

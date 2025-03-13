@@ -183,7 +183,10 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
         
         res.render("editsurveydesign", {
             name: response.data.name,
-            id: response.data.id
+            id: response.data.id,
+            title: response.data.title,
+            introText: response.data.introText,
+            conclusionText: response.data.conclusionText,
         })
 
     } catch (error) {

@@ -28,4 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
             })
         })
     }
+
+    // enable functionality of button for saving changes to survey design
+    const saveSurveyButton = document.getElementsByClassName("save-survey-button")[0]
+    if (saveSurveyButton) {
+        saveSurveyButton.addEventListener("click", () => {
+            fetch(saveSurveyButton.getAttribute("action"), { 
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    title: document.getElementById("title").value, 
+                    introText: document.getElementById("introText").value, 
+                    conclusionText: document.getElementById("conclusionText").value,
+                })
+            })
+        })
+    }
 })
