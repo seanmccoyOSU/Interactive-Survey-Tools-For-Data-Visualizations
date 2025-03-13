@@ -149,8 +149,15 @@ app.get('/visualizations/:id', async (req, res, next) => {
 
 // Edit survey design
 app.get('/surveyDesigns/:id', async (req, res, next) => {
+    let response
+
     try {
-        const response = await api.get(req.originalUrl)
+        response = await api.get(req.originalUrl)
+    } catch (error) {
+        next(error)
+    }
+
+    try {
         const questionResponse = await api.get(req.originalUrl + "/questions")
         
         res.render("editsurveydesign", {
@@ -161,19 +168,25 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
             questions: questionResponse.data.questions,
             conclusionText: response.data.conclusionText,
         })
-
     } catch (error) {
-        next(error)
+        res.render("editsurveydesign", {
+            name: response.data.name,
+            id: response.data.id,
+            title: response.data.title,
+            introText: response.data.introText,
+            questionError: "Unable to load questions",
+            conclusionText: response.data.conclusionText,
+        })
     }
+        
+
+    
 });
 
 // Edit survey question
 app.get('/questions/:id', async (req, res, next) => {
     try {
         const response = await api.get(req.originalUrl)
-
-        let selectedType
-
         
         res.render("editquestion", {
             number: response.data.number,
@@ -201,7 +214,7 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
         req.body.allowComment = !!req.body.allowComment
         req.body.required = !!req.body.required
 
-        const response = await api.patch(req.originalUrl, req.body)
+        const response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body)
         res.redirect(req.get('Referrer'))
     } catch (error) {
         next(error)
@@ -209,41 +222,32 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
 })
 
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
-app.use('/:resource/:id/:method', async (req, res, next) => {
+app.post('/:resource/:id?/:method?', async (req, res, next) => {
     let response
 
     try {
         // relay request to api
-        switch (req.method) {
-            case 'POST':
-                if (req.params.method == "PATCH")
-                    response = await api.patch(req.originalUrl, req.body)
-                else
-                    response = await api.post(req.originalUrl, req.body)
-                break;
+        switch (req.params.method) {
             case 'PATCH':
-                response = await api.patch(req.originalUrl, req.body)
+                response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body)
                 break;
             case 'DELETE':
-                response = await api.delete(req.originalUrl, req.body)
+                response = await api.delete(req.originalUrl.split('/DELETE')[0], req.body)
+                break;
+            case 'POST':
+                response = await api.post(req.originalUrl.split('/POST')[0], req.body)
                 break;
             default:
-                next()
-                return
+                response = await api.post(req.originalUrl, req.body)
         }
 
-        if (req.body.name || req.params.method) {
-            // creating a new object for the main user collections doesn't have its own redirect, this refreshes
-            res.redirect(req.get('Referrer'))
-        } else {
-            res.send()
-        }
+        // refresh
+        res.redirect(req.get('Referrer'))
         
     } catch (error) {
         next(error)
     }
 })
-
 
 
 // anything else is 404

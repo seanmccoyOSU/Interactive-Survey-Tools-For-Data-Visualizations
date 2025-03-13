@@ -1,7 +1,11 @@
 <h3>
-    <a href="/questions/{{id}}">Question {{number}}</a>
+    <form action="/questions/{{id}}/DELETE" method="POST">
+        <a href="/questions/{{id}}">Question {{number}}</a>
+        <button class="delete-button">Delete</button>
+    </form>
 </h3>
-<button class="delete-button" action="/questions/{{id}}">Delete</button>
+<p><strong>Question Text:</strong> {{text}}</p>
+
 <!-- Shifting buttons, to be implemented
 <h4>Change order: </h4>
 <button class="shift-up-button" action="/questions/{{id}}">↑</button>
@@ -9,4 +13,3 @@
 <button class="make-first-button" action="/questions/{{id}}">First</button>
 <button class="make-last-button" action="/questions/{{id}}">Last</button>
 -->
-<p>{{text}}</p>

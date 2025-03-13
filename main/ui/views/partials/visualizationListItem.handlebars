@@ -1,15 +1,18 @@
-<a href="visualizations/{{id}}">{{name}}</a>
-<button class="delete-button" action="visualizations/{{id}}">Delete</button>
-<a class="rename-button" href="#visualizationsRenamePopup{{id}}">Rename</a>
-<br>
+<form action="/visualizations/{{id}}/DELETE" method="POST">
+    <a href="/visualizations/{{id}}">{{name}}</a>
+    <button class="delete-button">Delete</button>
+    <a class="rename-button" href="#visualizationsRenamePopup{{id}}">Rename</a>
+</form>
 
 <!-- Rename popup -->
 <div class="popup rename-popup" id="visualizationsRenamePopup{{id}}">
     <div class="popup-content">
         <h2>Rename "{{name}}"</h2>
-        <input type="text" name="name" placeholder="new name" class="rename-input">
-        <p class="rename-error" hidden></p>
-        <button class="popup-rename-button" action="visualizations/{{id}}">Rename</button>
+        <form action="/visualizations/{{id}}/PATCH" method="POST">
+            <input type="text" name="name" placeholder="new name" class="rename-input">
+            <p class="rename-error" hidden></p>
+            <button class="popup-rename-button">Rename</button>
+        </form>
         <a class="popup-cancel-button" href="#">Cancel</a>
     </div>
 </div>
