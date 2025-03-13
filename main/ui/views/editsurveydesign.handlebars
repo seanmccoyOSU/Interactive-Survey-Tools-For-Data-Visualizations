@@ -9,6 +9,13 @@
 <p>This is the text the participant sees before starting the survey.</p>
 <textarea type="text" id="introText" name="introText" rows="4" cols="50">{{introText}}</textarea>
 
+<h2>Questions</h2>
+{{#each questions}}
+    {{> questionListItem}}
+{{/each}}
+<button class="add-question-button" action="/surveyDesigns/{{id}}/questions">+ Add</button>
+
+
 <h2>Conclusion Text</h2>
 <p>This is the text the participant sees after completing the survey.</p>
 <textarea type="text" id="conclusionText" name="conclusionText" rows="4" cols="50">{{conclusionText}}</textarea>

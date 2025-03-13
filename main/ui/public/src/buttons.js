@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // enable functionality of all delete buttons
-    for (let element of document.getElementsByClassName("delete-button")) {
+    for (const element of document.getElementsByClassName("delete-button")) {
         element.addEventListener("click", () => {
             fetch(element.getAttribute("action"), { 
                 method: "DELETE"
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // enable functionality of all rename buttons
-    for (let element of document.getElementsByClassName("rename-popup")) {
+    for (const element of document.getElementsByClassName("rename-popup")) {
         const renameButton = element.getElementsByClassName("popup-rename-button")[0]
         const input = element.getElementsByClassName("rename-input")[0]
         const errorText = element.getElementsByClassName("rename-error")[0]
@@ -45,5 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             })
         })
+
+        // enable functionality of button for adding a new question to the survey design
+        const addQuestionButton = document.getElementsByClassName("add-question-button")[0]
+        if (addQuestionButton) {
+            addQuestionButton.addEventListener("click", () => {
+                saveSurveyButton.dispatchEvent(new Event('click'))
+                fetch(addQuestionButton.getAttribute("action"), { 
+                    method: "POST"
+                }).then(response => {
+                    window.location.replace(window.location.href.split('#')[0])  // refreshes page
+                })
+            })
+        }
     }
 })

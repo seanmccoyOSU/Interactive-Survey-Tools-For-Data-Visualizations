@@ -130,7 +130,6 @@ app.post('/users(/*)?', async (req, res, next) => {
     }
 })
 
-
 // page of specific visualization
 app.get('/visualizations/:id', async (req, res, next) => {
     try {
@@ -141,6 +140,26 @@ app.get('/visualizations/:id', async (req, res, next) => {
         res.render("visualization", {
             name: response.data.name,
             id: response.data.contentId
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
+// Edit survey design
+app.get('/surveyDesigns/:id', async (req, res, next) => {
+    try {
+        const response = await api.get(req.originalUrl)
+        const questionResponse = await api.get(req.originalUrl + "/questions")
+        
+        res.render("editsurveydesign", {
+            name: response.data.name,
+            id: response.data.id,
+            title: response.data.title,
+            introText: response.data.introText,
+            questions: questionResponse.data.questions,
+            conclusionText: response.data.conclusionText,
         })
 
     } catch (error) {
@@ -169,30 +188,19 @@ app.use('/:resource', async (req, res, next) => {
                 return
         }
 
-        // refresh page
-        res.redirect(req.get("Referrer"))
+        if (req.body.name) {
+            // creating a new object for the main user collections doesn't have its own redirect, this refreshes
+            res.redirect(req.get('Referrer'))
+        } else {
+            res.send()
+        }
+        
     } catch (error) {
         next(error)
     }
 })
 
-// Edit survey design
-app.get('/surveyDesigns/:id', async (req, res, next) => {
-    try {
-        const response = await api.get(req.originalUrl)
-        
-        res.render("editsurveydesign", {
-            name: response.data.name,
-            id: response.data.id,
-            title: response.data.title,
-            introText: response.data.introText,
-            conclusionText: response.data.conclusionText,
-        })
 
-    } catch (error) {
-        next(error)
-    }
-});
 
 // anything else is 404
 app.use('*', function (req, res, next) {

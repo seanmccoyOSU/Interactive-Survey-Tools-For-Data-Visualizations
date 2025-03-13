@@ -28,6 +28,45 @@ const LOCAL_JSON = {
             name: "debug design 2",
             title: "debug design 1",
         },
+    ],
+
+    questions: [
+        {
+            id: 0,
+            surveyId: 0,
+            number: 1,
+            text: "Please select one.",
+            type: "Multiple Choice",
+            required: true,
+            allowComment: true,
+            min: 1,
+            max: 1,
+            choices: "First|Second|Third"
+        },
+        {
+            id: 1,
+            surveyId: 0,
+            number: 2,
+            text: "Please select two.",
+            type: "Multiple Choice",
+            required: true,
+            allowComment: true,
+            min: 2,
+            max: 2,
+            choices: "First|Second|Third"
+        },
+        {
+            id: 2,
+            surveyId: 1,
+            number: 1,
+            text: "Please write in an answer.",
+            type: "Short Answer",
+            required: true,
+            allowComment: true,
+            min: 100,
+            max: 500,
+            choices: ""
+        },
     ]
 }
 
@@ -55,6 +94,14 @@ class DebugApi {
                 // here there is only one user
                 return { data: this.debugData["user"] }
             }
+        } else if (pathLevels[1] == "surveyDesigns" && pathLevels[3] == "questions") {  // GET /surveyDesigns/{id}/questions
+            // const returnArray = []
+            // for (const object of this.debugData.questions) {
+            //     if (object.surveyId == pathLevels[2])
+            //         returnArray.push()
+            // }
+
+            return {data: { questions: this.debugData.questions.filter(obj => obj.surveyId == pathLevels[2]) } }
         } else {
             const collection = this.debugData[pathLevels[1]]
             if (collection) {                                       // GET /{resource}/{id}
@@ -77,16 +124,24 @@ class DebugApi {
         if (pathLevels[1] == "users") {
             // do nothing for users
             return
-        }
-        const collection = this.debugData[pathLevels[1]]
-        if (collection) {                                           // POST /{resource}
-            // add new element to end of array
-            collection.push(body)
-            collection[collection.length-1].id = collection.length-1
+        } else if (pathLevels[1] == "surveyDesigns" && pathLevels[3] == "questions") {  // POST /surveyDesigns/{id}/questions
+            const numOfQuestionsInSurvey = this.debugData.questions.filter(obj => obj.surveyId == pathLevels[2]).length
+            this.debugData.questions.push(body)
+            this.debugData.questions[this.debugData.questions.length-1].number = numOfQuestionsInSurvey+1
+            this.debugData.questions[this.debugData.questions.length-1].id = this.debugData.questions.length-1
+            this.debugData.questions[this.debugData.questions.length-1].surveyId = pathLevels[2]
         } else {
-            // collection does not exist
-            throw new Error()
+            const collection = this.debugData[pathLevels[1]]
+            if (collection) {                                           // POST /{resource}
+                // add new element to end of array
+                collection.push(body)
+                collection[collection.length-1].id = collection.length-1
+            } else {
+                // collection does not exist
+                throw new Error()
+            }
         }
+        
 
     }
 
@@ -98,6 +153,7 @@ class DebugApi {
         }
         const collection = this.debugData[pathLevels[1]]
         if (collection) {                                             // DELETE /{resource}/{id}
+            // NOTE: deletes do not cascade, this may cause weird errors if you test deleting then other actions afterwards
             // this just removes the last element, regardless of id
             collection.pop()
         } else {
