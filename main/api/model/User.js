@@ -5,43 +5,47 @@ const { Visualization } = require('./Visualization')
 const { SurveyDesign } = require('./SurveyDesign')
 
 const User = sequelize.define('user', {
-  name: { type: DataTypes.STRING, allowNull: false, unique: true },
+  user_id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true,
+    autoIncrement: true
+  },
+  username: { type: DataTypes.STRING, allowNull: false, unique: true },
+  email: { type: DataTypes.STRING, allowNull: false, unique: true },
+  role: { type: DataTypes.STRING },
   password: { 
     type: DataTypes.STRING, 
     allowNull: false,
     set(value) {
-        this.setDataValue('password', bcrypt.hashSync(value, 8))
+      this.setDataValue('password', bcrypt.hashSync(value, 8))
     }
   }
-})
-
+}, {
+  timestamps: true,
+  createdAt: 'created_at',  // map Sequelize's createdAt to your column name
+  updatedAt: false  // Disable the updatedAt column
+});
 /*
-* Set up one-to-many relationship between User and Visualization.
-*/
-User.hasMany(Visualization, { foreignKey: { allowNull: false } })
-Visualization.belongsTo(Visualization)
+ * Set up associations.
+ */
+// One-to-many: A user can have many visualizations.
+User.hasMany(Visualization, { foreignKey: 'uploaded_by' });
+Visualization.belongsTo(User, { foreignKey: 'uploaded_by' });
 
-/*
-* Set up one-to-many relationship between User and SurveyDesign.
-*/
-User.hasMany(SurveyDesign, { foreignKey: { allowNull: false } })
-SurveyDesign.belongsTo(User)
+// One-to-many: A user can have many survey designs.
+User.hasMany(SurveyDesign, { foreignKey: 'created_by' })
+SurveyDesign.belongsTo(User, { foreignKey: 'created_by' })
 
 exports.User = User
 
-/*
- * Export an array containing the names of fields the client is allowed to set
- * on users.
- */
 exports.UserClientFields = [
-  'name',
+  'username', // updated field name
+  'email',
+  'role',
   'password'
 ]
 
-/*
- * validate username and password
- */
-exports.validateCredentials = async function (name, password) {
-    const user = await User.findOne({ where: { name: name }})
+exports.validateCredentials = async function (username, password) {
+    const user = await User.findOne({ where: { username } })
     return user && await bcrypt.compare(password, user.password)
 }
