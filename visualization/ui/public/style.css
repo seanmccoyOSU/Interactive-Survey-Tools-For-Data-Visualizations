@@ -11,6 +11,7 @@ html, body {
 #visual-container {
     min-width: 100%;
     min-height: 100%;
+    position: fixed;
 }
 
 .participant .visual-element.selectable:hover, .editor .visual-element:hover {

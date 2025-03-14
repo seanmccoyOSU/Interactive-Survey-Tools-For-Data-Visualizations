@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Survey</title>
+
+        <script type="module" src="/src/questionEdit.js" charset="utf-8" defer></script>
+        <link rel="stylesheet" href="/takesurveystyle.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="image-section">
+                <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="100%" width="100%"></iframe>
+            </div>
+
+            <div class="controls-section">
+                <div class="progress-percentage">
+                    <span id="progress">25% Complete</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div class="box question-box">
+                    <span class="question-header">Question {{number}}.</span>
+                    <div class="question-text-box">
+                        <span class="question-text">{{text}}</span>
+                    </div>
+                </div>
+
+                <div class="box answer-box">
+                    <p>Answer:</p>
+                    <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer" {{shortAnswer}}></textarea>
+                    {{#each choices}}
+                        {{> choiceCheckItem}}
+                    {{/each}}
+                </div>
+                <div class="box comment-box">
+                    Comment:
+                    <textarea class="text-entry-box comment-entry-box" type="text" id="comment" name="comment">{{comment}}</textarea>
+                </div>
+                
+                <div class="button-container">
+                    <a href="/takeSurvey/{{linkHash}}?page={{prev}}" class="nav-button">Previous Question</a>
+                    <a href="/takeSurvey/{{linkHash}}?page={{next}}" class="nav-button">{{nextText}}</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html> 
+ 
+ 

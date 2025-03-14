@@ -76,24 +76,42 @@ app.get('/', async (req, res, next) => {
 
     // if logged in, display user dashboard
     if (user) {
+        // get user visualizations
+        let userVisualizations
+        let userSurveyDesigns
+        let userPublishedSurveys
+
+        let visError = ""
+        let surError = ""
+        let pSurError = ""
+
         try {
-            // get user visualizations
-            const userVisualizations = await api.get(`/users/${user.id}/visualizations`)
-            const userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
-                        
-            res.render("dashboard", {
-                name: user.name,
-                visualizations: userVisualizations.data.visualizations,
-                surveyDesigns: userSurveyDesigns.data.surveyDesigns,
-            })
-    
-        } catch (error) {
-            res.render("dashboard", {
-                name: user.name,
-                visError: "Unable to load visualizations.",
-                surError: "Unable to load survey designs.",
-            })
+            userVisualizations = await api.get(`/users/${user.id}/visualizations`)
+        } catch {
+            visError = "Unable to load visualizations."
         }
+        
+        try {
+            userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
+        } catch {
+            surError = "Unable to load survey designs."
+        }
+
+        try {
+            userPublishedSurveys = await api.get(`/users/${user.id}/publishedSurveys`)
+        } catch {
+            pSurError = "Unable to load published surveys."
+        }
+                    
+        res.render("dashboard", {
+            name: user.name,
+            visualizations: userVisualizations?.data.visualizations,
+            surveyDesigns: userSurveyDesigns?.data.surveyDesigns,
+            publishedSurveys: userPublishedSurveys?.data.publishedSurveys,
+            visError: visError,
+            surError: surError,
+            pSurError: pSurError
+        })
     }
     
 });
@@ -191,7 +209,7 @@ app.get('/questions/:id', async (req, res, next) => {
         res.render("editquestion", {
             number: response.data.number,
             id: response.data.id,
-            surveyId: response.data.surveyId,
+            surveyDesignId: response.data.surveyDesignId,
             text: response.data.text,
             multipleChoice: response.data.type == "Multiple Choice" ? "selected" : "",
             shortAnswer: response.data.type == "Short Answer" ? "selected" : "",
@@ -200,6 +218,24 @@ app.get('/questions/:id', async (req, res, next) => {
             max: response.data.max,
             required: response.data.required ? "checked" : "",
             allowComment: response.data.allowComment ? "checked" : "",
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
+// View published survey
+app.get('/publishedSurveys/:id', async (req, res, next) => {
+    try {
+        const response = await api.get(req.originalUrl)
+
+        res.render('publishedSurvey', {
+            name: response.data.name,
+            openDateTime: response.data.openDateTime,
+            closeDateTime: response.data.closeDateTime,
+            status: response.data.status,
+            url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
         })
 
     } catch (error) {
@@ -220,6 +256,58 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
         next(error)
     }
 })
+
+// links for taking surveys
+app.get('/takeSurvey/:hash', async (req, res, next) => {
+    try {
+        const response = await api.get(req.originalUrl)
+
+        if (req.query.page && req.query.page < response.data.questions.length+2 && req.query.page > 0) {
+            if (req.query.page == response.data.questions.length+1) {
+                res.render("takeSurveyConclusion", {
+                    layout: false,
+                    conclusionText: response.data.surveyDesign.conclusionText,
+                })
+            } else {
+                const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
+
+                let choices = []
+                if (question.type == "Multiple Choice") {
+                    const qChoices = question.choices.split('|')
+                    for (let i = 0; i < qChoices.length; i++)
+                        choices.push({ id: `choice${i}`, choice: qChoices[i] })
+                }
+                console.log(choices)
+
+                res.render("takeSurveyPage", {
+                    layout: false,
+                    linkHash: response.data.linkHash,
+                    text: question.text,
+                    number: question.number,
+                    choices: choices,
+                    shortAnswer: question.type == "Short Answer" ? "" : "hidden",
+                    prev: question.number-1,
+                    next: question.number+1,
+                    nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
+                })
+            }
+        } else if (!req.query.page || req.query.page == 0) {
+            res.render("takeSurveyWelcome", {
+                layout: false,
+                linkHash: response.data.linkHash,
+                title: response.data.surveyDesign.title,
+                introText: response.data.surveyDesign.introText
+            })
+        } else {
+            next()
+        }
+
+        
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
 app.post('/:resource/:id?/:method?', async (req, res, next) => {

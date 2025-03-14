@@ -33,7 +33,7 @@ const LOCAL_JSON = {
     questions: [
         {
             id: 0,
-            surveyId: 0,
+            surveyDesignId: 0,
             number: 1,
             text: "Please select one.",
             type: "Multiple Choice",
@@ -45,7 +45,7 @@ const LOCAL_JSON = {
         },
         {
             id: 1,
-            surveyId: 0,
+            surveyDesignId: 0,
             number: 2,
             text: "Please select two.",
             type: "Multiple Choice",
@@ -57,7 +57,7 @@ const LOCAL_JSON = {
         },
         {
             id: 2,
-            surveyId: 1,
+            surveyDesignId: 1,
             number: 1,
             text: "Please write in an answer.",
             type: "Short Answer",
@@ -67,7 +67,45 @@ const LOCAL_JSON = {
             max: 500,
             choices: ""
         },
-    ]
+    ],
+
+    publishedSurveys: [
+        {
+            id: 0,
+            name: "debug survey 1",
+            openDateTime: new Date("2025-01-01T01:00:00.000Z"),
+            closeDateTime: new Date("2025-06-30T23:00:00.000Z"),
+            status: "in progress",
+            linkHash: "AB89887E",
+            surveyDesign: {
+                title: "Example Survey",
+                introText: "Welcome to my survey!",
+                conclusionText: "Thank you for taking my survey!",
+            },
+            questions: [
+                {
+                    number: 1,
+                    text: "Please select two.",
+                    type: "Multiple Choice",
+                    required: true,
+                    allowComment: true,
+                    min: 2,
+                    max: 2,
+                    choices: "First|Second|Third"
+                },
+                {
+                    number: 2,
+                    text: "Write in an answer!",
+                    type: "Short Answer",
+                    required: true,
+                    allowComment: true,
+                    min: 10,
+                    max: 100
+                } 
+            ]
+            
+        }
+    ],
 }
 
 // Debug API Interface
@@ -95,13 +133,9 @@ class DebugApi {
                 return { data: this.debugData["user"] }
             }
         } else if (pathLevels[1] == "surveyDesigns" && pathLevels[3] == "questions") {  // GET /surveyDesigns/{id}/questions
-            // const returnArray = []
-            // for (const object of this.debugData.questions) {
-            //     if (object.surveyId == pathLevels[2])
-            //         returnArray.push()
-            // }
-
-            return {data: { questions: this.debugData.questions.filter(obj => obj.surveyId == pathLevels[2]) } }
+            return {data: { questions: this.debugData.questions.filter(obj => obj.surveyDesignId == pathLevels[2]) } }
+        } else if (pathLevels[1] == "takeSurvey") {                                     // GET /takeSurvey/{hash}
+            return {data: this.debugData.publishedSurveys.filter(obj => obj.linkHash == pathLevels[2].split('?')[0])[0]}
         } else {
             const collection = this.debugData[pathLevels[1]]
             if (collection) {                                       // GET /{resource}/{id}
@@ -125,11 +159,11 @@ class DebugApi {
             // do nothing for users
             return
         } else if (pathLevels[1] == "surveyDesigns" && pathLevels[3] == "questions") {  // POST /surveyDesigns/{id}/questions
-            const numOfQuestionsInSurvey = this.debugData.questions.filter(obj => obj.surveyId == pathLevels[2]).length
+            const numOfQuestionsInSurvey = this.debugData.questions.filter(obj => obj.surveyDesignId == pathLevels[2]).length
             this.debugData.questions.push(body)
             this.debugData.questions[this.debugData.questions.length-1].number = numOfQuestionsInSurvey+1
             this.debugData.questions[this.debugData.questions.length-1].id = this.debugData.questions.length-1
-            this.debugData.questions[this.debugData.questions.length-1].surveyId = pathLevels[2]
+            this.debugData.questions[this.debugData.questions.length-1].surveyDesignId = pathLevels[2]
         } else {
             const collection = this.debugData[pathLevels[1]]
             if (collection) {                                           // POST /{resource}
