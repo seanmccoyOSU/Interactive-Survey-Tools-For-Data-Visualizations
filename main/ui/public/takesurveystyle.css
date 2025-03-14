@@ -100,7 +100,16 @@ body {
     background-color: #c9ab59;
 }
 
-.comment-entry-box {
+.text-entry-box {
     width: 100%;
     height: 80%;
+    resize: none;
+    overflow-y: scroll;
+    background: lightcyan;
+    font: caption;
+    padding: 4px;
+}
+
+.comment-entry-box {
+    background: lightcyan;
 }
