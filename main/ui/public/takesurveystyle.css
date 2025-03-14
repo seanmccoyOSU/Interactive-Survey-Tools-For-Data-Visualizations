@@ -94,6 +94,8 @@ body {
     cursor: pointer;
     font-size: 1rem;
     font-weight: bold;
+    color: black;
+    text-decoration: none;
 }
 
 .nav-button:hover {
@@ -122,4 +124,16 @@ body {
 
 .question-text {
     font-weight: normal;
+}
+
+.welcome-box {
+    justify-self: center;
+    position: absolute;
+    background: lightgoldenrodyellow;
+}
+
+.conclusion-box {
+    justify-self: center;
+    position: absolute;
+    background: lightgoldenrodyellow;
 }

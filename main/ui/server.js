@@ -226,7 +226,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
     try {
         const response = await api.get(`/publishedSurveys/${req.params.hash}`)
 
-        if (req.query.page && req.query.page < response.data.questions.length+2) {
+        if (req.query.page && req.query.page < response.data.questions.length+2 && req.query.page > 0) {
             if (req.query.page == response.data.questions.length+1) {
                 res.render("takeSurveyConclusion", {
                     layout: false,
@@ -245,7 +245,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
                 })
             }
-        } else if (!req.query.page) {
+        } else if (!req.query.page || req.query.page == 0) {
             res.render("takeSurveyWelcome", {
                 layout: false,
                 linkHash: response.data.linkHash,
