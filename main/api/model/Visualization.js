@@ -1,19 +1,49 @@
-const { DataTypes, ValidationError } = require('sequelize')
+const { DataTypes } = require('sequelize')
 const sequelize = require('../lib/sequelize')
 
 const Visualization = sequelize.define('visualization', {
-  name: { type: DataTypes.STRING, allowNull: false, unique: false },
-  contentId: { type: DataTypes.INTEGER, allowNull: false, unique: false } // this is the ID of the corresponding visualization from the visualization engine database
+  visual_id: { 
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  file_name: { 
+    type: DataTypes.STRING, 
+    allowNull: false 
+  },
+  file_type: { 
+    type: DataTypes.STRING(50),  // matches VARCHAR(50)
+    allowNull: false 
+  },
+  hitbox_data: { 
+    type: DataTypes.TEXT, 
+    allowNull: true 
+  },
+  uploaded_by: { 
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',  // name of the referenced table
+      key: 'user_id'   // the primary key in the users table
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  // Disable Sequelize's automatic timestamps because we're managing created_at manually
+  timestamps: false
 })
 
 exports.Visualization = Visualization
 
-/*
- * Export an array containing the names of fields the client is allowed to set
- * on visualizations.
- */
 exports.VisualClientFields = [
-  'userId',
-  'name',
-  'contentId'
+  'file_name',
+  'file_type',
+  'hitbox_data',
+  'uploaded_by'
+  // Optionally, if clients should set these fields.
 ]
