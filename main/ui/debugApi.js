@@ -134,8 +134,8 @@ class DebugApi {
             }
         } else if (pathLevels[1] == "surveyDesigns" && pathLevels[3] == "questions") {  // GET /surveyDesigns/{id}/questions
             return {data: { questions: this.debugData.questions.filter(obj => obj.surveyDesignId == pathLevels[2]) } }
-        } else if (pathLevels[1] == "publishedSurveys") {                                     // GET /publishedSurveys/{hash}
-            return {data: this.debugData.publishedSurveys.filter(obj => obj.linkHash == pathLevels[2])[0]}
+        } else if (pathLevels[1] == "takeSurvey") {                                     // GET /takeSurvey/{hash}
+            return {data: this.debugData.publishedSurveys.filter(obj => obj.linkHash == pathLevels[2].split('?')[0])[0]}
         } else {
             const collection = this.debugData[pathLevels[1]]
             if (collection) {                                       // GET /{resource}/{id}

@@ -18,6 +18,13 @@
     <p>{{surError}}</p>
 </section>
 
+<h2>Published Surveys</h2>
+<section id="publishedSurveys">
+    {{#each publishedSurveys}}
+        {{> publishedSurveyListItem}}
+    {{/each}}
+    <p>{{pSurError}}</p>
+</section>
 
 <h2>User Options</h2>
 <form action="/users/logout" method="POST"><button>logout</button></form>

@@ -76,24 +76,42 @@ app.get('/', async (req, res, next) => {
 
     // if logged in, display user dashboard
     if (user) {
+        // get user visualizations
+        let userVisualizations
+        let userSurveyDesigns
+        let userPublishedSurveys
+
+        let visError = ""
+        let surError = ""
+        let pSurError = ""
+
         try {
-            // get user visualizations
-            const userVisualizations = await api.get(`/users/${user.id}/visualizations`)
-            const userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
-                        
-            res.render("dashboard", {
-                name: user.name,
-                visualizations: userVisualizations.data.visualizations,
-                surveyDesigns: userSurveyDesigns.data.surveyDesigns,
-            })
-    
-        } catch (error) {
-            res.render("dashboard", {
-                name: user.name,
-                visError: "Unable to load visualizations.",
-                surError: "Unable to load survey designs.",
-            })
+            userVisualizations = await api.get(`/users/${user.id}/visualizations`)
+        } catch {
+            visError = "Unable to load visualizations."
         }
+        
+        try {
+            userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
+        } catch {
+            surError = "Unable to load survey designs."
+        }
+
+        try {
+            userPublishedSurveys = await api.get(`/users/${user.id}/publishedSurveys`)
+        } catch {
+            pSurError = "Unable to load published surveys."
+        }
+                    
+        res.render("dashboard", {
+            name: user.name,
+            visualizations: userVisualizations?.data.visualizations,
+            surveyDesigns: userSurveyDesigns?.data.surveyDesigns,
+            publishedSurveys: userPublishedSurveys?.data.publishedSurveys,
+            visError: visError,
+            surError: surError,
+            pSurError: pSurError
+        })
     }
     
 });
@@ -207,6 +225,24 @@ app.get('/questions/:id', async (req, res, next) => {
     }
 });
 
+// View published survey
+app.get('/publishedSurveys/:id', async (req, res, next) => {
+    try {
+        const response = await api.get(req.originalUrl)
+
+        res.render('publishedSurvey', {
+            name: response.data.name,
+            openDateTime: response.data.openDateTime,
+            closeDateTime: response.data.closeDateTime,
+            status: response.data.status,
+            url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
+        })
+
+    } catch (error) {
+        next(error)
+    }
+});
+
 // handle ui button for saving questions
 app.post('/questions/:id/PATCH', async (req, res, next) => {
     try {
@@ -224,7 +260,7 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
 // links for taking surveys
 app.get('/takeSurvey/:hash', async (req, res, next) => {
     try {
-        const response = await api.get(`/publishedSurveys/${req.params.hash}`)
+        const response = await api.get(req.originalUrl)
 
         if (req.query.page && req.query.page < response.data.questions.length+2 && req.query.page > 0) {
             if (req.query.page == response.data.questions.length+1) {
