@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Survey</title>
+
+        <script type="module" src="/src/questionEdit.js" charset="utf-8" defer></script>
+        <link rel="stylesheet" href="/takesurveystyle.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="image-section">
+                <iframe id="displayedImage" src="http://localhost:8000/{{id}}" height="100%" width="100%"></iframe>
+            </div>
+
+            <div class="controls-section">
+                <div class="progress-percentage">
+                    <span id="progress">25% Complete</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div class="box question-box">
+                    <span id="question-text">Question Box</span>
+                </div>
+                <div class="box comment-box">
+                    Comment:
+                    <textarea class="comment-entry-box" type="text" id="comment" name="comment">{{comment}}</textarea>
+                </div>
+                
+                <div class="button-container">
+                    <button class="nav-button">Previous Question</button>
+                    <button class="nav-button">Next Question</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html> 
+ 
+ 

@@ -221,6 +221,16 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
     }
 })
 
+
+app.get('/takeSurvey/:id', async (req, res, next) => {
+    try {
+        res.render("takeSurveyPage", {layout: false})
+    } catch (error) {
+        next(error)
+    }
+})
+
+
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
 app.post('/:resource/:id?/:method?', async (req, res, next) => {
     let response
