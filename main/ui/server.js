@@ -271,11 +271,21 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
             } else {
                 const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
 
+                let choices = []
+                if (question.type == "Multiple Choice") {
+                    const qChoices = question.choices.split('|')
+                    for (let i = 0; i < qChoices.length; i++)
+                        choices.push({ id: `choice${i}`, choice: qChoices[i] })
+                }
+                console.log(choices)
+
                 res.render("takeSurveyPage", {
                     layout: false,
                     linkHash: response.data.linkHash,
                     text: question.text,
                     number: question.number,
+                    choices: choices,
+                    shortAnswer: question.type == "Short Answer" ? "" : "hidden",
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",

@@ -65,7 +65,7 @@ body {
 .box {
     border: 3px solid #ddd;
     border-radius: 8px;
-    height: 200px;
+    height: 100%;
     width: 500px;
     padding: 10px;
     margin-bottom: 20px;
@@ -107,7 +107,6 @@ body {
     height: 80%;
     resize: none;
     overflow-y: scroll;
-    background: lightcyan;
     font: caption;
     padding: 4px;
 }
@@ -130,10 +129,20 @@ body {
     justify-self: center;
     position: absolute;
     background: lightgoldenrodyellow;
+    height: 50%;
 }
 
 .conclusion-box {
     justify-self: center;
     position: absolute;
     background: lightgoldenrodyellow;
+    height: 50%;
+}
+
+.answer-box {
+    background: salmon;
+}
+
+.answer-entry-box {
+    background: pink;
 }

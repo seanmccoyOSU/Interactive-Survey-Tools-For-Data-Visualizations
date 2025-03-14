@@ -28,6 +28,14 @@
                         <span class="question-text">{{text}}</span>
                     </div>
                 </div>
+
+                <div class="box answer-box">
+                    <p>Answer:</p>
+                    <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer" {{shortAnswer}}></textarea>
+                    {{#each choices}}
+                        {{> choiceCheckItem}}
+                    {{/each}}
+                </div>
                 <div class="box comment-box">
                     Comment:
                     <textarea class="text-entry-box comment-entry-box" type="text" id="comment" name="comment">{{comment}}</textarea>
