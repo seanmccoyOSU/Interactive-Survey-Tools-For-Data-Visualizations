@@ -9,6 +9,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+// Serving favicon requests so they don't hit the API routes
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // API routes
 app.use('/users', userRoutes);
 app.use('/visualizations', visualRoutes);
