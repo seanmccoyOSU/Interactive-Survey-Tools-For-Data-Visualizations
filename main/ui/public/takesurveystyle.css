@@ -115,7 +115,7 @@ body {
 }
 
 .question-text-box {
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 90%;
     width: 100%;
 }

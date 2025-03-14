@@ -191,7 +191,7 @@ app.get('/questions/:id', async (req, res, next) => {
         res.render("editquestion", {
             number: response.data.number,
             id: response.data.id,
-            surveyId: response.data.surveyId,
+            surveyDesignId: response.data.surveyDesignId,
             text: response.data.text,
             multipleChoice: response.data.type == "Multiple Choice" ? "selected" : "",
             shortAnswer: response.data.type == "Short Answer" ? "selected" : "",
@@ -221,10 +221,42 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
     }
 })
 
-
-app.get('/takeSurvey/:id', async (req, res, next) => {
+// links for taking surveys
+app.get('/takeSurvey/:hash', async (req, res, next) => {
     try {
-        res.render("takeSurveyPage", {layout: false})
+        const response = await api.get(`/publishedSurveys/${req.params.hash}`)
+
+        if (req.query.page && req.query.page < response.data.questions.length+2) {
+            if (req.query.page == response.data.questions.length+1) {
+                res.render("takeSurveyConclusion", {
+                    layout: false,
+                    conclusionText: response.data.surveyDesign.conclusionText,
+                })
+            } else {
+                const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
+
+                res.render("takeSurveyPage", {
+                    layout: false,
+                    linkHash: response.data.linkHash,
+                    text: question.text,
+                    number: question.number,
+                    prev: question.number-1,
+                    next: question.number+1,
+                    nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
+                })
+            }
+        } else if (!req.query.page) {
+            res.render("takeSurveyWelcome", {
+                layout: false,
+                linkHash: response.data.linkHash,
+                title: response.data.surveyDesign.title,
+                introText: response.data.surveyDesign.introText
+            })
+        } else {
+            next()
+        }
+
+        
     } catch (error) {
         next(error)
     }
