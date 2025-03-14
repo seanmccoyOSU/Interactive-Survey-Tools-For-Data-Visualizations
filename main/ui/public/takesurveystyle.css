@@ -113,3 +113,13 @@ body {
 .comment-entry-box {
     background: lightcyan;
 }
+
+.question-text-box {
+    overflow-y: scroll;
+    height: 90%;
+    width: 100%;
+}
+
+.question-text {
+    font-weight: normal;
+}
