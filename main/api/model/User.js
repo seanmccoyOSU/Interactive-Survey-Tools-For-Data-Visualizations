@@ -3,6 +3,7 @@ const sequelize = require('../lib/sequelize')
 const bcrypt = require('bcryptjs')
 const { Visualization } = require('./Visualization')
 const { SurveyDesign } = require('./SurveyDesign')
+const { PublishedSurvey } = require('./PublishedSurvey')
 
 const User = sequelize.define('user', {
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -26,6 +27,12 @@ Visualization.belongsTo(Visualization)
 */
 User.hasMany(SurveyDesign, { foreignKey: { allowNull: false } })
 SurveyDesign.belongsTo(User)
+
+/*
+* Set up one-to-many relationship between User and PublishedSurvey.
+*/
+User.hasMany(PublishedSurvey, { foreignKey: { allowNull: false } })
+PublishedSurvey.belongsTo(User)
 
 exports.User = User
 
