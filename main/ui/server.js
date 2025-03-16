@@ -13,8 +13,9 @@ const tough = require('tough-cookie');
 const cookieJar = new tough.CookieJar();
 
 // setup axios API interface
+const DEBUG = process.argv[2] == "-debug"
 const axios = require('axios');
-const api = (process.argv[2] == "-debug") ? (
+const api = (DEBUG) ? (
     // if running in debug mode, use fake debug API
     require('./debugApi')
 ) : (
@@ -283,9 +284,13 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     layout: false,
                     linkHash: response.data.linkHash,
                     text: question.text,
+                    visual: true,
+                    visualizationContentId: question.visualizationContentId,
                     number: question.number,
+                    total: response.data.questions.length,
+                    percent: ((question.number / response.data.questions.length) * 100).toFixed(2),
                     choices: choices,
-                    shortAnswer: question.type == "Short Answer" ? "" : "hidden",
+                    shortAnswer: question.type == "Short Answer",
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",

@@ -10,16 +10,18 @@
     </head>
     <body>
         <div class="container">
-            <div class="image-section">
-                <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="100%" width="100%"></iframe>
-            </div>
+            {{#if visual}}
+                <div class="image-section">
+                    <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="100%" width="100%"></iframe>
+                </div>
+            {{/if}}
 
             <div class="controls-section">
                 <div class="progress-percentage">
-                    <span id="progress">25% Complete</span>
+                    <span id="progress">{{percent}}% Complete ({{number}}/{{total}})</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill"></div>
+                    <div class="progress-fill" style="width:{{percent}}%"></div>
                 </div>
 
                 <div class="box question-box">
@@ -31,7 +33,10 @@
 
                 <div class="box answer-box">
                     <p>Answer:</p>
-                    <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer" {{shortAnswer}}></textarea>
+                    {{#if shortAnswer}}
+                        <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer"></textarea>
+                    {{/if}}
+                    
                     {{#each choices}}
                         {{> choiceCheckItem}}
                     {{/each}}
