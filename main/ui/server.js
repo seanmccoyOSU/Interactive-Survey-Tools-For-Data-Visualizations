@@ -278,7 +278,19 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     for (let i = 0; i < qChoices.length; i++)
                         choices.push({ id: `choice${i}`, choice: qChoices[i] })
                 }
-                console.log(choices)
+                
+                let choiceRequirement = ""
+                if (question.min > 0) {
+                    if (question.max == question.min) {
+                        choiceRequirement = `exactly ${question.min} `
+                    } else if (question.max < choices.length) {
+                        choiceRequirement = `${question.min} to ${question.max} `
+                    } else {
+                        choiceRequirement = `at least ${question.min} `
+                    }
+                } else if (question.max < choices.length) {
+                    choiceRequirement = `up to ${question.max} `
+                } 
 
                 res.render("takeSurveyPage", {
                     layout: false,
@@ -290,7 +302,10 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     total: response.data.questions.length,
                     percent: ((question.number / response.data.questions.length) * 100).toFixed(2),
                     choices: choices,
+                    choiceRequirement: choiceRequirement,
                     shortAnswer: question.type == "Short Answer",
+                    shortAnswerRequirement: (question.min > 0) ? ` must be at least ${question.min} characters` : "",
+                    allowComment: question.allowComment,
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",

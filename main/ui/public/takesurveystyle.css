@@ -70,7 +70,6 @@ body {
     padding: 10px;
     margin-bottom: 20px;
     text-align: left;
-    font-weight: bold;
 }
 
 .question-box {
@@ -84,6 +83,7 @@ body {
 .button-container {
     display: flex;
     justify-content: space-between;
+    font-weight: bold;
 }
 
 .nav-button {

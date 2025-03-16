@@ -25,26 +25,33 @@
                 </div>
 
                 <div class="box question-box">
-                    <span class="question-header">Question {{number}}.</span>
+                    <span class="question-header"><strong>Question {{number}}.</strong></span>
                     <div class="question-text-box">
                         <span class="question-text">{{text}}</span>
                     </div>
                 </div>
 
                 <div class="box answer-box">
-                    <p>Answer:</p>
+                    
                     {{#if shortAnswer}}
+                        <p><strong>Short answer:</strong>{{shortAnswerRequirement}}</p>
                         <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer"></textarea>
                     {{/if}}
                     
-                    {{#each choices}}
-                        {{> choiceCheckItem}}
-                    {{/each}}
+                    {{#if choices}}
+                        <p><strong>Select {{choiceRequirement}}items:</strong></p>
+                        {{#each choices}}
+                            {{> choiceCheckItem}}
+                        {{/each}}
+                    {{/if}}
                 </div>
-                <div class="box comment-box">
-                    Comment:
-                    <textarea class="text-entry-box comment-entry-box" type="text" id="comment" name="comment">{{comment}}</textarea>
-                </div>
+
+                {{#if allowComment}}
+                    <div class="box comment-box">
+                        <strong>Comment:</strong>
+                        <textarea class="text-entry-box comment-entry-box" type="text" id="comment" name="comment">{{comment}}</textarea>
+                    </div>
+                {{/if}}
                 
                 <div class="button-container">
                     <a href="/takeSurvey/{{linkHash}}?page={{prev}}" class="nav-button">Previous Question</a>
