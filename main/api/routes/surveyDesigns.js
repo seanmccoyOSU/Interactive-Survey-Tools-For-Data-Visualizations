@@ -1,6 +1,7 @@
 // database imports
 const { User } = require('../model/User')
 const { SurveyDesign, SurveyDesignClientFields } = require('../model/SurveyDesign')
+const { Question } = require('../model/Question')
 const { requireAuthentication } = require('../lib/auth')
 const { handleErrors, getResourceById } = require('../lib/error')
 
@@ -70,6 +71,22 @@ router.patch('/:id', requireAuthentication, handleErrors( async (req, res, next)
 		res.status(401).send({ 
 			error: "You do not have access to this resource"
 		})
+	}
+}))
+
+// Get questions belonging to design
+router.get('/:id/questions', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+
+	// verify correct id
+	if (req.userid != surveyDesign.userId) {
+		res.status(401).send({
+			error: "You are not allowed to access this resource"
+		})
+	} else {
+		const questions = await Question.findAll({ where: { surveyDesignId: req.params.id} })	
+
+		res.status(200).send({questions: questions});	// sending as json response
 	}
 }))
 
