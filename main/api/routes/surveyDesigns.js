@@ -1,7 +1,7 @@
 // database imports
-const { User } = require('../model/User')
 const { SurveyDesign, SurveyDesignClientFields } = require('../model/SurveyDesign')
 const { Question, QuestionClientFields } = require('../model/Question')
+const { PublishedSurvey, PublishedSurveyClientFields } = require('../model/PublishedSurvey')
 const { requireAuthentication } = require('../lib/auth')
 const { handleErrors, getResourceById } = require('../lib/error')
 
@@ -105,6 +105,31 @@ router.post('/:id/questions', requireAuthentication, handleErrors( async (req, r
 	const question = await Question.create(questionData, QuestionClientFields)
 	res.status(201).send({ id: question.id })
 }))
+
+// Publish a survey
+router.post('/:id/publishedSurveys', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+	const questions = await Question.findAll({where: {surveyDesignId: req.params.id}})
+
+	const today = new Date(Date.now())
+	const tomorrow = new Date(Date.now() + 86400000)
+
+	// Get survey data from req
+	const publishedSurveyData = {
+		userId: surveyDesign.userId,
+		name: surveyDesign.name + " - published",
+		openDateTime: today,
+		closeDateTime: tomorrow,
+		surveyDesign: surveyDesign,
+		questions: questions
+	}
+
+	// Create new survey design in database
+	const publishedSurvey = await PublishedSurvey.create(publishedSurveyData, PublishedSurveyClientFields)
+	res.status(201).send({ id: publishedSurvey.id })
+}))
+
+
 
 
 module.exports = router;

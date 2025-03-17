@@ -202,6 +202,15 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
     
 });
 
+// button for publishing survey design
+app.get('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
+    try {
+        await api.post(originalUrl)
+    } catch (error) {
+        next(error)
+    }
+})
+
 // Edit survey question
 app.get('/questions/:id', async (req, res, next) => {
     try {
@@ -236,11 +245,24 @@ app.get('/questions/:id', async (req, res, next) => {
 app.get('/publishedSurveys/:id', async (req, res, next) => {
     try {
         const response = await api.get(req.originalUrl)
+        let openDateTime
+        let closeDateTime
+        if (response.data.openDateTime instanceof Date) {
+            openDateTime = response.data.openDateTime
+        } else {
+            openDateTime = new Date(response.data.openDateTime)
+        }
+
+        if (response.data.closeDateTime instanceof Date) {
+            closeDateTime = response.data.closeDateTime
+        } else {
+            closeDateTime = new Date(response.data.closeDateTime)
+        }
 
         res.render('publishedSurvey', {
             name: response.data.name,
-            openDateTime: response.data.openDateTime,
-            closeDateTime: response.data.closeDateTime,
+            openDateTime: openDateTime,
+            closeDateTime: closeDateTime,
             status: response.data.status,
             url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
         })

@@ -4,7 +4,10 @@ const userRoutes = require('./routes/users');
 const visualRoutes = require('./routes/visualizations');
 const surveyDesignRoutes = require('./routes/surveyDesigns');
 const questionRoutes = require('./routes/questions');
+const publishedSurveyRoutes = require('./routes/publishedSurveys');
 const sequelize = require('./lib/sequelize')
+const { PublishedSurvey } = require('./model/PublishedSurvey')
+const { handleErrors } = require('./lib/error')
 
 const express = require('express');
 const app = express();
@@ -15,6 +18,17 @@ app.use('/users', userRoutes);
 app.use('/visualizations', visualRoutes);
 app.use('/surveyDesigns', surveyDesignRoutes);
 app.use('/questions', questionRoutes)
+app.use('/publishedSurveys', publishedSurveyRoutes)
+
+// Get specific published survey info (participant end)
+app.get('/takeSurvey/:hash', handleErrors( async (req, res, next) => {
+    const publishedSurvey = await PublishedSurvey.findOne({where: {linkHash: req.params.hash} })
+    
+    if (publishedSurvey)
+        res.status(200).json(publishedSurvey)
+    else
+        next()
+}))
 
 
 // catch-all for any undefined API endpoint
@@ -35,9 +49,8 @@ app.use('*', function (err, req, res, next) {
 module.exports = app
 
 // start API server
-const PORT = 5050;
 sequelize.sync().then(function () {
-    app.listen(PORT, function () {
-        console.log("== Server is running on port", PORT)
+    app.listen(process.env.MAIN_API_PORT, function () {
+        console.log("== Server is running on port", process.env.MAIN_API_PORT)
     })
 })

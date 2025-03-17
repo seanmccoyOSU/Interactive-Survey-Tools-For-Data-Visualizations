@@ -14,15 +14,17 @@ const PublishedSurvey = sequelize.define('publishedSurvey', {
 }, {
   hooks: {
     beforeCreate: (publishedSurvey, options) => {
-      if (Date.now() < Date.parse(PublishedSurvey.openDateTime)) {
+      if (Date.now() < publishedSurvey.openDateTime.valueOf()) {
         publishedSurvey.status = "pending"
-      } else if (Date.now() < Date.parse(PublishedSurvey.closeDateTime)) {
+      } else if (Date.now() < publishedSurvey.closeDateTime.valueOf()) {
         publishedSurvey.status = "in-progress"
-      } else if (Date.now() < Date.parse(PublishedSurvey.closeDateTime)) {
+      } else if (Date.now() < publishedSurvey.closeDateTime.valueOf()) {
         publishedSurvey.status = "closed"
       }
 
-      const hash = crypto.createHash('sha1').update(PublishedSurvey.id).digest('hex')
+      const hash = crypto.createHash('sha1').update(String(publishedSurvey.id)).digest('hex')
+      console.log("HASH", hash)
+      console.log("HASH", hash.substring(0, 12))
       publishedSurvey.linkHash = hash.substring(0, 12)
     }
   }
