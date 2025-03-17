@@ -146,3 +146,8 @@ body {
 .answer-entry-box {
     background: pink;
 }
+
+#required {
+    color: red;
+    font-size: 10px;
+}

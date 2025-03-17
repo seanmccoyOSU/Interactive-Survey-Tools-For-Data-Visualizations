@@ -2,6 +2,7 @@
 function ChangeMinMaxText(type, min, max) {
     switch (type.value) {
         case "Multiple Choice":
+        case "Select Elements":
             min.textContent = "Minimum required selections: "
             max.textContent = "Maximum allowed selections: "
             break;
@@ -32,6 +33,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 multiChoiceSections.setAttribute("hidden", "true")
             }
 
+        })
+    }
+
+    // saving without importing a visual
+    const saveQuestionButton = document.getElementsByClassName("save-question-button")[0]
+    if (saveQuestionButton) {
+        saveQuestionButton.addEventListener("click", (event) => {
+            // this will make it so the import doesn't send
+            event.preventDefault()
+            const form = document.getElementsByTagName("form")[0]
+            form.elements['visualizationId'].value = ""
+            form.submit()
+        })
+    }
+
+    // removing a visual
+    const removeVisualButton = document.getElementsByClassName("remove-visualization-button")[0]
+    if (removeVisualButton) {
+        removeVisualButton.addEventListener("click", (event) => {
+            // negative number removes visualization
+            event.preventDefault()
+            const form = document.getElementsByTagName("form")[0]
+            form.elements['visualizationId'].value = "-1"
+            form.submit()
         })
     }
 })

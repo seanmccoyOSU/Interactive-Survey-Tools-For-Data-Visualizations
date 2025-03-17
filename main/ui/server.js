@@ -206,19 +206,25 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
 app.get('/questions/:id', async (req, res, next) => {
     try {
         const response = await api.get(req.originalUrl)
+        const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`)
+        const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`)
         
         res.render("editquestion", {
             number: response.data.number,
             id: response.data.id,
             surveyDesignId: response.data.surveyDesignId,
             text: response.data.text,
-            multipleChoice: response.data.type == "Multiple Choice" ? "selected" : "",
-            shortAnswer: response.data.type == "Short Answer" ? "selected" : "",
+            multipleChoice: response.data.type == "Multiple Choice",
+            shortAnswer: response.data.type == "Short Answer",
+            selectElements: response.data.type == "Select Elements",
             choices: response.data.choices,
             min: response.data.min,
             max: response.data.max,
-            required: response.data.required ? "checked" : "",
-            allowComment: response.data.allowComment ? "checked" : "",
+            visualizations: visualResponse.data.visualizations,
+            visualizationContentId: response.data.visualizationContentId,
+            required: response.data.required,
+            allowComment: response.data.allowComment,
+            DEBUG: DEBUG
         })
 
     } catch (error) {
@@ -299,16 +305,21 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     visual: true,
                     visualizationContentId: question.visualizationContentId,
                     number: question.number,
+                    progress: question.number-1,
                     total: response.data.questions.length,
-                    percent: ((question.number / response.data.questions.length) * 100).toFixed(2),
+                    percent: (((question.number-1) / response.data.questions.length) * 100).toFixed(2),
+                    multipleChoice: question.type == "Multiple Choice",
+                    selectElements: question.type == "Select Elements",
+                    shortAnswer: question.type == "Short Answer",
                     choices: choices,
                     choiceRequirement: choiceRequirement,
-                    shortAnswer: question.type == "Short Answer",
                     shortAnswerRequirement: (question.min > 0) ? ` must be at least ${question.min} characters` : "",
                     allowComment: question.allowComment,
+                    required: question.required,
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
+                    DEBUG: DEBUG
                 })
             }
         } else if (!req.query.page || req.query.page == 0) {

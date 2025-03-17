@@ -20,11 +20,13 @@ const LOCAL_JSON = {
     surveyDesigns: [
         {
             id: 0,
+            userId: 0,
             name: "debug design 1",
             title: "debug design 1",
         },
         {
             id: 1,
+            userId: 0,
             name: "debug design 2",
             title: "debug design 1",
         },
@@ -93,15 +95,28 @@ const LOCAL_JSON = {
                     max: 2,
                     choices: "First|Second|Third"
                 },
+
                 {
                     number: 2,
-                    text: "Write in an answer!",
+                    text: "Write in an answer! Describe this visual.",
                     type: "Short Answer",
-                    required: true,
+                    visualizationContentId: 10,
+                    required: false,
                     allowComment: true,
                     min: 10,
                     max: 100
-                } 
+                },
+                
+                {
+                    number: 3,
+                    text: "Select the elements",
+                    type: "Select Elements",
+                    visualizationContentId: 2,
+                    required: true,
+                    allowComment: false,
+                    min: 10,
+                    max: 100
+                },
             ]
             
         }
@@ -176,7 +191,6 @@ class DebugApi {
             }
         }
         
-
     }
 
     delete(path) {                                      // DELETE
@@ -207,6 +221,16 @@ class DebugApi {
             // here the id just matches the index
             if (collection[pathLevels[2]]) {                            // PATCH /{resource}/{id}
                 // replace the object, but keep the id
+                if (pathLevels[1] == "questions") {
+                    if (parseInt(body.visualizationId) < 0) {
+                        collection[pathLevels[2]].visualizationContentId = null
+                    } else {
+                        body.visualizationContentId = body.visualizationId
+                    }
+                    
+                    delete body.visualizationId
+                }
+
                 for (const property in body) {
                     collection[pathLevels[2]][property] = body[property]
                 }

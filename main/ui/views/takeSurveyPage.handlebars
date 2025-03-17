@@ -10,22 +10,28 @@
     </head>
     <body>
         <div class="container">
-            {{#if visual}}
+            {{#if visualizationContentId}}
+                
                 <div class="image-section">
-                    <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="100%" width="100%"></iframe>
+                    {{#unless DEBUG}}
+                        <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="100%" width="100%"></iframe>
+                    {{/unless}}
+                    {{#if DEBUG}}
+                        <iframe id="displayedImage" src="http://localhost:8000/" height="100%" width="100%"></iframe>
+                    {{/if}}
                 </div>
             {{/if}}
 
             <div class="controls-section">
                 <div class="progress-percentage">
-                    <span id="progress">{{percent}}% Complete ({{number}}/{{total}})</span>
+                    <span id="progress">{{percent}}% Complete ({{progress}}/{{total}})</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width:{{percent}}%"></div>
                 </div>
 
                 <div class="box question-box">
-                    <span class="question-header"><strong>Question {{number}}.</strong></span>
+                    <span class="question-header"><strong>Question {{number}}.</strong>{{#if required}}<span id="required"> *required</span>{{/if}}</span>
                     <div class="question-text-box">
                         <span class="question-text">{{text}}</span>
                     </div>
@@ -37,8 +43,12 @@
                         <p><strong>Short answer:</strong>{{shortAnswerRequirement}}</p>
                         <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer"></textarea>
                     {{/if}}
+
+                    {{#if selectElements}}
+                        <p><strong>Please select {{choiceRequirement}}elements on the visual to the left.</strong></p>
+                    {{/if}}
                     
-                    {{#if choices}}
+                    {{#if multipleChoice}}
                         <p><strong>Select {{choiceRequirement}}items:</strong></p>
                         {{#each choices}}
                             {{> choiceCheckItem}}
