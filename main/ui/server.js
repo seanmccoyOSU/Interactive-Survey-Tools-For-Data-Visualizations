@@ -176,6 +176,9 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
         next(error)
     }
 
+    const today = new Date(Date.now())
+	const tomorrow = new Date(Date.now() + 86400000)
+
     try {
         const questionResponse = await api.get(req.originalUrl + "/questions")
         
@@ -186,6 +189,8 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
             introText: response.data.introText,
             questions: questionResponse.data.questions,
             conclusionText: response.data.conclusionText,
+            today: today.toISOString().substring(0, 16),
+            tomorrow: tomorrow.toISOString().substring(0, 16)
         })
     } catch (error) {
         res.render("editsurveydesign", {
@@ -195,6 +200,8 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
             introText: response.data.introText,
             questionError: "Unable to load questions",
             conclusionText: response.data.conclusionText,
+            today: today.toISOString().substring(0, 16),
+            tomorrow: tomorrow.toISOString().substring(0, 16)
         })
     }
         
@@ -203,9 +210,10 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
 });
 
 // button for publishing survey design
-app.get('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
+app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
     try {
-        await api.post(originalUrl)
+        await api.post(req.originalUrl, req.body)
+        res.redirect(req.protocol + "://" + req.get("host"))
     } catch (error) {
         next(error)
     }

@@ -111,15 +111,12 @@ router.post('/:id/publishedSurveys', requireAuthentication, handleErrors( async 
 	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
 	const questions = await Question.findAll({where: {surveyDesignId: req.params.id}})
 
-	const today = new Date(Date.now())
-	const tomorrow = new Date(Date.now() + 86400000)
-
 	// Get survey data from req
 	const publishedSurveyData = {
 		userId: surveyDesign.userId,
-		name: surveyDesign.name + " - published",
-		openDateTime: today,
-		closeDateTime: tomorrow,
+		name: req.body.name,
+		openDateTime: new Date(req.body.openDateTime),
+		closeDateTime: new Date(req.body.closeDateTime),
 		surveyDesign: surveyDesign,
 		questions: questions
 	}
