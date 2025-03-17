@@ -130,14 +130,23 @@ addEventListener("DOMContentLoaded", () => {
 function handleSvgUpload(event){
     const file = event.target.files[0];
     if (!file) return;
-    if (!file.name.endsWith('.svg')) return;
+    if (debug)
+        if (!file.name.endsWith('.svg')) return;
+    else
+        if (!(file.name.endsWith('.svg') || file.name.endsWith('.jpg') || file.name.endsWith('.png'))) return;
 
-    const reader = new FileReader();
-    reader.onload = function(e){
-        const svgText = e.target.result;
-        loadSvgFromText(svgText);
+    if (file.name.endsWith('.svg')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const svgText = e.target.result;
+            loadSvgFromText(svgText);
+        }
+        reader.readAsText(file);
+    } else {
+        loadRaster(file)
+        
     }
-    reader.readAsText(file);
+    
 }
 
 function loadSvgFromText(svgText) {
@@ -156,12 +165,10 @@ function loadSvgFromText(svgText) {
       firstUpload = false
     }
 
-    // Parse SVG text
+   
     svgElement = visualContainer.appendChild(svgDoc.documentElement);
-    console.log("Appended SVG:", svgElement);
 
     visualizationElement = new VisualizationElement(svgElement)
-    console.log("Visualization Element Object:", visualizationElement);
 
     if (!debug) {
         fetch(window.location.href, { 
@@ -174,6 +181,52 @@ function loadSvgFromText(svgText) {
             },    
         })
     }
+  
+    // Re-initialize pan/zoom
+    OnLoadSvg();
+    if (firstUpload)
+        OnFirstUpload();
+}
+
+function loadRaster(file) {
+    // send request to upload image
+    const formData = new FormData()
+    const urlParts = window.location.href.split('/')
+    const fileParts = file.name.split('.')
+    const fileUrl = window.location.href.split('?')[0] + "/photo"
+    formData.append('file', file, urlParts[urlParts.length-1].split('?')[0] + '.' + fileParts[fileParts.length-1]);
+    fetch(fileUrl, { 
+        method: "POST",
+        body: formData
+    })
+
+    // Remove old SVG if one is already present
+    let firstUpload = true
+    if (svgElement) {
+        visualContainer.removeChild(visualizationElement.svg);
+        firstUpload = false
+    }
+
+    // create svg element
+    const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    newSvg.setAttributeNS(null, "width", "500")
+    newSvg.setAttributeNS(null, "height", "500")
+    newSvg.setAttributeNS(null, "viewBox", "0 0 500 500")
+    newSvg.innerHTML = `<image href="${fileUrl}" x="0" y="0" height="500" width="500"></image>`
+
+    svgElement = visualContainer.appendChild(newSvg);
+
+    visualizationElement = new VisualizationElement(svgElement)
+
+    fetch(window.location.href, { 
+        method: "PUT",
+        body: JSON.stringify({
+            svg: svgElement.outerHTML
+        }),
+        headers: {
+            "Content-type": "application/json",
+        },    
+    })
   
     // Re-initialize pan/zoom
     OnLoadSvg();

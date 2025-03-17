@@ -104,9 +104,8 @@ app.use('*', function (err, req, res, next) {
 module.exports = app
 
 // start API server
-const PORT = 8080;
 sequelize.sync().then(function () {
-    app.listen(PORT, function () {
-        console.log("== Server is running on port", PORT)
+    app.listen(process.env.VISUAL_API_PORT, function () {
+        console.log("== Server is running on port", process.env.VISUAL_API_PORT)
     })
 })
