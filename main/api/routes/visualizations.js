@@ -12,10 +12,9 @@ const cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
 // setup axios API interface for visualization engine
-const API_URL = "http://localhost:8080"
 const axios = require('axios');
 const visualApi = axios.create({
-    baseURL: API_URL
+    baseURL: process.env.VISUAL_API_URL
 })
 
 // Create new visualization

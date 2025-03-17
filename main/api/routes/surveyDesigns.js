@@ -1,7 +1,7 @@
 // database imports
 const { User } = require('../model/User')
 const { SurveyDesign, SurveyDesignClientFields } = require('../model/SurveyDesign')
-const { Question } = require('../model/Question')
+const { Question, QuestionClientFields } = require('../model/Question')
 const { requireAuthentication } = require('../lib/auth')
 const { handleErrors, getResourceById } = require('../lib/error')
 
@@ -88,6 +88,22 @@ router.get('/:id/questions', requireAuthentication, handleErrors( async (req, re
 
 		res.status(200).send({questions: questions});	// sending as json response
 	}
+}))
+
+// Create new question
+router.post('/:id/questions', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+	const questions = await Question.findAll({where: {surveyDesignId: req.params.id}})
+
+	// Get survey data from req
+	const questionData = {
+		surveyDesignId: req.params.id,
+		number: questions.length+1
+	}
+
+	// Create new survey design in database
+	const question = await Question.create(questionData, QuestionClientFields)
+	res.status(201).send({ id: question.id })
 }))
 
 

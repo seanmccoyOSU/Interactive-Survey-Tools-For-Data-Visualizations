@@ -40,13 +40,14 @@
             {{#each visualizations}}
                 <option value={{this.id}}>{{this.name}}</option>
             {{/each}}
+            <option value="-1" hidden>Delete</option>
         </select>
         <button class="import-visualization-button">Import</button>
     </h5>
 
     {{#if visualizationContentId}}
         {{#unless DEBUG}}
-            <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="360" width="480"></iframe>
+            <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}?editor=true" height="360" width="480"></iframe>
         {{/unless}}
         {{#if DEBUG}}
             <iframe id="displayedImage" src="http://localhost:8000/" height="360" width="480"></iframe>

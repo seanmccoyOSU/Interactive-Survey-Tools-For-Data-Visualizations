@@ -45,15 +45,17 @@ app.post('/', async (req, res, next) => {
 // replace visualization content
 app.put('/:id', async (req, res, next) => {
     try {
-        const result = await Visualization.update(req.body, {
-            where: { id: req.params.id },
-            fields: VisualClientFields
-          })
-          if (result[0] > 0) {
+        const visualization = await Visualization.findOne({where: { id: req.params.id} })
+        if (visualization) {
+            await Visualization.update(req.body, {
+                where: { id: req.params.id },
+                fields: VisualClientFields
+              })
+
             res.status(204).send()
-          } else {
+        } else {
             next()
-          }
+        }
     } catch (e) {
         if (e instanceof ValidationError) {
             // attempted to create a bad visualization
@@ -70,12 +72,13 @@ app.put('/:id', async (req, res, next) => {
 app.delete('/:id', async (req, res, next) => { 
     // TODO
     try {
-        const result = await Visualization.destroy({
-            where: { id: req.params.id }
-        })
-        if (result > 0) {
+        const visualization = await Visualization.findOne({where: { id: req.params.id} })
+        if (visualization) {
+            await Visualization.destroy({
+                where: { id: req.params.id }
+            })
             res.status(204).send()
-        }   else {
+        } else {
             next()
         }
     }   catch(e) {

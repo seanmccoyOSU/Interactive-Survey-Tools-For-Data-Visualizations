@@ -13,6 +13,16 @@ const Question = sequelize.define('question', {
   disableZoom: { type: DataTypes.BOOLEAN, allowNull: true, unique: false },
   disablePan: { type: DataTypes.BOOLEAN, allowNull: true, unique: false },
   visualizationContentId: { type: DataTypes.INTEGER, allowNull: true, unique: false },
+}, {
+  hooks: {
+    beforeCreate: (question, options) => {
+      question.min = 0
+      question.max = 0
+      question.type = "Multiple Choice"
+      question.required = false
+      question.allowComment = true
+    }
+  }
 })
 
 exports.Question = Question
