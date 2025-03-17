@@ -21,7 +21,7 @@ body {
     height: 600px;
     max-width: 1400px;
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-auto-columns: 1fr;
     gap: 20px;
 }
 
@@ -30,6 +30,7 @@ body {
     border: 3px solid #ddd;
     border-radius: 10px;
     overflow: hidden;
+    grid-column: -3 / 1;
 }
 
 .image-section img {
@@ -41,6 +42,9 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    justify-self: center;
+    max-width: 500px;
+    grid-column: 1;
 }
 
 .progress-percentage {
