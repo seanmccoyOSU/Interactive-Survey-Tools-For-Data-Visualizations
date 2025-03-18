@@ -227,6 +227,8 @@ function loadRaster(file) {
             "Content-type": "application/json",
         },    
     })
+
+    window.location.replace(window.location.href)
   
     // Re-initialize pan/zoom
     OnLoadSvg();

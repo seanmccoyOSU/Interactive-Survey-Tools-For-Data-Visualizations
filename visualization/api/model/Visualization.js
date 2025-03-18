@@ -2,8 +2,7 @@ const { DataTypes } = require('sequelize')
 const sequelize = require('../lib/sequelize')
 
 const Visualization = sequelize.define('visualization', {
-  svg: { type: DataTypes.TEXT('medium'), allowNull: true },
-  photo: { type: DataTypes.STRING, allowNull: true }
+  svg: { type: DataTypes.TEXT('medium'), allowNull: true }
 })
 
 exports.Visualization = Visualization

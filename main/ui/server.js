@@ -316,7 +316,9 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                 }
                 
                 let choiceRequirement = ""
-                if (question.min > 0) {
+                if (question.max == 0) {
+                    choiceRequirement = ""
+                } else if (question.min > 0) {
                     if (question.max == question.min) {
                         choiceRequirement = `exactly ${question.min} `
                     } else if (question.max < choices.length) {
@@ -413,7 +415,6 @@ app.use('*', function (err, req, res, next) {
 })
 
 // start server
-const PORT = 5000;
-app.listen(PORT, function () {
-    console.log("== Server is running on port", PORT)
+app.listen(process.env.MAIN_UI_PORT, function () {
+    console.log("== Server is running on port", process.env.MAIN_UI_PORT)
 })

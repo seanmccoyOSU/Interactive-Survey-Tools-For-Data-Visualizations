@@ -55,9 +55,20 @@ app.get('/', function(req,res,next) {
     })
 })
 
+function clearBeforeUpload(req, res, next) {
+    if (fs.existsSync(`${__dirname}/uploads/${req.params.id}.png`))
+        fs.unlinkSync(`${__dirname}/uploads/${req.params.id}.png`)
+    else if (fs.existsSync(`${__dirname}/uploads/${req.params.id}.jpg`))
+        fs.unlinkSync(`${__dirname}/uploads/${req.params.id}.jpg`)
+
+    next()
+}
+
 // ui post
-app.post('/:id/photo', upload.single("file"), async function(req,res,next) {
+app.post('/:id/photo', clearBeforeUpload, upload.single("file"), function(req,res,next) {
+    
     res.send()
+    //res.redirect(req.get("Referrer"))
 })
 
 app.post('/', async function(req,res,next) {
@@ -125,7 +136,6 @@ app.use('*', function (err, req, res, next) {
 })
 
 // start server
-const port = 8000
-app.listen(port, function () {
-    console.log("== Server is running on port", port)
+app.listen(process.env.VISUAL_UI_PORT, function () {
+    console.log("== Server is running on port", process.env.VISUAL_UI_PORT)
 })
