@@ -155,3 +155,10 @@ body {
     color: red;
     font-size: 10px;
 }
+
+#error-text {
+    color: red;
+    font-size: 15px;
+    align-self: end;
+    margin-top: 5px;
+}

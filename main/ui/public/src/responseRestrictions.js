@@ -5,11 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const max = requirements.getAttribute("max")
     const questionType = requirements.getAttribute("questionType")
 
-    console.log(required)
-    console.log(min)
-    console.log(max)
-    console.log(questionType)
-
     const nextButton = document.getElementById("next-button")
 
     nextButton.addEventListener('click', () => {
@@ -22,13 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            console.log(total >= min)
-            console.log(required == "false")
-            console.log(total <= max)
-            
-
-            if ((total >= min || required == "false") && total <= max)
+            if (total > max) {
+                document.getElementById("error-text").textContent = `You cannot select more than ${max} choices`
+            } else if (total < min && required == "true") {
+                document.getElementById("error-text").textContent = `You must select at least ${min} choices`
+            } else {
                 window.location.href = nextButton.getAttribute("href")
+            }
+        } else if (questionType == "Short Answer") {
+            const answer = document.getElementsByClassName("answer-entry-box")[0]
+
+            if (answer.value.length > max) {
+                document.getElementById("error-text").textContent = `Your answer may not exceed ${max} characters`
+            } else if (answer.value.length < min && required == "true") {
+                document.getElementById("error-text").textContent = `Your answer must be at least ${min} characters`
+            } else {
+                window.location.href = nextButton.getAttribute("href")
+            }
         } else {
             window.location.href = nextButton.getAttribute("href")
         }
