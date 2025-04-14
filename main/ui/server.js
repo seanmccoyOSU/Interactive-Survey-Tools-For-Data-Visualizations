@@ -349,6 +349,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     allowComment: question.allowComment,
                     min: question.min,
                     max: question.max,
+                    hasMax: question.max > 0,
                     required: question.required,
                     questionType: question.type,
                     prev: question.number-1,

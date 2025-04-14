@@ -7,6 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const nextButton = document.getElementById("next-button")
 
+    if (questionType == "Short Answer") {
+        const currentChars = document.getElementById("current-characters")
+        const answer = document.getElementsByClassName("answer-entry-box")[0]
+        currentChars.textContent = answer.value.length
+
+        answer.addEventListener("input", (evt) => {
+            currentChars.textContent = evt.target.value.length
+        })
+    }
+
     nextButton.addEventListener('click', () => {
         if (questionType == "Multiple Choice") {
             const boxes = document.getElementsByClassName("multiple-choice-box")
@@ -17,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (total > max) {
+            if (max > 0 && total > max) {
                 document.getElementById("error-text").textContent = `You cannot select more than ${max} choices`
-            } else if (total < min && required == "true") {
+            } else if (min > 0 && total < min && required == "true") {
                 document.getElementById("error-text").textContent = `You must select at least ${min} choices`
             } else {
                 window.location.href = nextButton.getAttribute("href")
@@ -27,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (questionType == "Short Answer") {
             const answer = document.getElementsByClassName("answer-entry-box")[0]
 
-            if (answer.value.length > max) {
+            if (max > 0 && answer.value.length > max) {
                 document.getElementById("error-text").textContent = `Your answer may not exceed ${max} characters`
-            } else if (answer.value.length < min && required == "true") {
+            } else if (min > 0 && answer.value.length < min && required == "true") {
                 document.getElementById("error-text").textContent = `Your answer must be at least ${min} characters`
             } else {
                 window.location.href = nextButton.getAttribute("href")

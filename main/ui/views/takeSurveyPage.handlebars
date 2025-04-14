@@ -42,6 +42,7 @@
                     {{#if shortAnswer}}
                         <p><strong>Short answer:</strong>{{shortAnswerRequirement}}</p>
                         <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer"></textarea>
+                        <span id="character-tracker"><span id="current-characters"></span>{{#if hasMax}} / {{max}}{{/if}}</span>
                     {{/if}}
 
                     {{#if selectElements}}

@@ -162,3 +162,7 @@ body {
     align-self: end;
     margin-top: 5px;
 }
+
+#character-tracker {
+    font-size: 10px;
+}
