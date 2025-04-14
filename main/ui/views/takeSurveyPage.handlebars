@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Survey</title>
 
-        <script type="module" src="/src/questionEdit.js" charset="utf-8" defer></script>
+        <script type="module" src="/src/responseRestrictions.js" charset="utf-8" defer></script>
         <link rel="stylesheet" href="/takesurveystyle.css">
     </head>
     <body>
@@ -38,7 +38,7 @@
                 </div>
 
                 <div class="box answer-box">
-                    
+                    <meta id="requirements" min={{min}} max={{max}} required={{required}} questionType="{{questionType}}">
                     {{#if shortAnswer}}
                         <p><strong>Short answer:</strong>{{shortAnswerRequirement}}</p>
                         <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer"></textarea>
@@ -65,7 +65,7 @@
                 
                 <div class="button-container">
                     <a href="/takeSurvey/{{linkHash}}?page={{prev}}" class="nav-button">Previous Question</a>
-                    <a href="/takeSurvey/{{linkHash}}?page={{next}}" class="nav-button">{{nextText}}</a>
+                    <button id="next-button" href="/takeSurvey/{{linkHash}}?page={{next}}" class="nav-button">{{nextText}}</button>
                 </div>
             </div>
         </div>
