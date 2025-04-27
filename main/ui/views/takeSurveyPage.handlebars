@@ -11,13 +11,14 @@
     <body>
         <div class="container">
             {{#if visualizationContentId}}
+                <meta id="visualURL" url="{{visualURL}}">
                 
                 <div class="image-section">
                     {{#unless DEBUG}}
-                        <iframe id="displayedImage" src="http://localhost:8000/{{visualizationContentId}}" height="100%" width="100%"></iframe>
+                        <iframe id="displayedImage" src="{{visualURL}}/{{visualizationContentId}}" height="100%" width="100%"></iframe>
                     {{/unless}}
                     {{#if DEBUG}}
-                        <iframe id="displayedImage" src="http://localhost:8000/" height="100%" width="100%"></iframe>
+                        <iframe id="displayedImage" src="{{visualURL}}" height="100%" width="100%"></iframe>
                     {{/if}}
                 </div>
             {{/if}}

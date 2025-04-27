@@ -4,9 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = requirements.getAttribute("min")
     const max = requirements.getAttribute("max")
     const questionType = requirements.getAttribute("questionType")
+    const visualURL = document.getElementById("visualURL").getAttribute("url")
 
     const nextButton = document.getElementById("next-button")
 
+    // for short answers, display character count
     if (questionType == "Short Answer") {
         const currentChars = document.getElementById("current-characters")
         const answer = document.getElementsByClassName("answer-entry-box")[0]
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
+    // on clicking the next button, check for restrictions
     nextButton.addEventListener('click', () => {
         if (questionType == "Multiple Choice") {
             const boxes = document.getElementsByClassName("multiple-choice-box")
@@ -44,9 +47,31 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 window.location.href = nextButton.getAttribute("href")
             }
+        } else if (questionType == "Select Elements") {
+            const visualWindow = document.getElementById("displayedImage").contentWindow
+
+            // send message to iframe to get selected element count
+            visualWindow.postMessage("count", visualURL) 
         } else {
             window.location.href = nextButton.getAttribute("href")
         }
     })
+
+    // if recieve a message from iframe, that's for the selected element count check
+    window.addEventListener('message', (event) => {
+        if (event.origin === visualURL) {
+            const count = parseInt(event.data)
+            
+            if (max > 0 && count > max) {
+                document.getElementById("error-text").textContent = `You cannot select more than ${max} elements`
+            } else if (min > 0 && count < min && required == "true") {
+                document.getElementById("error-text").textContent = `You must select at least ${min} elements`
+            } else {
+                window.location.href = nextButton.getAttribute("href")
+            }
+        }
+    })
 })
+
+
 

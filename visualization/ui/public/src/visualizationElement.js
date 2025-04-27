@@ -209,6 +209,19 @@ const VisualizationElement = class {
         this.svg.setAttribute("viewBox", "0 0 " + scale + " " + scale)
     }
 
+    /**
+     * Returns number of selected elements
+     * @returns {int} 
+     */
+    getNumberOfSelectedElements() {
+        let count = 0
+        for (const element of this.visualElements) {
+            if (element.classList.contains(SELECTION_LABEL))
+                count += 1
+        }
+        return count
+    }
+
     get scale() {
         return this.svg.viewBox.baseVal.width
     }

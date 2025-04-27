@@ -460,3 +460,9 @@ function screenToSVG(screenX, screenY) {
     p.y = screenY
     return p.matrixTransform(svgElement.getScreenCTM().inverse());
  }
+
+// this is in response for an iframe message for the count of selected elements
+window.addEventListener('message', (event) => {
+    if (event.data == "count")
+        event.source.postMessage(visualizationElement.getNumberOfSelectedElements(), "*")
+})

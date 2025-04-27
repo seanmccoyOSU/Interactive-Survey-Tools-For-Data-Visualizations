@@ -334,7 +334,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     layout: false,
                     linkHash: response.data.linkHash,
                     text: question.text,
-                    visual: true,
+                    visualURL: process.env.VISUAL_UI_URL,
                     visualizationContentId: question.visualizationContentId,
                     number: question.number,
                     progress: question.number-1,
