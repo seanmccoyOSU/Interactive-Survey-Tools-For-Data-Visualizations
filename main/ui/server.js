@@ -160,7 +160,8 @@ app.get('/visualizations/:id', async (req, res, next) => {
         // on success, refresh page
         res.render("visualization", {
             name: response.data.name,
-            id: response.data.contentId
+            id: response.data.contentId,
+            visualURL: process.env.VISUAL_UI_URL
         })
 
     } catch (error) {
@@ -243,6 +244,7 @@ app.get('/questions/:id', async (req, res, next) => {
             visualizationContentId: response.data.visualizationContentId,
             required: response.data.required,
             allowComment: response.data.allowComment,
+            visualURL: process.env.VISUAL_UI_URL,
             DEBUG: DEBUG
         })
 
