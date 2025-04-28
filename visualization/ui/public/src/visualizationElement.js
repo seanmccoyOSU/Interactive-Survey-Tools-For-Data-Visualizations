@@ -55,6 +55,7 @@ const VisualizationElement = class {
     constructor(svg) {
         this.svg = svg
         this.visualElements = ExtractVisualElements(svg)
+        this.nextId = this.visualElements.length
 
         this.defaultWidth = this.svg.viewBox?.baseVal?.width ? this.svg.viewBox.baseVal.width : this.svg.width.baseVal.value
         this.defaultHeight = this.svg.viewBox?.baseVal?.height ? this.svg.viewBox.baseVal.height : this.svg.height.baseVal.value
@@ -135,6 +136,19 @@ const VisualizationElement = class {
     }
 
     /**
+     * Returns all visualId's of selected elements
+     * @returns {Array} 
+     */
+    getSelectedIds() {
+        let ids = []
+        for (const element of this.visualElements) {
+            ids.push(element.getAttribute("visualId"))
+        }
+
+        return ids
+    }
+
+    /**
      * Marks multiple elements as selectable
      * @param {Array} elements 
      */
@@ -179,14 +193,15 @@ const VisualizationElement = class {
      * @param {Element} element 
      */
     addVisualElement(element) {
-        // append the element to the SVG
-        //const liveElement = this.svg.appendChild(element)
-
         // mark as a visual element
         element.classList.add(VISUAL_ELEMENT_LABEL)
 
         // mark as a custom element
         element.classList.add(CUSTOM_ELEMENT_LABEL)
+
+        // set unique ID
+        element.setAttribute("visualId", this.nextId)
+        this.nextId += 1
 
         // make selectable by default
         this.setSelectable(element)
@@ -258,6 +273,8 @@ const VisualizationElement = class {
  * @returns {HTMLCollection} Live collection of visual elements
  */
 function ExtractVisualElements(svg) {
+    let visualId = 0
+
     // this is a live collection of elements in class <VISUAL_ELEMENT_LABEL>
     const elements = svg.getElementsByClassName(VISUAL_ELEMENT_LABEL)
 
@@ -271,6 +288,8 @@ function ExtractVisualElements(svg) {
         const shapeGroup = svg.getElementsByTagName(tag)
         for (const shape of shapeGroup) {
             shape.classList.add(VISUAL_ELEMENT_LABEL)
+            shape.setAttribute("visualId", visualId)
+            visualId += 1
         }
     }
 

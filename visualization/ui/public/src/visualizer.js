@@ -464,5 +464,7 @@ function screenToSVG(screenX, screenY) {
 // this is in response for an iframe message for the count of selected elements
 window.addEventListener('message', (event) => {
     if (event.data == "count")
-        event.source.postMessage(visualizationElement.getNumberOfSelectedElements(), "*")
+        event.source.postMessage({ count: visualizationElement.getNumberOfSelectedElements() }, "*")
+    else if (event.data == "ids")
+        event.source.postMessage({ ids: visualizationElement.getSelectedIds() }, "*")
 })
