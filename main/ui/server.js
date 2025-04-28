@@ -396,10 +396,10 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
 // for saving cookie data while taking survey
 app.patch('/takeSurvey/:hash', async (req, res, next) => {
     let answers
-    if (req.cookies.answers) {
+    if (req.cookies.answers && req.cookies.answers.hash && req.cookies.answers.hash == req.params.hash) {
         answers = JSON.parse(req.cookies.answers)
     } else {
-        answers = { answers: [] }
+        answers = { hash: req.params.hash, answers: [] }
     }
 
     let isReplacement = false
