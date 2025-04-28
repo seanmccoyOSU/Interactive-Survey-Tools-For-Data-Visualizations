@@ -8,6 +8,8 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, "public")))
 
 // setup required for processing cookies
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 const { wrapper } = require('axios-cookiejar-support')
 const tough = require('tough-cookie');
 const cookieJar = new tough.CookieJar();
@@ -330,6 +332,20 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     choiceRequirement = `up to ${question.max} `
                 } 
 
+                let comment = ""
+                let userResponse = ""
+                if (req.cookies.answers) {
+                    const answers = JSON.parse(req.cookies.answers).answers
+
+                    const matchingAnswers = answers.filter(obj => obj?.questionNumber == question.number)
+
+                    if (matchingAnswers.length > 0) {
+                        const match = matchingAnswers[0]
+                        comment = match.comment
+                        userResponse = match.response
+                    }
+                }
+
                 res.render("takeSurveyPage", {
                     layout: false,
                     linkHash: response.data.linkHash,
@@ -352,6 +368,8 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     hasMax: question.max > 0,
                     required: question.required,
                     questionType: question.type,
+                    comment: comment,
+                    response: userResponse,
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
@@ -375,6 +393,33 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
     }
 })
 
+// for saving cookie data while taking survey
+app.patch('/takeSurvey/:hash', async (req, res, next) => {
+    let answers
+    if (req.cookies.answers) {
+        answers = JSON.parse(req.cookies.answers)
+    } else {
+        answers = { answers: [] }
+    }
+
+    let isReplacement = false
+    for (let i = 0; i < answers.answers.length && !isReplacement; i++) {
+        if (answers.answers[i] && answers.answers[i].questionNumber == req.body.answer.questionNumber) {
+            answers.answers[i] = req.body.answer
+            isReplacement = true
+        }
+    }
+
+    if (!isReplacement)
+        answers.answers.push(req.body.answer)
+
+    res.cookie("answers", JSON.stringify(answers), { httpOnly: true })
+    res.send()
+})
+
+// for submitting survey responses
+// app.post('/takeSurvey/:hash', async (req, res, next) => {
+// }
 
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
 app.post('/:resource/:id?/:method?', async (req, res, next) => {

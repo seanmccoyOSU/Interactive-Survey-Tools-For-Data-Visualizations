@@ -39,10 +39,10 @@
                 </div>
 
                 <div class="box answer-box">
-                    <meta id="requirements" min={{min}} max={{max}} required={{required}} questionType="{{questionType}}">
+                    <meta id="requirements" number={{number}} min={{min}} max={{max}} required={{required}} questionType="{{questionType}}">
                     {{#if shortAnswer}}
                         <p><strong>Short answer:</strong>{{shortAnswerRequirement}}</p>
-                        <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer"></textarea>
+                        <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer">{{response}}</textarea>
                         <span id="character-tracker"><span id="current-characters"></span>{{#if hasMax}} / {{max}}{{/if}}</span>
                     {{/if}}
 
@@ -66,7 +66,7 @@
                 {{/if}}
                 
                 <div class="button-container">
-                    <a href="/takeSurvey/{{linkHash}}?page={{prev}}" class="nav-button">Previous Question</a>
+                    <button id="prev-button" href="/takeSurvey/{{linkHash}}?page={{prev}}" class="nav-button">Previous Question</button>
                     <button id="next-button" href="/takeSurvey/{{linkHash}}?page={{next}}" class="nav-button">{{nextText}}</button>
                 </div>
 

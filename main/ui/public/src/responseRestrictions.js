@@ -4,9 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = requirements.getAttribute("min")
     const max = requirements.getAttribute("max")
     const questionType = requirements.getAttribute("questionType")
+    const number = requirements.getAttribute("number")
     const visualURL = document.getElementById("visualURL").getAttribute("url")
 
     const nextButton = document.getElementById("next-button")
+    const prevButton = document.getElementById("prev-button")
 
     // for short answers, display character count
     if (questionType == "Short Answer") {
@@ -19,7 +21,42 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
-    // on clicking the next button, check for restrictions
+    function saveAnswer() {
+        let response = ""
+        if (questionType == "Short Answer") {
+            response = document.getElementsByClassName("answer-entry-box")[0].value
+        }
+
+        let comment = ""
+        if (document.getElementsByClassName("comment-entry-box").length > 0) {
+            comment = document.getElementsByClassName("comment-entry-box")[0].value
+        }
+
+        fetch(window.location.href, { 
+            method: "PATCH",
+            body: JSON.stringify({
+                answer: {questionNumber: number, comment: comment, response: response}
+            }),
+            headers: {
+                "Content-type": "application/json",
+            },    
+        })
+    }
+
+    function goToNextPage() {
+        saveAnswer()
+
+        window.location.href = nextButton.getAttribute("href")
+    }
+
+    function goToPrevPage() {
+        saveAnswer()
+        window.location.href = prevButton.getAttribute("href")
+    }
+
+    prevButton.addEventListener('click', goToPrevPage)
+
+    // on clicking the next button, check for restrictions and save cookie
     nextButton.addEventListener('click', () => {
         if (questionType == "Multiple Choice") {
             const boxes = document.getElementsByClassName("multiple-choice-box")
@@ -35,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (min > 0 && total < min && required == "true") {
                 document.getElementById("error-text").textContent = `You must select at least ${min} choices`
             } else {
-                window.location.href = nextButton.getAttribute("href")
+                goToNextPage()
             }
         } else if (questionType == "Short Answer") {
             const answer = document.getElementsByClassName("answer-entry-box")[0]
@@ -45,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (min > 0 && answer.value.length < min && required == "true") {
                 document.getElementById("error-text").textContent = `Your answer must be at least ${min} characters`
             } else {
-                window.location.href = nextButton.getAttribute("href")
+                goToNextPage()
             }
         } else if (questionType == "Select Elements") {
             const visualWindow = document.getElementById("displayedImage").contentWindow
@@ -53,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // send message to iframe to get selected element count
             visualWindow.postMessage("count", visualURL) 
         } else {
-            window.location.href = nextButton.getAttribute("href")
+            goToNextPage()
         }
     })
 
@@ -67,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (min > 0 && count < min && required == "true") {
                 document.getElementById("error-text").textContent = `You must select at least ${min} elements`
             } else {
-                window.location.href = nextButton.getAttribute("href")
+                goToNextPage()
             }
         }
     })
