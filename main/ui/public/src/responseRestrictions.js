@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const max = requirements.getAttribute("max")
     const questionType = requirements.getAttribute("questionType")
     const number = requirements.getAttribute("number")
-    const visualURL = document.getElementById("visualURL").getAttribute("url")
+    const visualURL = document.getElementById("visualURL")?.getAttribute("url")
 
     const nextButton = document.getElementById("next-button")
     const prevButton = document.getElementById("prev-button")
@@ -21,10 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
+    // save answer as a cookie
     function saveAnswer() {
         let response = ""
         if (questionType == "Short Answer") {
             response = document.getElementsByClassName("answer-entry-box")[0].value
+        } else if (questionType == "Multiple Choice") {
+            const boxes = document.getElementsByClassName("multiple-choice-box")
+
+            for (let box of boxes) {
+                if (box.checked) {
+                    if (response == "")
+                        response = box.value
+                    else
+                        response += `,${box.value}`
+                }
+            }
         }
 
         let comment = ""
@@ -56,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     prevButton.addEventListener('click', goToPrevPage)
 
-    // on clicking the next button, check for restrictions and save cookie
+    // on clicking the next button, check for restrictions
     nextButton.addEventListener('click', () => {
         if (questionType == "Multiple Choice") {
             const boxes = document.getElementsByClassName("multiple-choice-box")

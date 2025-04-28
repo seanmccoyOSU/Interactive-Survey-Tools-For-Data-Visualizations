@@ -310,11 +310,28 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
             } else {
                 const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
 
+                let comment = ""
+                let userResponse = ""
+                if (req.cookies.answers) {
+                    const answers = JSON.parse(req.cookies.answers).answers
+
+                    const matchingAnswers = answers.filter(obj => obj?.questionNumber == question.number)
+
+                    if (matchingAnswers.length > 0) {
+                        const match = matchingAnswers[0]
+                        comment = match.comment
+                        userResponse = match.response
+                    }
+                }
+
                 let choices = []
                 if (question.type == "Multiple Choice") {
                     const qChoices = question.choices.split('|')
+                    const userSelections = userResponse.split(',')
+                    console.log(userResponse)
+
                     for (let i = 0; i < qChoices.length; i++)
-                        choices.push({ id: `choice${i}`, choice: qChoices[i] })
+                        choices.push({ id: `choice${i}`, choice: qChoices[i], checked: userSelections.includes(qChoices[i]) })
                 }
                 
                 let choiceRequirement = ""
@@ -332,19 +349,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     choiceRequirement = `up to ${question.max} `
                 } 
 
-                let comment = ""
-                let userResponse = ""
-                if (req.cookies.answers) {
-                    const answers = JSON.parse(req.cookies.answers).answers
-
-                    const matchingAnswers = answers.filter(obj => obj?.questionNumber == question.number)
-
-                    if (matchingAnswers.length > 0) {
-                        const match = matchingAnswers[0]
-                        comment = match.comment
-                        userResponse = match.response
-                    }
-                }
+                
 
                 res.render("takeSurveyPage", {
                     layout: false,
