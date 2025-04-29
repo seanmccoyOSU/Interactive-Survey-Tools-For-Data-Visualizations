@@ -4,7 +4,7 @@ document.getElementById("displayedImage")?.addEventListener('load', () => {
     if (questionType == "Select Elements") {
         // get saved ids of selected elements
         const savedResponse = document.getElementById("savedResponse").getAttribute("response")
-        const selectedIds = savedResponse.split(',')
+        const selectedIds = savedResponse.split('|')
     
         // send message to iframe to highlight selected elements
         const visualURL = document.getElementById("visualURL").getAttribute("url")

@@ -30,6 +30,27 @@ app.get('/takeSurvey/:hash', handleErrors( async (req, res, next) => {
         next()
 }))
 
+// submit answers (participant end)
+app.patch('/takeSurvey/:hash', handleErrors( async (req, res, next) => {
+    const publishedSurvey = await PublishedSurvey.findOne({where: {linkHash: req.params.hash} })
+    
+    if (publishedSurvey) {
+        let results = null
+        if (publishedSurvey.results)
+            results = publishedSurvey.results
+        else
+            results = { participants: [] }
+
+        const newParticipant = { participantId: results.participants.length, answers: req.body.answers }
+        results.participants.push(newParticipant)
+        
+        await PublishedSurvey.update({ results: results }, {where: { id: publishedSurvey.id }})
+        res.status(200).send()
+    } else {
+        next()
+    }
+}))
+
 
 // catch-all for any undefined API endpoint
 app.use('*', function (req, res, next) {

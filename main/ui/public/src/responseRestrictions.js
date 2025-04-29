@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const max = requirements.getAttribute("max")
     const questionType = requirements.getAttribute("questionType")
 
+    
+
     const visualURL = document.getElementById("visualURL")?.getAttribute("url")
     
     const nextButton = document.getElementById("next-button")
@@ -24,7 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function goToNextPage() {
-        saveAnswer(() => { window.location.href = nextButton.getAttribute("href") })
+        saveAnswer(() => {
+            const questionNumber = document.getElementById("questionNumber").getAttribute("number")
+            const questionTotal = document.getElementById("questionTotal").getAttribute("total")
+
+            if (questionNumber == questionTotal) {
+                const style = document.createElement('style')
+                style.innerHTML = '*{cursor: wait !important;}'
+                document.head.appendChild(style)
+                setTimeout(() => {window.location.href = nextButton.getAttribute("href")}, 3000)
+            } else {
+                window.location.href = nextButton.getAttribute("href")
+            }
+        })
     }
 
     function goToPrevPage() {

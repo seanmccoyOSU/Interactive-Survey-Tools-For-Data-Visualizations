@@ -6,6 +6,7 @@ const app = express();
 app.use(express.json());
 const path = require('path');
 app.use(express.static(path.join(__dirname, "public")))
+const fs = require('fs')
 
 // setup required for processing cookies
 const cookieParser = require('cookie-parser');
@@ -272,13 +273,35 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             closeDateTime = new Date(response.data.closeDateTime)
         }
 
-        res.render('publishedSurvey', {
-            name: response.data.name,
-            openDateTime: openDateTime,
-            closeDateTime: closeDateTime,
-            status: response.data.status,
-            url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
-        })
+        if (req.query.downloadJSON) {
+            const jsonTosend = { 
+                surveyName: response.data.name, 
+                resultsdownloadDate: new Date(Date.now()).toUTCString(),
+                surveyOpenDate: openDateTime.toUTCString(),
+                surveyCloseDate: closeDateTime.toUTCString(),
+                results: response.data.results
+            }
+            const filepath = `${__dirname}/temp/${response.data.name}-results.json`
+            fs.writeFile(filepath, JSON.stringify(jsonTosend, null, 2), (err) => {
+                if (err) {
+                    console.error("could not write file!")
+                } else {
+                    res.download(filepath, () => {
+                        fs.unlinkSync(filepath)
+                    })
+                }
+            });
+        } else {
+            res.render('publishedSurvey', {
+                name: response.data.name,
+                openDateTime: openDateTime,
+                closeDateTime: closeDateTime,
+                status: response.data.status,
+                url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
+            })
+        }
+
+        
 
     } catch (error) {
         next(error)
@@ -310,6 +333,11 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     layout: false,
                     conclusionText: response.data.surveyDesign.conclusionText,
                 })
+
+                // when this page is loaded, send cookie data to API
+            
+                const parsedAnswers = JSON.parse(req.cookies.answers)
+                await api.patch(req.originalUrl, { answers: parsedAnswers.answers })
             } else {
                 const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
 
