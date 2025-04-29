@@ -117,7 +117,42 @@ const LOCAL_JSON = {
                     min: 10,
                     max: 100
                 },
-            ]
+            ],
+            results: {
+                participants: [
+                    {
+                        participantId: 0,
+                        answers: [
+                            {
+                                questionNumber: 1,
+                                comment: "person 1 comment 1",
+                                response: "multiple|choice|response"
+                            },
+                            {
+                                questionNumber: 2,
+                                comment: "person 1 comment 2",
+                                response: "Short answer response"
+                            }
+                        ]
+                    },
+                    {
+                        participantId: 1,
+                        answers: [
+                            {
+                                questionNumber: 1,
+                                comment: "person 2 comment 1",
+                                response: "select|elements|response"
+                            },
+                            {
+                                questionNumber: 2,
+                                comment: "person 2 comment 2",
+                                response: "radio|buttons|response"
+                            }
+                        ]
+                    }
+                    
+                ]
+            }
             
         }
     ],
@@ -131,7 +166,7 @@ class DebugApi {
     }
 
     get(path) {                                         // GET
-        const pathLevels = path.split('/')
+        const pathLevels = path.split('?')[0].split('/')
 
         if (pathLevels[1] == "users") {
             if (pathLevels[2] && parseInt(pathLevels[2]) != NaN) {  // GET /users/{id}/{resource}
@@ -198,7 +233,7 @@ class DebugApi {
         if (pathLevels[1] == "users") {
             // do nothing for users
             return
-        }
+        } 
         const collection = this.debugData[pathLevels[1]]
         if (collection) {                                             // DELETE /{resource}/{id}
             // NOTE: deletes do not cascade, this may cause weird errors if you test deleting then other actions afterwards
@@ -214,6 +249,9 @@ class DebugApi {
         const pathLevels = path.split('/')              
         if (pathLevels[1] == "users") {
             // do nothing for users
+            return
+        } else if (pathLevels[1] == "takeSurvey") { 
+            // do nothing
             return
         }
         const collection = this.debugData[pathLevels[1]]
