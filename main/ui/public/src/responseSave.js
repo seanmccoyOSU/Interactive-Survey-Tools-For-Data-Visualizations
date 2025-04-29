@@ -6,7 +6,7 @@ function getMultipleChoiceResponse(onGet) {
     let response = ""
     for (const box of boxes) {
         if (box.checked) {
-            response += box.value + ','
+            response += box.value + '|'
         }
     }
 
@@ -37,7 +37,7 @@ function getSelectElementResponse(onGet) {
         if (event.origin === visualURL && event.data.type == "ids") {
             let response = ""
             for (const id of event.data.ids) {
-                response += id + ','
+                response += id + '|'
             }
         
             if (response == "")

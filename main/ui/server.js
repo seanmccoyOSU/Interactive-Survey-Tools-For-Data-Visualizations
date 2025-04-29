@@ -331,7 +331,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                 let choices = []
                 if (question.type == "Multiple Choice") {
                     const qChoices = question.choices.split('|')
-                    const userSelections = userResponse.split(',')
+                    const userSelections = userResponse.split('|')
 
                     for (let i = 0; i < qChoices.length; i++)
                         choices.push({ id: `choice${i}`, choice: qChoices[i], checked: userSelections.includes(qChoices[i]) })
