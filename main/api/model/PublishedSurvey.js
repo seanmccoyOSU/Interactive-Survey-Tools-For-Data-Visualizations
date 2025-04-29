@@ -17,9 +17,6 @@ const PublishedSurvey = sequelize.define('publishedSurvey', {
         updatedStatus = "closed"
       }
 
-      console.log("old status", this.getDataValue('status'))
-      console.log("updated status", updatedStatus)
-
       this.setDataValue('status', updatedStatus)
       return this.getDataValue('status')
     }

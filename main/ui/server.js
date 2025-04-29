@@ -54,7 +54,6 @@ const apiPageNames = {
 
 // some browsers request this automatically, ignoring for now
 app.get('/favicon.ico', (req, res, next) => {
-    console.log("ignoring favicon request")
     return
 })
 

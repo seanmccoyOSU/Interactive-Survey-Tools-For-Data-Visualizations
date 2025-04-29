@@ -45,7 +45,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage })
 
-
+// some browsers request this automatically, ignoring for now
+app.get('/favicon.ico', (req, res, next) => {
+    return
+})
 
 // debug endpoint
 app.get('/', function(req,res,next) {
