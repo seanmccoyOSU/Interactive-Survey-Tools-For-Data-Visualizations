@@ -179,8 +179,9 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
         next(error)
     }
 
-    const today = new Date(Date.now())
-	const tomorrow = new Date(Date.now() + 86400000)
+    const localOffset = new Date(Date.now()).getTimezoneOffset()
+    const today = new Date(Date.now() - (localOffset * 60000))
+	const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
 
     try {
         const questionResponse = await api.get(req.originalUrl + "/questions")

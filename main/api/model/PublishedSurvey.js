@@ -6,7 +6,24 @@ const PublishedSurvey = sequelize.define('publishedSurvey', {
   name: { type: DataTypes.STRING, allowNull: false, unique: false },
   openDateTime: { type: DataTypes.DATE, allowNull: true, unique: false },
   closeDateTime: { type: DataTypes.DATE, allowNull: true, unique: false },
-  status: {type: DataTypes.STRING, allowNull: true, unique: false},
+  status: {type: DataTypes.STRING, allowNull: true, unique: false, 
+    get() {
+      let updatedStatus
+      if (Date.now() < this.getDataValue('openDateTime')) {
+        updatedStatus = "pending"
+      } else if (Date.now() < this.getDataValue('closeDateTime')) {
+        updatedStatus = "in-progress"
+      } else {
+        updatedStatus = "closed"
+      }
+
+      console.log("old status", this.getDataValue('status'))
+      console.log("updated status", updatedStatus)
+
+      this.setDataValue('status', updatedStatus)
+      return this.getDataValue('status')
+    }
+  },
   linkHash: {type: DataTypes.STRING, allowNull: true, unique: false},
   surveyDesign: { type: DataTypes.JSON, allowNull: false, unique: false },
   questions: { type: DataTypes.JSON, allowNull: false, unique: false },
@@ -20,7 +37,7 @@ const PublishedSurvey = sequelize.define('publishedSurvey', {
         updatedStatus = "pending"
       } else if (Date.now() < publishedSurvey.closeDateTime.valueOf()) {
         updatedStatus = "in-progress"
-      } else if (Date.now() < publishedSurvey.closeDateTime.valueOf()) {
+      } else {
         updatedStatus = "closed"
       }
 
