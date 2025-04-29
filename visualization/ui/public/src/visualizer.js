@@ -461,10 +461,17 @@ function screenToSVG(screenX, screenY) {
     return p.matrixTransform(svgElement.getScreenCTM().inverse());
  }
 
-// this is in response for an iframe message for the count of selected elements
+// this is in response for an iframe message for the count of selected elements, ids of selected elements, or selection based on array of ids
 window.addEventListener('message', (event) => {
     if (event.data == "count")
-        event.source.postMessage({ count: visualizationElement.getNumberOfSelectedElements() }, "*")
+        event.source.postMessage({ type: "count", count: visualizationElement.getNumberOfSelectedElements() }, "*")
     else if (event.data == "ids")
-        event.source.postMessage({ ids: visualizationElement.getSelectedIds() }, "*")
+        event.source.postMessage({ type: "ids", ids: visualizationElement.getSelectedIds() }, "*")
+    else if (event.data.selectIds) {
+        for (const id of event.data.selectIds) {
+            const elementToSelect = visualizationElement.getElementById(id)
+            if (elementToSelect)
+                visualizationElement.select(elementToSelect)
+        }
+    }
 })

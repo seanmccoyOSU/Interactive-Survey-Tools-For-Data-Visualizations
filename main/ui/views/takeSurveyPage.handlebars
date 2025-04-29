@@ -6,9 +6,11 @@
         <title>Survey</title>
 
         <script type="module" src="/src/responseRestrictions.js" charset="utf-8" defer></script>
+        <script type="module" src="/src/responseHighlightElements.js" charset="utf-8" defer></script>
         <link rel="stylesheet" href="/takesurveystyle.css">
     </head>
     <body>
+        <meta id="savedResponse" response="{{response}}">
         <div class="container">
             {{#if visualizationContentId}}
                 <meta id="visualURL" url="{{visualURL}}">

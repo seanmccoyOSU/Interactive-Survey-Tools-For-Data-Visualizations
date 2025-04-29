@@ -142,10 +142,26 @@ const VisualizationElement = class {
     getSelectedIds() {
         let ids = []
         for (const element of this.visualElements) {
-            ids.push(element.getAttribute("visualId"))
+            if (element.classList.contains(SELECTION_LABEL))
+                ids.push(element.getAttribute("visualId"))
         }
 
         return ids
+    }
+
+    /**
+     * Returns element whose visualId matches param, null if no match
+     * @param {string} id
+     * @returns {Element} 
+     */
+    getElementById(id) {
+        for(const element of this.visualElements) {
+            if (element.getAttribute("visualId") == id) {
+                return element
+            }
+        }
+
+        return null
     }
 
     /**
@@ -283,13 +299,18 @@ function ExtractVisualElements(svg) {
         elements.item(0).classList.remove(VISUAL_ELEMENT_LABEL)
     }
 
-    // mark all elements with the appropriate tag
+    // mark all elements with the appropriate tag, 
     for (const tag of VISUAL_ELEMENT_TAGS) {
         const shapeGroup = svg.getElementsByTagName(tag)
         for (const shape of shapeGroup) {
             shape.classList.add(VISUAL_ELEMENT_LABEL)
-            shape.setAttribute("visualId", visualId)
-            visualId += 1
+
+            shape.classList.remove(SELECTION_LABEL)
+
+            if (!shape.hasAttribute("visualId")) {
+                shape.setAttribute("visualId", visualId)
+                visualId += 1
+            }
         }
     }
 

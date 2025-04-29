@@ -315,14 +315,16 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                 let comment = ""
                 let userResponse = ""
                 if (req.cookies.answers) {
-                    const answers = JSON.parse(req.cookies.answers).answers
+                    const parsedAnswers = JSON.parse(req.cookies.answers)
 
-                    const matchingAnswers = answers.filter(obj => obj?.questionNumber == question.number)
+                    if (parsedAnswers.hash == req.params.hash) {
+                        const matchingAnswers = parsedAnswers.answers.filter(obj => obj?.questionNumber == question.number)
 
-                    if (matchingAnswers.length > 0) {
-                        const match = matchingAnswers[0]
-                        comment = match.comment
-                        userResponse = match.response
+                        if (matchingAnswers.length > 0) {
+                            const match = matchingAnswers[0]
+                            comment = match.comment
+                            userResponse = match.response
+                        }
                     }
                 }
 
@@ -330,7 +332,6 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                 if (question.type == "Multiple Choice") {
                     const qChoices = question.choices.split('|')
                     const userSelections = userResponse.split(',')
-                    console.log(userResponse)
 
                     for (let i = 0; i < qChoices.length; i++)
                         choices.push({ id: `choice${i}`, choice: qChoices[i], checked: userSelections.includes(qChoices[i]) })
@@ -402,10 +403,12 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
 
 // for saving cookie data while taking survey
 app.patch('/takeSurvey/:hash', async (req, res, next) => {
-    let answers
-    if (req.cookies.answers && req.cookies.answers.hash && req.cookies.answers.hash == req.params.hash) {
+    let answers = null
+    if (req.cookies.answers) {
         answers = JSON.parse(req.cookies.answers)
-    } else {
+    }
+
+    if (!answers || answers.hash != req.params.hash) {
         answers = { hash: req.params.hash, answers: [] }
     }
 
