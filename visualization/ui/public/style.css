@@ -15,15 +15,18 @@ html, body {
 }
 
 .participant .visual-element.selectable:hover, .editor .visual-element:hover {
-    stroke: red !important;
+    fill-opacity: 40%;
+    filter: grayscale(50%) drop-shadow(0px 0px 2px red) saturate(3);
 }
 
 .participant .visual-element.selected, .editor .visual-element.selectable {
-    stroke: blue !important;
+    fill-opacity: 40%;
+    filter: grayscale(50%) drop-shadow(0px 0px 2px blue) saturate(3);
 }
 
 .editor .visual-element {
-    stroke: lightblue !important;
+    fill-opacity: 40%;
+    filter: grayscale(70%) drop-shadow(0px 0px 2px lightblue) saturate(3);
 }
 
 svg {
