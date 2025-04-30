@@ -6,15 +6,19 @@ const app = express();
 app.use(express.json());
 const path = require('path');
 app.use(express.static(path.join(__dirname, "public")))
+const fs = require('fs')
 
 // setup required for processing cookies
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 const { wrapper } = require('axios-cookiejar-support')
 const tough = require('tough-cookie');
 const cookieJar = new tough.CookieJar();
 
 // setup axios API interface
+const DEBUG = process.argv[2] == "-debug"
 const axios = require('axios');
-const api = (process.argv[2] == "-debug") ? (
+const api = (DEBUG) ? (
     // if running in debug mode, use fake debug API
     require('./debugApi')
 ) : (
@@ -50,7 +54,6 @@ const apiPageNames = {
 
 // some browsers request this automatically, ignoring for now
 app.get('/favicon.ico', (req, res, next) => {
-    console.log("ignoring favicon request")
     return
 })
 
@@ -157,7 +160,8 @@ app.get('/visualizations/:id', async (req, res, next) => {
         // on success, refresh page
         res.render("visualization", {
             name: response.data.name,
-            id: response.data.contentId
+            id: response.data.contentId,
+            visualURL: process.env.VISUAL_UI_URL
         })
 
     } catch (error) {
@@ -175,6 +179,10 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
         next(error)
     }
 
+    const localOffset = new Date(Date.now()).getTimezoneOffset()
+    const today = new Date(Date.now() - (localOffset * 60000))
+	const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
+
     try {
         const questionResponse = await api.get(req.originalUrl + "/questions")
         
@@ -185,6 +193,8 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
             introText: response.data.introText,
             questions: questionResponse.data.questions,
             conclusionText: response.data.conclusionText,
+            today: today.toISOString().substring(0, 16),
+            tomorrow: tomorrow.toISOString().substring(0, 16)
         })
     } catch (error) {
         res.render("editsurveydesign", {
@@ -194,6 +204,8 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
             introText: response.data.introText,
             questionError: "Unable to load questions",
             conclusionText: response.data.conclusionText,
+            today: today.toISOString().substring(0, 16),
+            tomorrow: tomorrow.toISOString().substring(0, 16)
         })
     }
         
@@ -201,23 +213,40 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
     
 });
 
+// button for publishing survey design
+app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
+    try {
+        await api.post(req.originalUrl, req.body)
+        res.redirect(req.protocol + "://" + req.get("host"))
+    } catch (error) {
+        next(error)
+    }
+})
+
 // Edit survey question
 app.get('/questions/:id', async (req, res, next) => {
     try {
         const response = await api.get(req.originalUrl)
+        const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`)
+        const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`)
         
         res.render("editquestion", {
             number: response.data.number,
             id: response.data.id,
             surveyDesignId: response.data.surveyDesignId,
             text: response.data.text,
-            multipleChoice: response.data.type == "Multiple Choice" ? "selected" : "",
-            shortAnswer: response.data.type == "Short Answer" ? "selected" : "",
+            multipleChoice: response.data.type == "Multiple Choice",
+            shortAnswer: response.data.type == "Short Answer",
+            selectElements: response.data.type == "Select Elements",
             choices: response.data.choices,
             min: response.data.min,
             max: response.data.max,
-            required: response.data.required ? "checked" : "",
-            allowComment: response.data.allowComment ? "checked" : "",
+            visualizations: visualResponse.data.visualizations,
+            visualizationContentId: response.data.visualizationContentId,
+            required: response.data.required,
+            allowComment: response.data.allowComment,
+            visualURL: process.env.VISUAL_UI_URL,
+            DEBUG: DEBUG
         })
 
     } catch (error) {
@@ -229,14 +258,49 @@ app.get('/questions/:id', async (req, res, next) => {
 app.get('/publishedSurveys/:id', async (req, res, next) => {
     try {
         const response = await api.get(req.originalUrl)
+        let openDateTime
+        let closeDateTime
+        if (response.data.openDateTime instanceof Date) {
+            openDateTime = response.data.openDateTime
+        } else {
+            openDateTime = new Date(response.data.openDateTime)
+        }
 
-        res.render('publishedSurvey', {
-            name: response.data.name,
-            openDateTime: response.data.openDateTime,
-            closeDateTime: response.data.closeDateTime,
-            status: response.data.status,
-            url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
-        })
+        if (response.data.closeDateTime instanceof Date) {
+            closeDateTime = response.data.closeDateTime
+        } else {
+            closeDateTime = new Date(response.data.closeDateTime)
+        }
+
+        if (req.query.downloadJSON) {
+            const jsonTosend = { 
+                surveyName: response.data.name, 
+                resultsdownloadDate: new Date(Date.now()).toUTCString(),
+                surveyOpenDate: openDateTime.toUTCString(),
+                surveyCloseDate: closeDateTime.toUTCString(),
+                results: response.data.results
+            }
+            const filepath = `${__dirname}/temp/${response.data.name}-results.json`
+            fs.writeFile(filepath, JSON.stringify(jsonTosend, null, 2), (err) => {
+                if (err) {
+                    console.error("could not write file!")
+                } else {
+                    res.download(filepath, () => {
+                        fs.unlinkSync(filepath)
+                    })
+                }
+            });
+        } else {
+            res.render('publishedSurvey', {
+                name: response.data.name,
+                openDateTime: openDateTime,
+                closeDateTime: closeDateTime,
+                status: response.data.status,
+                url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
+            })
+        }
+
+        
 
     } catch (error) {
         next(error)
@@ -268,27 +332,84 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     layout: false,
                     conclusionText: response.data.surveyDesign.conclusionText,
                 })
+
+                // when this page is loaded, send cookie data to API
+            
+                const parsedAnswers = JSON.parse(req.cookies.answers)
+                await api.patch(req.originalUrl, { answers: parsedAnswers.answers })
             } else {
                 const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
+
+                let comment = ""
+                let userResponse = ""
+                if (req.cookies.answers) {
+                    const parsedAnswers = JSON.parse(req.cookies.answers)
+
+                    if (parsedAnswers.hash == req.params.hash) {
+                        const matchingAnswers = parsedAnswers.answers.filter(obj => obj?.questionNumber == question.number)
+
+                        if (matchingAnswers.length > 0) {
+                            const match = matchingAnswers[0]
+                            comment = match.comment
+                            userResponse = match.response
+                        }
+                    }
+                }
 
                 let choices = []
                 if (question.type == "Multiple Choice") {
                     const qChoices = question.choices.split('|')
+                    const userSelections = userResponse.split('|')
+
                     for (let i = 0; i < qChoices.length; i++)
-                        choices.push({ id: `choice${i}`, choice: qChoices[i] })
+                        choices.push({ id: `choice${i}`, choice: qChoices[i], checked: userSelections.includes(qChoices[i]) })
                 }
-                console.log(choices)
+                
+                let choiceRequirement = ""
+                if (question.max == 0) {
+                    choiceRequirement = ""
+                } else if (question.min > 0) {
+                    if (question.max == question.min) {
+                        choiceRequirement = `exactly ${question.min} `
+                    } else if (question.max < choices.length) {
+                        choiceRequirement = `${question.min} to ${question.max} `
+                    } else {
+                        choiceRequirement = `at least ${question.min} `
+                    }
+                } else if (question.max < choices.length) {
+                    choiceRequirement = `up to ${question.max} `
+                } 
+
+                
 
                 res.render("takeSurveyPage", {
                     layout: false,
                     linkHash: response.data.linkHash,
                     text: question.text,
+                    visualURL: process.env.VISUAL_UI_URL,
+                    visualizationContentId: question.visualizationContentId,
                     number: question.number,
+                    progress: question.number-1,
+                    total: response.data.questions.length,
+                    percent: (((question.number-1) / response.data.questions.length) * 100).toFixed(2),
+                    multipleChoice: question.type == "Multiple Choice",
+                    selectElements: question.type == "Select Elements",
+                    shortAnswer: question.type == "Short Answer",
                     choices: choices,
-                    shortAnswer: question.type == "Short Answer" ? "" : "hidden",
+                    choiceRequirement: choiceRequirement,
+                    shortAnswerRequirement: (question.min > 0) ? ` must be at least ${question.min} characters` : "",
+                    allowComment: question.allowComment,
+                    min: question.min,
+                    max: question.max,
+                    hasMax: question.max > 0,
+                    required: question.required,
+                    questionType: question.type,
+                    comment: comment,
+                    response: userResponse,
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
+                    DEBUG: DEBUG
                 })
             }
         } else if (!req.query.page || req.query.page == 0) {
@@ -308,6 +429,35 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
     }
 })
 
+// for saving cookie data while taking survey
+app.patch('/takeSurvey/:hash', async (req, res, next) => {
+    let answers = null
+    if (req.cookies.answers) {
+        answers = JSON.parse(req.cookies.answers)
+    }
+
+    if (!answers || answers.hash != req.params.hash) {
+        answers = { hash: req.params.hash, answers: [] }
+    }
+
+    let isReplacement = false
+    for (let i = 0; i < answers.answers.length && !isReplacement; i++) {
+        if (answers.answers[i] && answers.answers[i].questionNumber == req.body.answer.questionNumber) {
+            answers.answers[i] = req.body.answer
+            isReplacement = true
+        }
+    }
+
+    if (!isReplacement)
+        answers.answers.push(req.body.answer)
+
+    res.cookie("answers", JSON.stringify(answers), { httpOnly: true })
+    res.send()
+})
+
+// for submitting survey responses
+// app.post('/takeSurvey/:hash', async (req, res, next) => {
+// }
 
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
 app.post('/:resource/:id?/:method?', async (req, res, next) => {
@@ -352,7 +502,6 @@ app.use('*', function (err, req, res, next) {
 })
 
 // start server
-const PORT = 5000;
-app.listen(PORT, function () {
-    console.log("== Server is running on port", PORT)
+app.listen(process.env.MAIN_UI_PORT, function () {
+    console.log("== Server is running on port", process.env.MAIN_UI_PORT)
 })

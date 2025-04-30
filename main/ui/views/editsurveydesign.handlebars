@@ -31,3 +31,29 @@
     <button class="save-survey-button">Save Changes</button>
 </form>
 
+<br>
+<a class="new-button" href="#publishSurveyPopup">Publish</a>
+
+<!-- popup windows -->
+
+<!-- some HTML referenced from https://www.geeksforgeeks.org/how-to-create-popup-box-using-html-and-css/ section "Using Display Property"-->
+<div class="popup" id="publishSurveyPopup">
+    <div class="popup-content">
+        <h2>Publish your survey</h2>
+        <form action="/surveyDesigns/{{id}}/publishedSurveys" method="POST">
+            
+            <label for="openDateTime">Open time: </label>
+            <input type="datetime-local" id="openDateTime" name="openDateTime" value="{{today}}"/>
+
+            <label for="closeDateTime">Close time: </label>
+            <input type="datetime-local" id="closeDateTime" name="closeDateTime" value="{{tomorrow}}"/>
+
+            <label for="name">Name: </label>
+            <input type="text" name="name" placeholder="survey name" value="{{name}}">
+
+            <button class="popup-create-button" id="publish-survey-button">Publish</button>
+        </form>
+        <a class="popup-cancel-button" href="#">Cancel</a>
+    </div>
+</div>
+

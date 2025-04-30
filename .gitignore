@@ -1,1 +1,3 @@
 node_modules/
+visualization/ui/uploads/*
+main/ui/temp/*

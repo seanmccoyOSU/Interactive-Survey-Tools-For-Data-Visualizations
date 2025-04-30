@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize')
 const sequelize = require('../lib/sequelize')
+const { Question } = require('./Question')
 
 const SurveyDesign = sequelize.define('surveyDesign', {
   name: { type: DataTypes.STRING, allowNull: false, unique: false },
@@ -13,6 +14,12 @@ const SurveyDesign = sequelize.define('surveyDesign', {
     }
   }
 })
+
+/*
+* Set up one-to-many relationship between SurveyDesign and Question.
+*/
+SurveyDesign.hasMany(Question, { foreignKey: { allowNull: false } })
+Question.belongsTo(SurveyDesign)
 
 exports.SurveyDesign = SurveyDesign
 

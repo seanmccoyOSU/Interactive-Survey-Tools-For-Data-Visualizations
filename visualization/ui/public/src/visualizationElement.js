@@ -55,9 +55,10 @@ const VisualizationElement = class {
     constructor(svg) {
         this.svg = svg
         this.visualElements = ExtractVisualElements(svg)
+        this.nextId = this.visualElements.length
 
-        this.defaultWidth = this.svg.viewBox.baseVal.width ? this.svg.viewBox.baseVal.width : this.svg.width.baseVal.value
-        this.defaultHeight = this.svg.viewBox.baseVal.height ? this.svg.viewBox.baseVal.height : this.svg.height.baseVal.value
+        this.defaultWidth = this.svg.viewBox?.baseVal?.width ? this.svg.viewBox.baseVal.width : this.svg.width.baseVal.value
+        this.defaultHeight = this.svg.viewBox?.baseVal?.height ? this.svg.viewBox.baseVal.height : this.svg.height.baseVal.value
         this.resetScaleAndPosition()
         
         // on first time upload, mark all visual elements as selectable by default
@@ -135,6 +136,35 @@ const VisualizationElement = class {
     }
 
     /**
+     * Returns all visualId's of selected elements
+     * @returns {Array} 
+     */
+    getSelectedIds() {
+        let ids = []
+        for (const element of this.visualElements) {
+            if (element.classList.contains(SELECTION_LABEL))
+                ids.push(element.getAttribute("visualId"))
+        }
+
+        return ids
+    }
+
+    /**
+     * Returns element whose visualId matches param, null if no match
+     * @param {string} id
+     * @returns {Element} 
+     */
+    getElementById(id) {
+        for(const element of this.visualElements) {
+            if (element.getAttribute("visualId") == id) {
+                return element
+            }
+        }
+
+        return null
+    }
+
+    /**
      * Marks multiple elements as selectable
      * @param {Array} elements 
      */
@@ -179,14 +209,15 @@ const VisualizationElement = class {
      * @param {Element} element 
      */
     addVisualElement(element) {
-        // append the element to the SVG
-        //const liveElement = this.svg.appendChild(element)
-
         // mark as a visual element
         element.classList.add(VISUAL_ELEMENT_LABEL)
 
         // mark as a custom element
         element.classList.add(CUSTOM_ELEMENT_LABEL)
+
+        // set unique ID
+        element.setAttribute("visualId", this.nextId)
+        this.nextId += 1
 
         // make selectable by default
         this.setSelectable(element)
@@ -207,6 +238,19 @@ const VisualizationElement = class {
     resetScaleAndPosition() {
         const scale = this.defaultWidth > this.defaultHeight ? this.defaultWidth : this.defaultHeight
         this.svg.setAttribute("viewBox", "0 0 " + scale + " " + scale)
+    }
+
+    /**
+     * Returns number of selected elements
+     * @returns {int} 
+     */
+    getNumberOfSelectedElements() {
+        let count = 0
+        for (const element of this.visualElements) {
+            if (element.classList.contains(SELECTION_LABEL))
+                count += 1
+        }
+        return count
     }
 
     get scale() {
@@ -245,6 +289,8 @@ const VisualizationElement = class {
  * @returns {HTMLCollection} Live collection of visual elements
  */
 function ExtractVisualElements(svg) {
+    let visualId = 0
+
     // this is a live collection of elements in class <VISUAL_ELEMENT_LABEL>
     const elements = svg.getElementsByClassName(VISUAL_ELEMENT_LABEL)
 
@@ -253,11 +299,18 @@ function ExtractVisualElements(svg) {
         elements.item(0).classList.remove(VISUAL_ELEMENT_LABEL)
     }
 
-    // mark all elements with the appropriate tag
+    // mark all elements with the appropriate tag, 
     for (const tag of VISUAL_ELEMENT_TAGS) {
         const shapeGroup = svg.getElementsByTagName(tag)
         for (const shape of shapeGroup) {
             shape.classList.add(VISUAL_ELEMENT_LABEL)
+
+            shape.classList.remove(SELECTION_LABEL)
+
+            if (!shape.hasAttribute("visualId")) {
+                shape.setAttribute("visualId", visualId)
+                visualId += 1
+            }
         }
     }
 

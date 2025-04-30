@@ -10,8 +10,9 @@
     <h5>
         <label for="type">Answer type: </label>
         <select name="type" id="type">
-            <option value="Multiple Choice" {{multipleChoice}}>Multiple Choice</option>
-            <option value="Short Answer" {{shortAnswer}}>Short Answer</option>
+            <option value="Multiple Choice" {{#if multipleChoice}}selected{{/if}}>Multiple Choice</option>
+            <option value="Short Answer" {{#if shortAnswer}}selected{{/if}}>Short Answer</option>
+            <option value="Select Elements" {{#if selectElements}}selected{{/if}}>Select Elements</option>
         </select>
     </h5>
 
@@ -32,14 +33,40 @@
     <input type="text" id="max" name="max" value="{{max}}">
     </h5>
 
+    <h5>
+        <label for="visualizationId">Import visualization: </label>
+        <select id="visualizationId" name="visualizationId">
+            <option value="">Select One</option>
+            {{#each visualizations}}
+                <option value={{this.id}}>{{this.name}}</option>
+            {{/each}}
+            <option value="-1" hidden>Delete</option>
+        </select>
+        <button class="import-visualization-button">Import</button>
+    </h5>
+
+    {{#if visualizationContentId}}
+        {{#unless DEBUG}}
+            <iframe id="displayedImage" src="{{visualURL}}/{{visualizationContentId}}?editor=true" height="360" width="480"></iframe>
+        {{/unless}}
+        {{#if DEBUG}}
+            <iframe id="displayedImage" src="{{visualURL}}" height="360" width="480"></iframe>
+        {{/if}}
+        <br>
+        <button class="remove-visualization-button">Remove</button>
+        <br>
+    {{/if}}
+
+    
+
     <h5><label for="required">Required? </label>
-    <input type="checkbox" id="required" name="required" {{required}}>
+    <input type="checkbox" id="required" name="required" {{#if required}}checked{{/if}}>
     </h5>
 
     <h5><label for="allowComment">Allow comment? </label>
-    <input type="checkbox" id="allowComment" name="allowComment" value="true" {{allowComment}}>
+    <input type="checkbox" id="allowComment" name="allowComment" value="true" {{#if allowComment}}checked{{/if}}>
     </h5>
 
     <br>
-    <button class="save-question-button" action="/questions/{{id}}">Save Changes</button>
+    <button class="save-question-button">Save Changes</button>
 </form>

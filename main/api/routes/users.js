@@ -1,5 +1,4 @@
 // database imports
-const { Visualization } = require('../model/Visualization')
 const { User, UserClientFields, validateCredentials } = require('../model/User')
 const { generateAuthToken, requireAuthentication } = require('../lib/auth')
 const { handleErrors, getResourceById } = require('../lib/error')
@@ -10,43 +9,19 @@ const router = express.Router();
 
 // setup cookie parser
 const cookieParser = require('cookie-parser');
-const { SurveyDesign } = require('../model/SurveyDesign');
 router.use(cookieParser());
+
+
+/*****************************************
+ * Start User endpoints
+ * 
+ *****************************************/
 
 // Get current user info
 router.get('/', requireAuthentication, handleErrors( async (req, res, next) => {
 	// find user with matching id and return info
 	const user = await getResourceById(User, req.userid)
 	res.status(200).send({ id: user.id, name: user.name })
-}))
-
-// Get visualizations belonging to user
-router.get('/:id/visualizations', requireAuthentication, handleErrors( async (req, res, next) => {
-	// verify correct id
-	if (req.userid != req.params.id) {
-		res.status(401).send({
-			error: "You are not allowed to access this resource"
-		})
-	} else {
-		const visualizations = await Visualization.findAll({ where: { userId: req.params.id} })	
-
-		res.status(200).send({visualizations: visualizations});	// sending as json response
-	}
-}))
-
-// Get survey designs belonging to user
-router.get('/:id/surveyDesigns', requireAuthentication, handleErrors( async (req, res, next) => {
-	// verify correct id
-	if (req.userid != req.params.id) {
-		res.status(401).send({
-			error: "You are not allowed to access this resource"
-		})
-	} else {
-		// TODO: get user's survey designs
-		const surveyDesigns = await SurveyDesign.findAll({ where: { userId: req.params.id} })	
-		res.status(200).send({surveyDesigns: surveyDesigns});	// sending as json response
-		// next()	// goes to 404 right now
-	}
 }))
 
 // Register a new user
@@ -82,5 +57,42 @@ router.post('/logout', handleErrors( async (req, res, next) => {
 	res.cookie("access_token", null, { httpOnly: true })
 	res.status(200).send()
 }))
+
+
+/*****************************************
+ * GET User collections endpoints
+ *****************************************/
+
+// generic function for a getting a collection list from a user
+function getUserCollection(collectionModel, collectionName) {
+	return async (req, res, next) => {
+		// verify correct id
+		if (req.userid != req.params.id) {
+			res.status(401).send({
+				error: "You are not allowed to access this resource"
+			})
+		} else {
+			const resources = await collectionModel.findAll({ where: { userId: req.params.id} })	
+
+			const returnJson = {}
+			returnJson[collectionName] = resources
+
+			res.status(200).send(returnJson);	// sending as json response
+		}
+	}
+}
+
+// collection imports
+const { Visualization } = require('../model/Visualization')
+const { SurveyDesign } = require('../model/SurveyDesign');
+const { PublishedSurvey } = require('../model/PublishedSurvey')
+
+// get list of specific collection from user
+router.get('/:id/visualizations', requireAuthentication, handleErrors(getUserCollection(Visualization, 'visualizations')))
+
+router.get('/:id/surveyDesigns', requireAuthentication, handleErrors(getUserCollection(SurveyDesign, 'surveyDesigns')))
+
+router.get('/:id/publishedSurveys', requireAuthentication, handleErrors(getUserCollection(PublishedSurvey, 'publishedSurveys')))
+
 
 module.exports = router;

@@ -4,14 +4,15 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const path = require('path')
+const fs = require('fs')
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")))
 
 // setup axios API interface
-const API_URL = "http://localhost:8080"
 const axios = require('axios');
 const api = axios.create({
-    baseURL: API_URL
+    baseURL: process.env.VISUAL_API_URL
 })
 
 // express-handlebars setup
@@ -23,6 +24,32 @@ app.engine("handlebars", exphbs.engine({
 }))
 app.set("view engine", "handlebars")
 
+//file upload
+const multer = require("multer")
+const crypto = require("node:crypto")
+const imageTypes = {
+    "image/jpeg": "jpg",
+    "image/png": "png"
+}
+const storage = multer.diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, `${__dirname}/uploads`)
+        },
+        filename: (req, file, callback) => {
+            callback(null, file.originalname)
+        }
+    })
+    // fileFilter: (req, file, callback) => {
+    //     callback(null, !!imageTypes[file.mimetype])
+    // }
+
+const upload = multer({ storage })
+
+// some browsers request this automatically, ignoring for now
+app.get('/favicon.ico', (req, res, next) => {
+    return
+})
+
 // debug endpoint
 app.get('/', function(req,res,next) {
     console.log("loading debug page")
@@ -31,11 +58,26 @@ app.get('/', function(req,res,next) {
     })
 })
 
+function clearBeforeUpload(req, res, next) {
+    if (fs.existsSync(`${__dirname}/uploads/${req.params.id}.png`))
+        fs.unlinkSync(`${__dirname}/uploads/${req.params.id}.png`)
+    else if (fs.existsSync(`${__dirname}/uploads/${req.params.id}.jpg`))
+        fs.unlinkSync(`${__dirname}/uploads/${req.params.id}.jpg`)
+
+    next()
+}
+
 // ui post
+app.post('/:id/photo', clearBeforeUpload, upload.single("file"), function(req,res,next) {
+    
+    res.send()
+    //res.redirect(req.get("Referrer"))
+})
+
 app.post('/', async function(req,res,next) {
     try {
         const response = await api.post(req.originalUrl, req.body)
-        console.log("visualization ID: ", response.data.id)
+        res.send()
     } catch (e) {
         next(e)
     }
@@ -45,6 +87,18 @@ app.post('/', async function(req,res,next) {
 app.put('/:id', async function(req,res,next) {
     try {
         const response = await api.put(req.originalUrl, req.body)
+    } catch (e) {
+        next(e)
+    }
+})
+
+// endpoint to load photo
+app.get('/:id/photo', async function(req,res,next) {
+    try {
+        if (fs.existsSync(`${__dirname}/uploads/${req.params.id}.png`))
+            res.sendFile(`${__dirname}/uploads/${req.params.id}.png`)
+        else
+            res.sendFile(`${__dirname}/uploads/${req.params.id}.jpg`)
     } catch (e) {
         next(e)
     }
@@ -85,7 +139,6 @@ app.use('*', function (err, req, res, next) {
 })
 
 // start server
-const port = 8000
-app.listen(port, function () {
-    console.log("== Server is running on port", port)
+app.listen(process.env.VISUAL_UI_PORT, function () {
+    console.log("== Server is running on port", process.env.VISUAL_UI_PORT)
 })

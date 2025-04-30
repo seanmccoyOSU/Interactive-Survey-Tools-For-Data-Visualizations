@@ -1,6 +1,7 @@
 // database imports
-const { User } = require('../model/User')
 const { SurveyDesign, SurveyDesignClientFields } = require('../model/SurveyDesign')
+const { Question, QuestionClientFields } = require('../model/Question')
+const { PublishedSurvey, PublishedSurveyClientFields } = require('../model/PublishedSurvey')
 const { requireAuthentication } = require('../lib/auth')
 const { handleErrors, getResourceById } = require('../lib/error')
 
@@ -72,6 +73,60 @@ router.patch('/:id', requireAuthentication, handleErrors( async (req, res, next)
 		})
 	}
 }))
+
+// Get questions belonging to design
+router.get('/:id/questions', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+
+	// verify correct id
+	if (req.userid != surveyDesign.userId) {
+		res.status(401).send({
+			error: "You are not allowed to access this resource"
+		})
+	} else {
+		const questions = await Question.findAll({ where: { surveyDesignId: req.params.id} })	
+
+		res.status(200).send({questions: questions});	// sending as json response
+	}
+}))
+
+// Create new question
+router.post('/:id/questions', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+	const questions = await Question.findAll({where: {surveyDesignId: req.params.id}})
+
+	// Get survey data from req
+	const questionData = {
+		surveyDesignId: req.params.id,
+		number: questions.length+1
+	}
+
+	// Create new survey design in database
+	const question = await Question.create(questionData, QuestionClientFields)
+	res.status(201).send({ id: question.id })
+}))
+
+// Publish a survey
+router.post('/:id/publishedSurveys', requireAuthentication, handleErrors( async (req, res, next) => {
+	const surveyDesign = await getResourceById(SurveyDesign, req.params.id)
+	const questions = await Question.findAll({where: {surveyDesignId: req.params.id}})
+
+	// Get survey data from req
+	const publishedSurveyData = {
+		userId: surveyDesign.userId,
+		name: req.body.name,
+		openDateTime: new Date(req.body.openDateTime),
+		closeDateTime: new Date(req.body.closeDateTime),
+		surveyDesign: surveyDesign,
+		questions: questions
+	}
+
+	// Create new survey design in database
+	const publishedSurvey = await PublishedSurvey.create(publishedSurveyData, PublishedSurveyClientFields)
+	res.status(201).send({ id: publishedSurvey.id })
+}))
+
+
 
 
 module.exports = router;
