@@ -3,6 +3,38 @@ html, body {
     margin: 0;
 }
 
+body {
+    --visual-scale: 1px
+}
+
+.zoom-button {
+    position: absolute;
+    left: 2%;
+    font-size: 7vh;
+    border-radius: 100%;
+    z-index: 12;
+    padding: 0px 2vh;
+    border: 0px;
+    background-color: lightgray;
+}
+
+.zoom-button:active {
+    background-color: darkgray;
+}
+
+.zoom-button:hover {
+    transform: scale(1.1)
+}
+
+#zoom-in {
+    top: 2%;
+}
+
+#zoom-out {
+    top: 12%;
+}
+
+
 #wrapper {
     min-height: 100%;
     align-items: center;
@@ -15,18 +47,21 @@ html, body {
 }
 
 .participant .visual-element.selectable:hover, .editor .visual-element:hover {
-    fill-opacity: 40%;
-    filter: grayscale(50%) drop-shadow(0px 0px 2px red) saturate(3);
+    fill-opacity: 40% !important;
+    stroke-opacity: 40% !important;
+    filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) red) saturate(15);
 }
 
 .participant .visual-element.selected, .editor .visual-element.selectable {
-    fill-opacity: 40%;
-    filter: grayscale(50%) drop-shadow(0px 0px 2px blue) saturate(3);
+    fill-opacity: 40% !important;
+    stroke-opacity: 40% !important;
+    filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) blue) saturate(15);
 }
 
 .editor .visual-element {
-    fill-opacity: 40%;
-    filter: grayscale(70%) drop-shadow(0px 0px 2px lightblue) saturate(3);
+    fill-opacity: 40% !important;
+    stroke-opacity: 40% !important;
+    filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) cyan) saturate(15);
 }
 
 svg {

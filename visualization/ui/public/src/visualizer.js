@@ -170,6 +170,8 @@ function loadSvgFromText(svgText) {
 
     visualizationElement = new VisualizationElement(svgElement)
 
+    document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
+
     if (!debug) {
         fetch(window.location.href, { 
             method: "PUT",
