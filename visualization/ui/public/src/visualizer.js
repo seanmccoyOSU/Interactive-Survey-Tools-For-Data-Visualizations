@@ -170,8 +170,6 @@ function loadSvgFromText(svgText) {
 
     visualizationElement = new VisualizationElement(svgElement)
 
-    document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
-
     if (!debug) {
         fetch(window.location.href, { 
             method: "PUT",
@@ -239,20 +237,45 @@ function loadRaster(file) {
 }
 
 function OnLoadSvg() {
+    document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
     EnableSelection()
 }
 
 function OnFirstUpload() {
     if (wrapper.classList.contains("editor") || debug) {
-        document.getElementById("set-all-selectable-button").removeAttribute("hidden")
-        document.getElementById("set-all-selectable-button").addEventListener("click", (evt) => {
+        const setAllSelectableButton = document.createElement("button")
+        setAllSelectableButton.textContent = "Make All Elements Selectable"
+        setAllSelectableButton.addEventListener("click", () => {
             visualizationElement.setAllSelectable()
         })
 
-        document.getElementById("set-all-not-selectable-button").removeAttribute("hidden")
-        document.getElementById("set-all-not-selectable-button").addEventListener("click", (evt) => {
+        const setAllNotSelectableButton = document.createElement("button")
+        setAllNotSelectableButton.textContent = "Make All Elements Not Selectable"
+        setAllNotSelectableButton.addEventListener("click", () => {
             visualizationElement.setAllNotSelectable()
         })
+
+        const dropdownButtons = document.getElementsByClassName("dropdown-buttons")[0]
+        dropdownButtons.appendChild(setAllSelectableButton)
+        dropdownButtons.appendChild(setAllNotSelectableButton)        
+    }
+
+    if (!wrapper.classList.contains("editor") || debug) {
+        const selectAllButton = document.createElement("button")
+        selectAllButton.textContent = "Select All Elements"
+        selectAllButton.addEventListener("click", () => {
+            visualizationElement.selectAll()
+        })
+
+        const deselectAllButton = document.createElement("button")
+        deselectAllButton.textContent = "Clear All Selections"
+        deselectAllButton.addEventListener("click", () => {
+            visualizationElement.deselectAll()
+        })
+
+        const dropdownButtons = document.getElementsByClassName("dropdown-buttons")[0]
+        dropdownButtons.appendChild(selectAllButton)
+        dropdownButtons.appendChild(deselectAllButton)        
     }
     
 
@@ -274,7 +297,7 @@ function EnableSelectionOfElement(visualElement) {
     // clicking on selectable element as a participant marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
         if (mouseMode == "pan" || mouseMode == "select") {
-            if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
+            if (wrapper.classList.contains("participant")) { 
                 visualizationElement.toggleSelection(evt.currentTarget)
             } 
         }

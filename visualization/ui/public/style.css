@@ -1,10 +1,11 @@
 html, body {
     height: 100%;
     margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-    --visual-scale: 1px
+    --visual-scale: 1px;
 }
 
 .zoom-button {
@@ -83,4 +84,46 @@ button, input {
 #user-box {
     fill: blue;
     fill-opacity: 20%;
+}
+
+.dropdown {
+    position: absolute;
+    display: inline-block;
+    z-index: 13;
+    right: 2%;
+    top: 2%;
+    font-size: 4.5vh;
+    border: 0px;
+    background-color: #ccd9cc;
+    min-width: 22vh;
+    text-align: center;
+}
+
+.dropdown:hover {
+    background-color: #bbc7bb;
+}
+
+.dropdown-buttons {
+    display: none;
+    position: absolute;
+    box-shadow: 0px 4px 8px 0px #454545;
+    z-index: 14;
+    font-size: 2vh;
+}
+
+.dropdown-buttons button {
+    background-color: #ebfaeb;
+    border: 0px;
+    padding: 0.5vh;
+    min-width: 22vh;
+    font-size: 2vh;
+}
+
+.dropdown-buttons button:hover {
+    background-color: #ccd9cc;
+    cursor: pointer;
+}
+
+.dropdown:hover .dropdown-buttons {
+    display: block;
 }
