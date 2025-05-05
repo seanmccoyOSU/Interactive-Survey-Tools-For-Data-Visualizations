@@ -273,7 +273,7 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             closeDateTime = new Date(response.data.closeDateTime)
         }
 
-        if (req.query.downloadJSON) {
+        if (req.query.downloadCSV) {
             const { data: pub } = await api.get(req.originalUrl)
             const participants = pub.results?.participants || []
             // build one flat row per answer
