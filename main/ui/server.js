@@ -1,4 +1,5 @@
 require('dotenv').config()
+const { Parser } = require('json2csv');
 
 // express setup
 const express = require('express');
@@ -272,25 +273,47 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             closeDateTime = new Date(response.data.closeDateTime)
         }
 
-        if (req.query.downloadJSON) {
-            const jsonTosend = { 
-                surveyName: response.data.name, 
-                resultsdownloadDate: new Date(Date.now()).toUTCString(),
-                surveyOpenDate: openDateTime.toUTCString(),
-                surveyCloseDate: closeDateTime.toUTCString(),
-                results: response.data.results
-            }
-            const filepath = `${__dirname}/temp/${response.data.name}-results.json`
-            fs.writeFile(filepath, JSON.stringify(jsonTosend, null, 2), (err) => {
-                if (err) {
-                    console.error("could not write file!")
-                } else {
-                    res.download(filepath, () => {
-                        fs.unlinkSync(filepath)
-                    })
-                }
-            });
-        } else {
+        if (req.query.downloadCSV) {
+            const { data: pub } = await api.get(req.originalUrl)
+            const participants = pub.results?.participants || []
+            // build one flat row per answer
+            const records = []
+            participants.forEach(p =>
+              p.answers.forEach(a => {
+                records.push({
+                  surveyId:         pub.id,
+                  surveyName:       pub.name,
+                  status:           pub.status,
+                  openDateTime:     new Date(pub.openDateTime).toISOString(),
+                  closeDateTime:    new Date(pub.closeDateTime).toISOString(),
+                  downloadDateTime: new Date().toISOString(),
+                  participantId:    p.participantId,
+                  questionNumber:   a.questionNumber,
+                  response:         a.response,
+                  comment:          a.comment
+                })
+              })
+            )
+      
+            // defines column order
+            const fields = [
+              'surveyId','surveyName','status',
+              'openDateTime','closeDateTime','downloadDateTime',
+              'participantId','questionNumber','response','comment'
+            ]
+            const parser = new Parser({ fields })
+            const csv    = parser.parse(records)
+
+            return res
+            .status(200)
+            .set({
+              'Content-Type':        'text/csv',
+              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-results.csv"`
+            })
+            .send(csv)
+        }
+
+        else {
             res.render('publishedSurvey', {
                 name: response.data.name,
                 openDateTime: openDateTime,
@@ -299,8 +322,6 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
                 url: process.env.MAIN_UI_URL + '/takeSurvey/' + response.data.linkHash
             })
         }
-
-        
 
     } catch (error) {
         next(error)
@@ -496,8 +517,10 @@ app.use('*', function (req, res, next) {
 // error case
 app.use('*', function (err, req, res, next) {
     console.error("== Error:", err)
+    
     res.status(500).send({
         error: "Server error.  Please try again later."
+        
     })
 })
 
