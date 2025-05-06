@@ -1,11 +1,12 @@
 import {VisualizationElement} from "./visualizationElement.js"
+import {exportButton} from "./exportButton.js"
 
 let debug = false
 let mouseMode = "pan"
-let visualizationElement
-let svgElement
-const wrapper = document.getElementById("wrapper")                      // container that covers entire page
-const visualContainer = document.getElementById("visual-container")     // container for the visual
+export let visualizationElement
+export let svgElement
+export const wrapper = document.getElementById("wrapper")                      // container that covers entire page
+export const visualContainer = document.getElementById("visual-container")     // container for the visual
 
 document.getElementById("pan-button").addEventListener("click", (evt) => {
     mouseMode = "pan" 
@@ -27,19 +28,25 @@ document.getElementById("delete-button").addEventListener("click", (evt) => {
     wrapper.style.cursor = "default"
 })
 
-// start loading svg once page has loaded
-addEventListener("DOMContentLoaded", () => {
-    if (wrapper.classList.contains("editor")) {
+const visualizerBase = {
+    onPageLoad: function() {
+    
+    },
+    
+    onPageLoadAsEditor: function() {
+        // create tool buttons
         document.getElementById("pan-button").removeAttribute("hidden")
         document.getElementById("create-button").removeAttribute("hidden")
         document.getElementById("delete-button").removeAttribute("hidden")
         
+        // create file uploader
         const uploader = document.getElementById("svg-uploader");
         uploader.removeAttribute("hidden")
         uploader.addEventListener("change", handleSvgUpload);  
-
+    
+        // create save button
         document.getElementById("save-svg").removeAttribute("hidden")
-
+    
         // save changes to database
         document.getElementById("save-svg").addEventListener("click", () => {
             fetch(window.location.href, { 
@@ -52,65 +59,61 @@ addEventListener("DOMContentLoaded", () => {
                 },    
             })
         })
+    },
+    
+    onPageLoadAsParticipant: function() {
+    
+    },
+    
+    onPageLoadDebug: function() {
+        // debug mode set up
+        debug = true
+    
+        // create file uploader
+        const uploader = document.getElementById("svg-uploader");
+        uploader.removeAttribute("hidden")
+        uploader.addEventListener("change", handleSvgUpload);  
+    
+        // create debug mode buttons
+        document.getElementById("editor-button").removeAttribute("hidden")
+        document.getElementById("participant-button").removeAttribute("hidden")
+    
+        document.getElementById("editor-button").addEventListener("click", (evt) => {
+            wrapper.classList.remove("participant") 
+            wrapper.classList.add("editor") 
+            document.getElementById("pan-button").removeAttribute("hidden")
+            document.getElementById("create-button").removeAttribute("hidden")
+            document.getElementById("delete-button").removeAttribute("hidden")
+        })
+    
+        document.getElementById("participant-button").addEventListener("click", (evt) => {
+            wrapper.classList.remove("editor") 
+            wrapper.classList.add("participant") 
+            mouseMode = "pan"
+            document.getElementById("pan-button").setAttribute("hidden", "true")
+            document.getElementById("create-button").setAttribute("hidden", "true")
+            document.getElementById("delete-button").setAttribute("hidden", "true")
+        })
+    }
+
+}
+
+
+
+// start loading svg once page has loaded
+addEventListener("DOMContentLoaded", () => {
+    const visualizer = exportButton(visualizerBase)
+    visualizer.onPageLoad()
+
+    if (wrapper.classList.contains("editor")) {
+        visualizer.onPageLoadAsEditor()
     } else {
         wrapper.classList.add("participant")
+        visualizer.onPageLoadAsParticipant()
         
         // debug mode
         if (wrapper.classList.contains("debug")) {
-            // debug mode set up
-            debug = true
-
-            const uploader = document.getElementById("svg-uploader");
-            uploader.removeAttribute("hidden")
-            uploader.addEventListener("change", handleSvgUpload);  
-
-            document.getElementById("editor-button").removeAttribute("hidden")
-            document.getElementById("participant-button").removeAttribute("hidden")
-            document.getElementById("save-svg").removeAttribute("hidden")
-
-            // make buttons functional
-            document.getElementById("editor-button").addEventListener("click", (evt) => {
-                wrapper.classList.remove("participant") 
-                wrapper.classList.add("editor") 
-                document.getElementById("pan-button").removeAttribute("hidden")
-                document.getElementById("create-button").removeAttribute("hidden")
-                document.getElementById("delete-button").removeAttribute("hidden")
-            })
-
-            document.getElementById("participant-button").addEventListener("click", (evt) => {
-                wrapper.classList.remove("editor") 
-                wrapper.classList.add("participant") 
-                mouseMode = "pan"
-                document.getElementById("pan-button").setAttribute("hidden", "true")
-                document.getElementById("create-button").setAttribute("hidden", "true")
-                document.getElementById("delete-button").setAttribute("hidden", "true")
-            })
-
-            //Locally saves the current .SVG file being displayed
-            document.getElementById("save-svg").addEventListener("click", () => {
-                // we don't want to save modified scale and position
-                visualizationElement.resetScaleAndPosition()
-
-                // 1) Convert the current <svg> to a string
-                //    Using XMLSerializer preserves all attributes and nested elements
-                const serializer = new XMLSerializer();
-                const svgString = serializer.serializeToString(svgElement);
-            
-                // 2) Create a Blob from the string, then a URL from the Blob
-                const blob = new Blob([svgString], { type: "image/svg+xml" });
-                const url = URL.createObjectURL(blob);
-            
-                // 3) Create a temporary link element
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = "edited-visual.svg"; // default file name in download dialog
-                document.body.appendChild(link);
-            
-                // 4) Programmatically click it to start the download, then clean up
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            });
+            visualizer.onPageLoadDebug()
         }
     }
 
