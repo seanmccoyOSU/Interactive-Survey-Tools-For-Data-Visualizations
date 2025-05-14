@@ -1,4 +1,4 @@
-import { visualizationElement, svgElement } from "./visualizer.js"
+import { visualizationElement, svgElement } from "../visualizer.js"
 
 export const exportButton = (visualizer) => {
     const decoratedVisualizer = Object.create(visualizer)
@@ -9,7 +9,7 @@ export const exportButton = (visualizer) => {
     }
 
     decoratedVisualizer.onPageLoadAsEditor = function() {
-        visualizer.onPageLoadDebug()
+        visualizer.onPageLoadAsEditor()
         createExportButton()
     }
 
