@@ -1,6 +1,7 @@
 import {VisualizationElement} from "./visualizationElement.js"
 import {exportButton} from "./features/exportButton.js"
 import {selectElements} from "./features/selectElements.js"
+import {zoomPan} from "./features/zoomPan.js"
 
 export let debug = false
 export const mouseMode = { mode: "pan" }
@@ -10,19 +11,6 @@ export let svgElement
 export const wrapper = document.getElementById("wrapper")                      // container that covers entire page
 export const visualContainer = document.getElementById("visual-container")     // container for the visual
 
-document.getElementById("pan-button").addEventListener("click", (evt) => {
-    mouseMode.mode = "pan" 
-    wrapper.style.cursor = "grab"
-})
-
-// document.getElementById("select-button").addEventListener("click", (evt) => {
-//     mouseMode = "select" 
-//     wrapper.style.cursor = "default"
-// })
-
-
-
-
 
 const visualizerBase = {
     onPageLoad: function() {
@@ -30,9 +18,6 @@ const visualizerBase = {
     },
     
     onPageLoadAsEditor: function() {
-        // create tool buttons
-        document.getElementById("pan-button").removeAttribute("hidden")
-        
         // create file uploader
         const uploader = document.getElementById("svg-uploader");
         uploader.removeAttribute("hidden")
@@ -75,20 +60,16 @@ const visualizerBase = {
         document.getElementById("editor-button").addEventListener("click", (evt) => {
             wrapper.classList.remove("participant") 
             wrapper.classList.add("editor") 
-            document.getElementById("pan-button").removeAttribute("hidden")
         })
     
         document.getElementById("participant-button").addEventListener("click", (evt) => {
             wrapper.classList.remove("editor") 
             wrapper.classList.add("participant") 
-            mouseMode.mode = "pan"
-            document.getElementById("pan-button").setAttribute("hidden", "true")
         })
     },
 
     onFirstLoadSvg: function() {
-        EnablePanning()
-        EnableZoom()
+        
     },
 
     onLoadSvg: function() {
@@ -100,7 +81,7 @@ const visualizerBase = {
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
-    visualizer = selectElements(exportButton(visualizerBase))
+    visualizer = selectElements(zoomPan(exportButton(visualizerBase)))
     visualizer.onPageLoad()
 
     if (wrapper.classList.contains("editor")) {
@@ -234,82 +215,6 @@ function loadRaster(file) {
         visualizer.onFirstLoadSvg();
 }
 
-
-
-// Enable user to pan the visual by clicking and dragging anywhere on the page
-function EnablePanning() {
-    let isPanning = false
-    let startXMouse, startYMouse
-    let startXVisual, startYVisual
-
-    // define behavior for when user presses mouse button down anywhere on the page
-    wrapper.addEventListener("mousedown", evt => {
-        if (mouseMode.mode == "pan") {
-            evt.preventDefault()
-            // while user holds the mouse button down, the user is panning
-            isPanning = true
-    
-            // get starting coordinates for visual and mouse
-            startXMouse = evt.clientX
-            startYMouse = evt.clientY
-            startXVisual = visualizationElement.x
-            startYVisual = visualizationElement.y
-    
-            // change cursor image to grabbing
-            wrapper.style.cursor = "grabbing"
-        }
-    })
-
-    // define behavior for when user moves mouse while panning
-    document.addEventListener("mousemove", evt => {
-        if (isPanning) {
-            // prevent mouse from highlighting text while panning
-            evt.preventDefault()
-
-            // get scale of visualization as it is displayed in the window
-            const svgBoundingBox = visualizationElement.svg.getBoundingClientRect()
-            const svgWindowScale = svgBoundingBox.height < svgBoundingBox.width ? svgBoundingBox.height : svgBoundingBox.width
-
-            // panning speed adjusts based on visualization's programmed scale and its window scale 
-            const speedModifier = visualizationElement.scale / svgWindowScale
-
-            // coordinates to move visual to
-            visualizationElement.x = startXVisual - (evt.clientX - startXMouse) * speedModifier
-            visualizationElement.y = startYVisual - (evt.clientY - startYMouse) * speedModifier
-        }
-    })
-
-    // define behavior for when user releases mouse button
-    document.addEventListener("mouseup", () => {
-        if (mouseMode.mode == "pan") {
-            // the user is not panning if the mouse button is not pressed down
-            isPanning = false
-
-            // change cursor image to grab
-            wrapper.style.cursor = "grab"
-        }
-    })
-}
-
-// Enable user to zoom the visual by clicking the zoom buttons
-function EnableZoom() {
-    const zoomOutIntensity = 2
-    const zoomInIntensity = 1./zoomOutIntensity     // inverse
-    
-    // define zoom in event for clicking zoom in button
-    document.getElementById("zoom-in").addEventListener("click", () => {
-        let newSize = visualizationElement.scale * zoomInIntensity
-
-        visualizationElement.scale = newSize
-    })
-
-    // define zoom out event for clicking zoom out button
-    document.getElementById("zoom-out").addEventListener("click", () => {
-        let newSize = visualizationElement.scale * zoomOutIntensity
-
-        visualizationElement.scale = newSize
-    })
-}
 
 // The following function was adapted from stackoverflow user "inna" (Jan 19, 2018)
 // Adapted from function transformPoint() (name was taken from Paul LeBeau's answer) 
