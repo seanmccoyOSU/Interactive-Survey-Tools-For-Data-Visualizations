@@ -39,6 +39,11 @@ body {
 #wrapper {
     min-height: 100%;
     align-items: center;
+    cursor: grab;
+}
+
+#wrapper.panning {
+    cursor: grabbing;
 }
 
 #visual-container {

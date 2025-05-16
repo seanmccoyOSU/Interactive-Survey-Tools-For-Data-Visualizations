@@ -4,43 +4,26 @@ export const zoomPan = (visualizer) => {
 
     const decoratedVisualizer = Object.create(visualizer)
 
+    decoratedVisualizer.disablePan = false
+
     decoratedVisualizer.onFirstLoadSvg = function() {
         visualizer.onFirstLoadSvg()
-        EnablePanning()
+        EnablePanning(decoratedVisualizer.disablePan)
         EnableZoom()
-    }
-
-    decoratedVisualizer.onPageLoadDebug = function() {
-        visualizer.onPageLoadDebug()
-        createPanButton()
-    }
-
-    decoratedVisualizer.onPageLoadAsEditor = function() {
-        visualizer.onPageLoadAsEditor()
-        createPanButton()
     }
 
     return decoratedVisualizer
 }
 
-function createPanButton() {
-    document.getElementById("pan-button").removeAttribute("hidden")
-    document.getElementById("pan-button").addEventListener("click", (evt) => {
-        mouseMode.mode = "pan" 
-        wrapper.style.cursor = "grab"
-    })
-}
-
-
 // Enable user to pan the visual by clicking and dragging anywhere on the page
-function EnablePanning() {
+function EnablePanning(disablePan) {
     let isPanning = false
     let startXMouse, startYMouse
     let startXVisual, startYVisual
 
     // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
-        if (mouseMode.mode == "pan") {
+        if (!disablePan) {
             evt.preventDefault()
             // while user holds the mouse button down, the user is panning
             isPanning = true
@@ -51,8 +34,8 @@ function EnablePanning() {
             startXVisual = visualizationElement.x
             startYVisual = visualizationElement.y
     
-            // change cursor image to grabbing
-            wrapper.style.cursor = "grabbing"
+            // add wrapper class for CSS changes
+            wrapper.classList.add("panning")
         }
     })
 
@@ -77,12 +60,12 @@ function EnablePanning() {
 
     // define behavior for when user releases mouse button
     document.addEventListener("mouseup", () => {
-        if (mouseMode.mode == "pan") {
+        if (isPanning) {
             // the user is not panning if the mouse button is not pressed down
             isPanning = false
 
-            // change cursor image to grab
-            wrapper.style.cursor = "grab"
+            // remove wrapper class
+            wrapper.classList.remove("panning")
         }
     })
 }

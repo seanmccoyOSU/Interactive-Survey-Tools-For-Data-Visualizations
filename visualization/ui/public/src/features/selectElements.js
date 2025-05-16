@@ -69,18 +69,26 @@ export const selectElements = (visualizer) => {
     return decoratedVisualizer
 }
 
-function createCreateAndDeleteButtons() {
+function createCreateAndDeleteButtons(visualizer) {
     // create create box button
     document.getElementById("create-button").removeAttribute("hidden")
     document.getElementById("create-button").addEventListener("click", (evt) => {
-        mouseMode.mode = "create" 
+        visualizer.mode = "create"
+        wrapper.classList. 
+        wrapper.style.cursor = "crosshair"
+    })
+
+    // create create box button
+    document.getElementById("create-button").removeAttribute("hidden")
+    document.getElementById("create-button").addEventListener("click", (evt) => {
+        visualizer.mode = "create" 
         wrapper.style.cursor = "crosshair"
     })
 
     // create delete box button
     document.getElementById("delete-button").removeAttribute("hidden")
     document.getElementById("delete-button").addEventListener("click", (evt) => {
-        mouseMode.mode = "delete" 
+        visualizer.mode = "delete" 
         wrapper.style.cursor = "default"
     })
 }
@@ -97,7 +105,7 @@ function EnableSelection() {
 function EnableSelectionOfElement(visualElement) {
     // clicking on selectable element as a participant marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
-        if (mouseMode.mode == "pan" || mouseMode.mode == "select") {
+        if (visualizer.mode == "selectElements") {
             if (wrapper.classList.contains("participant")) { 
                 visualizationElement.toggleSelection(evt.currentTarget)
             } 
@@ -106,7 +114,7 @@ function EnableSelectionOfElement(visualElement) {
 
     // clicking on element as an editor marks/unmarks as "selectable"
     visualElement.addEventListener("click", evt => { 
-        if (mouseMode.mode == "pan" || mouseMode.mode == "select") {
+        if (visualizer.mode == "selectElements") {
             if (wrapper.classList.contains("editor")) { 
                 visualizationElement.toggleSelectable(evt.currentTarget)
             } 
@@ -116,7 +124,7 @@ function EnableSelectionOfElement(visualElement) {
     // clicking on element in delete mode deletes it (only for custom elements)
     if (visualizationElement.isCustom(visualElement)) {
         visualElement.addEventListener("click", evt => {
-            if (mouseMode.mode == "delete") {
+            if (visualizer.mode == "delete") {
                 visualizationElement.removeVisualElement(visualElement)
             }
         })
@@ -132,7 +140,7 @@ function EnableBox() {
 
     // when user presses mouse in select or create mode, enable box drawing
     wrapper.addEventListener("mousedown", evt => {
-        if (mouseMode.mode == "select" || mouseMode.mode == "create") {
+        if (visualizer.mode == "create") {
             evt.preventDefault()
             isStartDrawing = true
         }
@@ -186,10 +194,10 @@ function EnableBox() {
         isDrawingBox = false
         isStartDrawing = false
         if (box) {
-            if (mouseMode.mode == "select") {
+            if (visualizer.mode == "selectElements") {
                 box.remove()
                 // FUTURE GOAL: box selection
-            } else if (mouseMode.mode == "create") {
+            } else if (visualizer.mode == "create") {
                 // change from temporary box to actual visual element 
                 box.removeAttribute("id")
                 visualizationElement.addVisualElement(box)

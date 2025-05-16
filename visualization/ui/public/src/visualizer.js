@@ -13,10 +13,24 @@ export const visualContainer = document.getElementById("visual-container")     /
 
 
 const visualizerBase = {
+    // mode property is just for specifying what the current interaction mode is
+    // the rest of the code here is just for replacing the mode label in the wrapper classlist (for CSS)
+    modeLabels: [],
+    mode: "",
+    set mode(s) {
+        wrapper.classList.remove(this.modeLabels)
+        wrapper.classList.add(s)
+        if (!this.modeLabels.contains(s))
+            this.modeLabels.push(s)
+        this.value = s
+    },
+
+    // called when the page loads regardless of role
     onPageLoad: function() {
-    
+        
     },
     
+    // called when the page loads as an editor
     onPageLoadAsEditor: function() {
         // create file uploader
         const uploader = document.getElementById("svg-uploader");
@@ -40,10 +54,12 @@ const visualizerBase = {
         })
     },
     
+    // called when the page loads as a participant
     onPageLoadAsParticipant: function() {
     
     },
     
+    // called when the page loads in debug mode
     onPageLoadDebug: function() {
         // debug mode set up
         debug = true
@@ -68,14 +84,26 @@ const visualizerBase = {
         })
     },
 
+    // called when the SVG loads for the first time
     onFirstLoadSvg: function() {
         
     },
 
+    // called each time the SVG loads
     onLoadSvg: function() {
+        // send scale factor to CSS
         document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
     }
 }
+
+Object.defineProperty(visualizerBase, "mode", {
+    value: "",
+    set(s) {
+        wrapper.classList.remove(modeLabels)
+        wrapper.classList.add(s)
+        this.value = s
+    }
+})
 
 
 
