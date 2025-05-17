@@ -4,11 +4,11 @@ export const zoomPan = (visualizer) => {
 
     const decoratedVisualizer = Object.create(visualizer)
 
-    decoratedVisualizer.disablePan = false
+    //decoratedVisualizer.disablePan = false
 
     decoratedVisualizer.onFirstLoadSvg = function() {
         visualizer.onFirstLoadSvg()
-        EnablePanning(decoratedVisualizer.disablePan)
+        EnablePanning(decoratedVisualizer)
         EnableZoom()
     }
 
@@ -16,14 +16,14 @@ export const zoomPan = (visualizer) => {
 }
 
 // Enable user to pan the visual by clicking and dragging anywhere on the page
-function EnablePanning(disablePan) {
+function EnablePanning(visualizer) {
     let isPanning = false
     let startXMouse, startYMouse
     let startXVisual, startYVisual
 
     // define behavior for when user presses mouse button down anywhere on the page
     wrapper.addEventListener("mousedown", evt => {
-        if (!disablePan) {
+        if (!visualizer.disablePan) {
             evt.preventDefault()
             // while user holds the mouse button down, the user is panning
             isPanning = true

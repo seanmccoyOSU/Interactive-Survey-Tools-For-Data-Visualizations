@@ -113,6 +113,11 @@ app.get('/:id', async function(req,res,next) {
                 role: "editor",
                 svg: response.data.svg
             })
+        } else if (req.query.selectElements) {
+            res.render("visualizer", {
+                role: "selectElements",
+                svg: response.data.svg
+            })
         } else {
             res.render("visualizer", {
                 svg: response.data.svg

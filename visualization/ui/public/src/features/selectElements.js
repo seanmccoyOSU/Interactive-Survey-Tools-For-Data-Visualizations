@@ -6,26 +6,7 @@ export const selectElements = (visualizer) => {
     decoratedVisualizer.onFirstLoadSvg = function() {
         visualizer.onFirstLoadSvg()
 
-        if (wrapper.classList.contains("editor") || debug) {
-            // create set all selectable button
-            const setAllSelectableButton = document.createElement("button")
-            setAllSelectableButton.textContent = "Make All Elements Selectable"
-            setAllSelectableButton.addEventListener("click", () => {
-                visualizationElement.setAllSelectable()
-            })
-
-            // create set all not selectable button
-            const setAllNotSelectableButton = document.createElement("button")
-            setAllNotSelectableButton.textContent = "Make All Elements Not Selectable"
-            setAllNotSelectableButton.addEventListener("click", () => {
-                visualizationElement.setAllNotSelectable()
-            })
-
-            // add buttons to options dropdown
-            const dropdownButtons = document.getElementsByClassName("dropdown-buttons")[0]
-            dropdownButtons.appendChild(setAllSelectableButton)
-            dropdownButtons.appendChild(setAllNotSelectableButton)        
-        }
+        
 
         if (!wrapper.classList.contains("editor") || debug) {
             // create select all button
@@ -43,78 +24,99 @@ export const selectElements = (visualizer) => {
             })
 
             // add buttons to options dropdown
-            const dropdownButtons = document.getElementsByClassName("dropdown-buttons")[0]
+            const dropdownButtons = document.getElementsByClassName("option-buttons")[0]
             dropdownButtons.appendChild(selectAllButton)
             dropdownButtons.appendChild(deselectAllButton)        
         }
 
-        EnableBox()
+        if (wrapper.classList.contains("editor") || debug) {
+            // create set all selectable button
+            const setAllSelectableButton = document.createElement("button")
+            setAllSelectableButton.textContent = "Make All Elements Selectable"
+            setAllSelectableButton.addEventListener("click", () => {
+                visualizationElement.setAllSelectable()
+            })
+
+            // create set all not selectable button
+            const setAllNotSelectableButton = document.createElement("button")
+            setAllNotSelectableButton.textContent = "Make All Elements Not Selectable"
+            setAllNotSelectableButton.addEventListener("click", () => {
+                visualizationElement.setAllNotSelectable()
+            })
+
+            // add buttons to options dropdown
+            const dropdownButtons = document.getElementsByClassName("option-buttons")[0]
+            dropdownButtons.appendChild(setAllSelectableButton)
+            dropdownButtons.appendChild(setAllNotSelectableButton)
+            
+            EnableBox(decoratedVisualizer)
+        }
+        
     }
 
     decoratedVisualizer.onLoadSvg = function() {
         visualizer.onLoadSvg()
-        EnableSelection()
+        EnableSelection(decoratedVisualizer)
     }
 
     decoratedVisualizer.onPageLoadDebug = function() {
         visualizer.onPageLoadDebug()
-        createCreateAndDeleteButtons()
+        createToolButtons(decoratedVisualizer)
     }
 
     decoratedVisualizer.onPageLoadAsEditor = function() {
         visualizer.onPageLoadAsEditor()
-        createCreateAndDeleteButtons()
+        createToolButtons(decoratedVisualizer)
     }
 
     return decoratedVisualizer
 }
 
-function createCreateAndDeleteButtons(visualizer) {
-    // create create box button
-    document.getElementById("create-button").removeAttribute("hidden")
-    document.getElementById("create-button").addEventListener("click", (evt) => {
-        visualizer.mode = "create"
-        wrapper.classList. 
-        wrapper.style.cursor = "crosshair"
+function createToolButtons(visualizer) {
+    document.getElementsByClassName("tools")[0].removeAttribute("hidden")
+
+    // create set selectable button
+    document.getElementById("set-selectable-button").removeAttribute("hidden")
+    document.getElementById("set-selectable-button").addEventListener("click", (evt) => {
+        visualizer.mode = "setSelectable"
+        visualizer.disablePan = false
     })
 
     // create create box button
     document.getElementById("create-button").removeAttribute("hidden")
     document.getElementById("create-button").addEventListener("click", (evt) => {
-        visualizer.mode = "create" 
-        wrapper.style.cursor = "crosshair"
+        visualizer.mode = "create"
+        visualizer.disablePan = true
     })
 
     // create delete box button
     document.getElementById("delete-button").removeAttribute("hidden")
     document.getElementById("delete-button").addEventListener("click", (evt) => {
-        visualizer.mode = "delete" 
-        wrapper.style.cursor = "default"
+        visualizer.mode = "delete"
+        visualizer.disablePan = true
     })
 }
 
 // Enable user to select/deselect vector elements by clicking on them
-function EnableSelection() {
+function EnableSelection(visualizer) {
     // loop through all visual elements and add event listeners to each
     for(const visualElement of visualizationElement.visualElements) {
-        EnableSelectionOfElement(visualElement)
+        EnableSelectionOfElement(visualElement, visualizer)
     }
 }
 
 // Enable user to select/deselect a single visual element
-function EnableSelectionOfElement(visualElement) {
+function EnableSelectionOfElement(visualElement, visualizer) {
     // clicking on selectable element as a participant marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
-        if (visualizer.mode == "selectElements") {
             if (wrapper.classList.contains("participant")) { 
                 visualizationElement.toggleSelection(evt.currentTarget)
             } 
-        }
     })
 
     // clicking on element as an editor marks/unmarks as "selectable"
     visualElement.addEventListener("click", evt => { 
-        if (visualizer.mode == "selectElements") {
+        if (visualizer.mode == "setSelectable") {
             if (wrapper.classList.contains("editor")) { 
                 visualizationElement.toggleSelectable(evt.currentTarget)
             } 
@@ -132,7 +134,7 @@ function EnableSelectionOfElement(visualElement) {
 }
 
 // Enable user to draw a selectable box on the screen
-function EnableBox() {
+function EnableBox(visualizer) {
     let box
     let boxStartingPoint
     let isStartDrawing = false
@@ -201,7 +203,7 @@ function EnableBox() {
                 // change from temporary box to actual visual element 
                 box.removeAttribute("id")
                 visualizationElement.addVisualElement(box)
-                EnableSelectionOfElement(box)
+                EnableSelectionOfElement(box, visualizer)
             }
 
             box = null

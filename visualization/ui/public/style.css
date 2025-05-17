@@ -17,6 +17,7 @@ body {
     padding: 0px 2vh;
     border: 0px;
     background-color: lightgray;
+    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4);
 }
 
 .zoom-button:active {
@@ -46,25 +47,33 @@ body {
     cursor: grabbing;
 }
 
+#wrapper.create {
+    cursor: crosshair;
+}
+
+#wrapper.delete {
+    cursor: default;
+}
+
 #visual-container {
     min-width: 100%;
     min-height: 100%;
     position: fixed;
 }
 
-.participant .visual-element.selectable:hover, .editor .visual-element:hover {
+.selectElements .visual-element.selectable:hover, .setSelectable .visual-element:hover {
     fill-opacity: 40% !important;
     stroke-opacity: 40% !important;
     filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) red) saturate(15);
 }
 
-.participant .visual-element.selected, .editor .visual-element.selectable {
+.selectElements .visual-element.selected, .setSelectable .visual-element.selectable, .create .visual-element.custom, .delete .visual-element.custom {
     fill-opacity: 40% !important;
     stroke-opacity: 40% !important;
     filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) blue) saturate(15);
 }
 
-.editor .visual-element {
+.setSelectable .visual-element {
     fill-opacity: 40% !important;
     stroke-opacity: 40% !important;
     filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) cyan) saturate(15);
@@ -91,21 +100,37 @@ button, input {
     fill-opacity: 20%;
 }
 
-.dropdown {
+.dropdown, #export, #save-svg {
     position: absolute;
-    display: inline-block;
     z-index: 13;
-    right: 2%;
     top: 2%;
     font-size: 4.5vh;
     border: 0px;
-    background-color: #ccd9cc;
     min-width: 22vh;
     text-align: center;
+    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4);
 }
 
-.dropdown:hover {
+.options {
+    right: 2%;
+    background-color: #ccd9cc;
+}
+
+.tools {
+    right: 20%;
+    background-color: #fc7979;
+}
+
+#export {
+    background-color: lightgray;
+}
+
+.options:hover {
     background-color: #bbc7bb;
+}
+
+.tools:hover {
+    background-color: #bd5b5b;
 }
 
 .dropdown-buttons {
@@ -117,7 +142,6 @@ button, input {
 }
 
 .dropdown-buttons button {
-    background-color: #ebfaeb;
     border: 0px;
     padding: 0.5vh;
     min-width: 22vh;
@@ -125,10 +149,29 @@ button, input {
 }
 
 .dropdown-buttons button:hover {
-    background-color: #ccd9cc;
     cursor: pointer;
 }
 
-.dropdown:hover .dropdown-buttons {
+.options .dropdown-buttons button {
+    background-color: #ebfaeb;
+}
+
+.options .dropdown-buttons button:hover {
+    background-color: #ccd9cc;
+}
+
+.tools .dropdown-buttons button {
+    background-color: #e86f6f;
+}
+
+.tools .dropdown-buttons button:hover {
+    background-color: #a85151;
+}
+
+.options:hover .option-buttons {
+    display: block;
+}
+
+.tools:hover .tool-buttons {
     display: block;
 }

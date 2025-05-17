@@ -13,16 +13,21 @@ export const visualContainer = document.getElementById("visual-container")     /
 
 
 const visualizerBase = {
+    disablePan: false,
     // mode property is just for specifying what the current interaction mode is
     // the rest of the code here is just for replacing the mode label in the wrapper classlist (for CSS)
     modeLabels: [],
     mode: "",
     set mode(s) {
-        wrapper.classList.remove(this.modeLabels)
+        if (this.modeLabels.length > 0)
+            wrapper.classList.remove(...this.modeLabels)
         wrapper.classList.add(s)
-        if (!this.modeLabels.contains(s))
+        if (!this.modeLabels.includes(s))
             this.modeLabels.push(s)
         this.value = s
+    },
+    get mode() {
+        return this.value
     },
 
     // called when the page loads regardless of role
@@ -96,25 +101,18 @@ const visualizerBase = {
     }
 }
 
-Object.defineProperty(visualizerBase, "mode", {
-    value: "",
-    set(s) {
-        wrapper.classList.remove(modeLabels)
-        wrapper.classList.add(s)
-        this.value = s
-    }
-})
-
 
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
-    visualizer = selectElements(zoomPan(exportButton(visualizerBase)))
+    visualizer = zoomPan(selectElements(exportButton(visualizerBase)))
     visualizer.onPageLoad()
 
     if (wrapper.classList.contains("editor")) {
         visualizer.onPageLoadAsEditor()
     } else {
+        visualizer.mode = wrapper.className
+        console.log("mode set!", visualizer.mode)
         wrapper.classList.add("participant")
         visualizer.onPageLoadAsParticipant()
         
