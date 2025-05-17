@@ -10,7 +10,11 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-:root {
+.title-box {
+  filter: drop-shadow(2px 4px 6px black);
+}
+
+ :root {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;
   --bs-purple: #6f42c1;
@@ -10896,9 +10900,7 @@ header.masthead h1, header.masthead .h1 {
 
 .call-to-action {
   position: relative;
-  background-color: #343a40;
-  background: url("../assets/img/bg-masthead.jpg") no-repeat center center;
-  background-size: cover;
+  background: radial-gradient(circle, rgba(51, 61, 74, 1) 0%, rgba(29, 76, 130, 1) 74%);
   padding-top: 7rem;
   padding-bottom: 7rem;
 }
