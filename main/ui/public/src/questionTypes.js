@@ -71,7 +71,7 @@ const questionTypes = [
     {
         name: "Multiple Choice",
         label: "Multiple Choice",
-        description: "User checks boxes from a list of pre-written choices as a response",
+        description: "User checks boxes from a list of pre-written choices as a response.",
         hasRequired: true,
         hasMinMax: true,
         hasChoices: true,
@@ -117,12 +117,12 @@ const questionTypes = [
                 if (max > 1)
                     onFailure(`You cannot select more than ${max} choices`)
                 else
-                    onFailure(`You cannot select more than ${max} choice`)
+                    onFailure("You cannot select more than 1 choice")
             } else if (min > 0 && total < min) {
                 if (min > 1)
                     onFailure(`You must select at least ${min} choices`)
                 else
-                    onFailure(`You must select at least ${min} choice`)
+                    onFailure("You must select at least 1 choice")
             } else {
                 onSuccess()
             }
@@ -146,8 +146,145 @@ const questionTypes = [
         }
     },
     /**************************************************************************** 
-     * 
+     * Select Elements
     *****************************************************************************/
+    {
+        name: "Select Elements",
+        label: "Select Elements",
+        description: "User selects elements on a visual as a response.",
+        hasRequired: true,
+        hasMinMax: true,
+        hasChoices: false,
+        minText: "Minimum required selections",
+        maxText: "Maximum allowed selections",
+        requiresVisual: true,
+        getPromptString: function(min, max) {
+            let requirement = ""
+
+            if (min < 1 && max < 1) {
+                requirement = "elements"
+            } else if (min == max) {
+                if (min == 1)
+                    requirement = "exactly 1 element"
+                else 
+                    requirement = `exactly ${min} elements`
+            } else if (max < 1) {
+                if (min == 1)
+                    requirement = "at least 1 element"
+                else
+                    requirement = `at least ${min} elements`
+            } else if (min < 1) {
+                if (max == 1)
+                    requirement = "at most 1 element"
+                else
+                    requirement = `at most ${max} elements`
+            } else {
+                requirement = `${min} to ${max} elements`
+            }
+
+            return `Select ${requirement} on the visual to the left`
+        },
+        checkRequirement: function(min, max, required, onFailure, onSuccess) {
+            
+            // we want to send a message to the visual window in order to check the requirement
+            // the message will be sent after the message listener has been added
+
+            const visualURL = document.getElementById("visualURL").getAttribute("url")
+            
+            // add message listener
+            function messageListener(event) {
+                // if recieve a message from iframe, it might be for the selected element count check
+                
+                if (event.origin === visualURL && event.data.type == "count") {
+                    const count = parseInt(event.data.count)
+                
+                    if (max > 0 && count > max) {
+                        if (max > 1)
+                            onFailure(`You cannot select more than ${max} elements`)
+                        else 
+                            onFailure("You cannot select more than 1 element")
+                    } else if (min > 0 && count < min) {
+                        if (min > 1)
+                            onFailure(`You must select at least ${min} elements`)
+                        else
+                            onFailure("You must select at least 1 element")
+                    } else {
+                        onSuccess()
+                    }
+                } 
+            } 
+            
+            window.addEventListener('message', messageListener)
+
+            // send message to iframe to get selected element count
+            const visualWindow = document.getElementById("displayedImage").contentWindow
+            visualWindow.postMessage("count", visualURL) 
+        },
+        getResponse: function(onGet) {
+            // the visualization is in an iframe
+            // we need to send a request message to the iframe for the ids
+            // then wait for a response that contains the ids
+            const visualURL = document.getElementById("visualURL").getAttribute("url")
+            const visualWindow = document.getElementById("displayedImage").contentWindow
+
+            function messageListener(event) {
+                // if receive a message from iframe, it might be for the ids of visual elements
+                if (event.origin === visualURL && event.data.type == "ids") {
+                    let response = ""
+                    for (const id of event.data.ids) {
+                        response += id + '|'
+                    }
+                
+                    if (response == "")
+                        onGet(response)
+                    else
+                        onGet(response.slice(0, -1))
+                }
+            }
+
+            window.addEventListener('message', messageListener)
+
+            // send message to iframe to get selected element ids
+            visualWindow.postMessage("ids", visualURL)
+        },
+    },
+    /**************************************************************************** 
+     * Short Answer
+    *****************************************************************************/
+    {
+        name: "Short Answer",
+        label: "Short Answer",
+        description: "User writes an answer in a scrollable text box.",
+        hasRequired: true,
+        hasMinMax: true,
+        hasChoices: false,
+        minText: "Minimum required characters",
+        maxText: "Maximum allowed characters",
+        requiresVisual: false,
+        getPromptString: function(min, max) {
+            return "Short answer"
+        },
+        checkRequirement: function(min, max, required, onFailure, onSuccess) {
+            const answer = document.getElementsByClassName("answer-entry-box")[0]
+
+            if (max > 0 && answer.value.length > max) {
+                onFailure(`Your answer may not exceed ${max} characters`)
+            } else if (min > 0 && answer.value.length < min) {
+                if (min > 1)
+                    onFailure(`Your answer must be at least ${min} characters`)
+                else
+                    onFailure("Your answer must be at least 1 character")
+            } else {
+                onSuccess()
+            }
+        },
+        getResponse: function(onGet) {
+            onGet(document.getElementsByClassName("answer-entry-box")[0].value)
+        },
+        pageRenderOptions: {
+            shortAnswer: true
+        }
+    },
 ]
 
 export default questionTypes

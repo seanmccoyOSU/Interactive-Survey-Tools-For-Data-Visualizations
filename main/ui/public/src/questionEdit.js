@@ -1,43 +1,27 @@
 import questionTypes from "./questionTypes.js"
 
-// change min and max label text based on question type
-function ChangeMinMaxText(type, min, max) {
-    switch (type.value) {
-        case questionTypes[0].label:
-            min.textContent = questionTypes[0].minText
-            max.textContent = questionTypes[0].maxText
-            break;
-        case "Select Elements":
-            min.textContent = "Minimum required selections: "
-            max.textContent = "Maximum allowed selections: "
-            break;
-        case "Short Answer":
-            min.textContent = "Minimum required characters: "
-            max.textContent = "Maximum allowed characters: "
-            break;
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     // show appropriate content based on specified question type
     const questionType = document.getElementById("type")
     if (questionType) {
+        let typeInfo = questionTypes.filter(type => type.label == questionType.value)[0]
         const minLabel = document.getElementById("min-label")
         const maxLabel = document.getElementById("max-label")
-        const multiChoiceSections = document.getElementById("multiple-choice-section")
-        ChangeMinMaxText(questionType, minLabel, maxLabel)
-        if (questionType.value == "Multiple Choice") {
-            multiChoiceSections.removeAttribute("hidden")
-        }
+        const multiChoiceSection = document.getElementById("multiple-choice-section")
+        minLabel.textContent = typeInfo.minText
+        maxLabel.textContent = typeInfo.maxText
+
+        if (typeInfo.hasChoices)
+            multiChoiceSection.removeAttribute("hidden")
 
         questionType.addEventListener("change", () => {
-            ChangeMinMaxText(questionType, minLabel, maxLabel)
-            if (questionType.value == "Multiple Choice") {
-                multiChoiceSections.removeAttribute("hidden")
-            } else {
-                multiChoiceSections.setAttribute("hidden", "true")
-            }
-
+            typeInfo = questionTypes.filter(type => type.label == questionType.value)[0]
+            minLabel.textContent = typeInfo.minText
+            maxLabel.textContent = typeInfo.maxText
+            if (typeInfo.hasChoices)
+                multiChoiceSection.removeAttribute("hidden")
+            else
+                multiChoiceSection.setAttribute("hidden", "true")
         })
     }
 
