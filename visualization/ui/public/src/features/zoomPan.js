@@ -1,15 +1,21 @@
-import { visualizationElement, svgElement, wrapper, debug, mouseMode, screenToSVG } from "../visualizer.js"
+import { visualizationElement, svgElement, wrapper, debug, screenToSVG, page } from "../visualizer.js"
+
+let startPanning = null
 
 export const zoomPan = (visualizer) => {
 
     const decoratedVisualizer = Object.create(visualizer)
 
-    //decoratedVisualizer.disablePan = false
-
     decoratedVisualizer.onFirstLoadSvg = function() {
         visualizer.onFirstLoadSvg()
         EnablePanning(decoratedVisualizer)
         EnableZoom()
+    }
+
+    decoratedVisualizer.onChangeMode = function() {
+        visualizer.onChangeMode()
+        // make panning the default mousedown behavior
+        wrapper.onmousedown = startPanning
     }
 
     return decoratedVisualizer
@@ -22,22 +28,22 @@ function EnablePanning(visualizer) {
     let startXVisual, startYVisual
 
     // define behavior for when user presses mouse button down anywhere on the page
-    wrapper.addEventListener("mousedown", evt => {
-        if (!visualizer.disablePan) {
-            evt.preventDefault()
-            // while user holds the mouse button down, the user is panning
-            isPanning = true
-    
-            // get starting coordinates for visual and mouse
-            startXMouse = evt.clientX
-            startYMouse = evt.clientY
-            startXVisual = visualizationElement.x
-            startYVisual = visualizationElement.y
-    
-            // add wrapper class for CSS changes
-            wrapper.classList.add("panning")
-        }
-    })
+    startPanning = (evt) => {
+        evt.preventDefault()
+        // while user holds the mouse button down, the user is panning
+        isPanning = true
+
+        // get starting coordinates for visual and mouse
+        startXMouse = evt.clientX
+        startYMouse = evt.clientY
+        startXVisual = visualizationElement.x
+        startYVisual = visualizationElement.y
+
+        // add wrapper class for CSS changes
+        wrapper.classList.add("panning")
+    }
+    wrapper.onmousedown = startPanning
+
 
     // define behavior for when user moves mouse while panning
     document.addEventListener("mousemove", evt => {

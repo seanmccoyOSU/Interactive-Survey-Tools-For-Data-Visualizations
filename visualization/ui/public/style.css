@@ -8,6 +8,21 @@ body {
     --visual-scale: 1px;
 }
 
+#uploader-container {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    height: 100%;
+    position: fixed;
+    width: 100%;
+    z-index: 11;
+}
+
+#uploader-container[hidden] {
+    display: none;
+    z-index: 1;
+}
+
 .zoom-button {
     position: absolute;
     left: 2%;
@@ -51,27 +66,25 @@ body {
     cursor: crosshair;
 }
 
-#wrapper.delete {
-    cursor: default;
-}
-
 #visual-container {
     min-width: 100%;
     min-height: 100%;
     position: fixed;
 }
 
-.selectElements .visual-element.selectable:hover, .setSelectable .visual-element:hover {
+.selectElements .visual-element.selectable:hover, .setSelectable .visual-element:hover, .delete .visual-element.custom:hover {
     fill-opacity: 40% !important;
     stroke-opacity: 40% !important;
     filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) red) saturate(15);
 }
 
-.selectElements .visual-element.selected, .setSelectable .visual-element.selectable, .create .visual-element.custom, .delete .visual-element.custom {
+
+.selectElements .visual-element.selected, .setSelectable .visual-element.selectable, :is(.create, .delete) .visual-element.custom {
     fill-opacity: 40% !important;
     stroke-opacity: 40% !important;
     filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) blue) saturate(15);
 }
+
 
 .setSelectable .visual-element {
     fill-opacity: 40% !important;
@@ -100,29 +113,34 @@ button, input {
     fill-opacity: 20%;
 }
 
-.dropdown, #export, #save-svg {
-    position: absolute;
+.dropdown {
     z-index: 13;
-    top: 2%;
     font-size: 4.5vh;
     border: 0px;
     min-width: 22vh;
     text-align: center;
     box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4);
+    margin: 0 2vw;
+}
+
+.dropdown[hidden] {
+    display: none;
 }
 
 .options {
-    right: 2%;
     background-color: #ccd9cc;
 }
 
 .tools {
-    right: 20%;
     background-color: #fc7979;
 }
 
-#export {
-    background-color: lightgray;
+.file {
+    background-color: #c7c7c7;
+}
+
+.file:hover {
+    background-color: #a8a8a8;
 }
 
 .options:hover {
@@ -133,12 +151,21 @@ button, input {
     background-color: #bd5b5b;
 }
 
+#button-header {
+    display: inline-flex;
+    right: 0%;
+    position: fixed;
+    top: 2%;
+    z-index: 13;
+}
+
 .dropdown-buttons {
     display: none;
     position: absolute;
     box-shadow: 0px 4px 8px 0px #454545;
     z-index: 14;
     font-size: 2vh;
+    max-width: 22vh;
 }
 
 .dropdown-buttons button {
@@ -161,17 +188,30 @@ button, input {
 }
 
 .tools .dropdown-buttons button {
-    background-color: #e86f6f;
+    background-color: #f78b8b;
 }
 
 .tools .dropdown-buttons button:hover {
-    background-color: #a85151;
+    background-color: #c26e6e;
 }
 
-.options:hover .option-buttons {
-    display: block;
+.file .dropdown-buttons button {
+    background-color: #e3e3e3;
 }
 
-.tools:hover .tool-buttons {
-    display: block;
+.file .dropdown-buttons button:hover {
+    background-color: #bfbfbf;
+}
+
+.dropdown:hover .dropdown-buttons {
+    display: grid;
+}
+
+#help-button {
+    border: none;
+    background-color: transparent;
+    font-size: 4.3vh;
+    font-weight: bold;
+    font-family: sans-serif;
+    max-height: 5vh;
 }

@@ -1,10 +1,7 @@
 import {VisualizationElement} from "./visualizationElement.js"
-import {exportButton} from "./features/exportButton.js"
-import {selectElements} from "./features/selectElements.js"
-import {zoomPan} from "./features/zoomPan.js"
+import {visualizerDecorator} from "./features/visualizerDecorator.js"
 
 export let debug = false
-export const mouseMode = { mode: "pan" }
 let visualizer
 export let visualizationElement
 export let svgElement
@@ -13,23 +10,6 @@ export const visualContainer = document.getElementById("visual-container")     /
 
 
 const visualizerBase = {
-    disablePan: false,
-    // mode property is just for specifying what the current interaction mode is
-    // the rest of the code here is just for replacing the mode label in the wrapper classlist (for CSS)
-    modeLabels: [],
-    mode: "",
-    set mode(s) {
-        if (this.modeLabels.length > 0)
-            wrapper.classList.remove(...this.modeLabels)
-        wrapper.classList.add(s)
-        if (!this.modeLabels.includes(s))
-            this.modeLabels.push(s)
-        this.value = s
-    },
-    get mode() {
-        return this.value
-    },
-
     // called when the page loads regardless of role
     onPageLoad: function() {
         
@@ -39,24 +19,9 @@ const visualizerBase = {
     onPageLoadAsEditor: function() {
         // create file uploader
         const uploader = document.getElementById("svg-uploader");
-        uploader.removeAttribute("hidden")
+        const uploaderContainer = document.getElementById("uploader-container");
+        uploaderContainer.removeAttribute('hidden')
         uploader.addEventListener("change", handleSvgUpload);  
-    
-        // create save button
-        document.getElementById("save-svg").removeAttribute("hidden")
-    
-        // save changes to database
-        document.getElementById("save-svg").addEventListener("click", () => {
-            fetch(window.location.href, { 
-                method: "PUT",
-                body: JSON.stringify({
-                    svg: svgElement.outerHTML
-                }),
-                headers: {
-                    "Content-type": "application/json",
-                },    
-            })
-        })
     },
     
     // called when the page loads as a participant
@@ -71,7 +36,8 @@ const visualizerBase = {
     
         // create file uploader
         const uploader = document.getElementById("svg-uploader");
-        uploader.removeAttribute("hidden")
+        const uploaderContainer = document.getElementById("uploader-container");
+        uploaderContainer.removeAttribute('hidden')
         uploader.addEventListener("change", handleSvgUpload);  
     
         // create debug mode buttons
@@ -91,13 +57,120 @@ const visualizerBase = {
 
     // called when the SVG loads for the first time
     onFirstLoadSvg: function() {
-        
+        if (wrapper.classList.contains("editor") || debug) {
+            
+
+            page.addFileButton("Save", () => {
+                fetch(window.location.href, { 
+                    method: "PUT",
+                    body: JSON.stringify({
+                        svg: svgElement.outerHTML
+                    }),
+                    headers: {
+                        "Content-type": "application/json",
+                    },    
+                })
+            })
+
+            document.getElementById("uploader-container").setAttribute("hidden", "true")
+
+            page.addFileButton("Import", () => {
+                document.getElementById("svg-uploader").click()
+            })
+        }
     },
 
     // called each time the SVG loads
     onLoadSvg: function() {
         // send scale factor to CSS
         document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
+    },
+
+    // called when the page mode changes
+    onChangeMode: function() {
+
+    }
+}
+
+export const page = {
+    changeModeListeners: [],
+    mode: "",
+    set mode(s) {
+        // change class in wrapper for CSS
+        wrapper.classList.remove(this.value)
+        wrapper.classList.add(s)
+
+        // set the mode
+        this.value = s
+
+        // call listeners after changing the mode
+        for (const listener of this.changeModeListeners) {
+            listener()
+        }
+    },
+    get mode() {
+        return this.value
+    },
+
+    // takes a function listener
+    // makes it so function listener will be called when the page mode changes
+    addChangeModeListener: function(listener) {
+        this.changeModeListeners.push(listener)
+    },
+
+    addTool: function(toolName, toolMode) {
+        // tools dropdown is hidden by default, remove
+        document.getElementsByClassName("tools")[0].removeAttribute("hidden")
+
+        // create the button element
+        const newTool = document.createElement("button")
+        newTool.textContent = toolName
+
+        // clicking the button will change the mode accordingly
+        newTool.addEventListener("click", () => {this.mode = toolMode})
+
+        // add button to DOM
+        const toolButtons = document.getElementsByClassName("tool-buttons")[0]
+        toolButtons.appendChild(newTool)
+    },
+
+    addOption: function(optionName, mode, onClick) {
+        // options dropdown is hidden by default, remove
+        document.getElementsByClassName("options")[0].removeAttribute("hidden")
+
+        // create the button
+        const newOption = document.createElement("button")
+        newOption.textContent = optionName
+        newOption.addEventListener("click", onClick)
+
+        // button will only be visible in the right mode
+        if (this.mode != mode)
+            newOption.setAttribute("hidden", "true")
+        this.addChangeModeListener(() => {
+            if (this.mode == mode) {
+                newOption.removeAttribute("hidden")
+            } else {
+                newOption.setAttribute("hidden", "true")
+            }
+        })
+
+        // add button to DOM
+        const optionButtons = document.getElementsByClassName("option-buttons")[0]
+        optionButtons.appendChild(newOption)
+    },
+
+    addFileButton: function(buttonText, onClick) {
+        // file dropdown is hidden by default, remove
+        document.getElementsByClassName("file")[0].removeAttribute("hidden")
+
+        // create the button
+        const newFileButton = document.createElement("button")
+        newFileButton.textContent = buttonText
+        newFileButton.addEventListener("click", onClick)
+
+        // add button to DOM
+        const fileButtons = document.getElementsByClassName("file-buttons")[0]
+        fileButtons.appendChild(newFileButton)
     }
 }
 
@@ -105,21 +178,23 @@ const visualizerBase = {
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
-    visualizer = zoomPan(selectElements(exportButton(visualizerBase)))
+    //visualizer = selectElements(zoomPan(exportButton(visualizerBase)))
+    visualizer = visualizerDecorator(visualizerBase)
+
+    page.addChangeModeListener(visualizer.onChangeMode)
+
     visualizer.onPageLoad()
 
     if (wrapper.classList.contains("editor")) {
         visualizer.onPageLoadAsEditor()
     } else {
-        visualizer.mode = wrapper.className
-        console.log("mode set!", visualizer.mode)
-        wrapper.classList.add("participant")
-        visualizer.onPageLoadAsParticipant()
-        
         // debug mode
         if (wrapper.classList.contains("debug")) {
             visualizer.onPageLoadDebug()
         }
+
+        page.mode = wrapper.className
+        visualizer.onPageLoadAsParticipant()
     }
 
     if (visualContainer.firstElementChild) {

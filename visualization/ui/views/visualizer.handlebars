@@ -13,30 +13,35 @@
       <button id = "zoom-out" class="zoom-button">−</button>
       <button id = "editor-button" hidden>editor mode</button>
       <button id = "participant-button" hidden>participant mode</button>
-      <div id="button-header">
+      <div id="uploader-container" hidden>
         <input 
         type="file" 
         id="svg-uploader" 
         accept=".svg, .jpg, .png" 
         style="margin: 10px;"
-        hidden
         />
-        <button id="save-svg" hidden>Save</button>
-        <button id="export" hidden>Export</button>
+      </div>
+      
+      <div id="button-header">
         
-        <div class="tools dropdown" hidden>
-          Tools
-          <div class="dropdown-buttons tool-buttons">
-            <button id="set-selectable-button" hidden>Set Selectable</button>
-            <button id="create-button" hidden>Create</button>
-            <button id="delete-button" hidden>Delete</button>
+        <div class="file dropdown" hidden>
+          File
+          <div class="dropdown-buttons file-buttons">
           </div>
         </div>
-        <div class="options dropdown">
+        <div class="options dropdown" hidden>
           Options
           <div class="dropdown-buttons option-buttons">
           </div>
         </div>
+        <div class="tools dropdown" hidden>
+          Tools
+          <div class="dropdown-buttons tool-buttons">
+          </div>
+        </div>
+
+        <button id="help-button" hidden>?</button>
+        
 
       </div>
       

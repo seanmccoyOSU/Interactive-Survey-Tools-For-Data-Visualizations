@@ -1,132 +1,103 @@
-import { visualizationElement, svgElement, wrapper, debug, mouseMode, screenToSVG } from "../visualizer.js"
+const OPTIONTEXT_SELECT_ALL = "Select All Elements"
+const OPTIONTEXT_DESELECT_ALL = "Clear All Selections"
+const OPTIONTEXT_SET_ALL_SELECTABLE = "Make All Elements Selectable"
+const OPTIONTEXT_SET_ALL_NOT_SELECTABLE = "Make All Elements Not Selectable"
+
+const TOOLTEXT_SET_SELECTABLE = "Set Selectable"
+const TOOLTEXT_CREATE = "Create"
+const TOOLTEXT_DELETE = "Delete"
+
+const MODELABEL_SELECT_ELEMENTS = "selectElements"
+const MODELABEL_SET_SELECTABLE = "setSelectable"
+const MODELABEL_CREATE = "create"
+const MODELABEL_DELETE = "delete"
+
+import { visualizationElement, svgElement, page, wrapper, debug, screenToSVG } from "../visualizer.js"
 
 export const selectElements = (visualizer) => {
     const decoratedVisualizer = Object.create(visualizer)
 
+    decoratedVisualizer.onPageLoadAsParticipant = function() {
+        visualizer.onPageLoadAsParticipant()
+        if (page.mode == MODELABEL_SELECT_ELEMENTS) {
+            console.log(1)
+            // create select all button
+            page.addOption(OPTIONTEXT_SELECT_ALL, MODELABEL_SELECT_ELEMENTS, () => {visualizationElement.selectAll()})
+
+            // create deselect all button
+            page.addOption(OPTIONTEXT_DESELECT_ALL, MODELABEL_SELECT_ELEMENTS, () => {visualizationElement.deselectAll()})
+        }
+    }
+
     decoratedVisualizer.onFirstLoadSvg = function() {
         visualizer.onFirstLoadSvg()
 
-        
-
-        if (!wrapper.classList.contains("editor") || debug) {
-            // create select all button
-            const selectAllButton = document.createElement("button")
-            selectAllButton.textContent = "Select All Elements"
-            selectAllButton.addEventListener("click", () => {
-                visualizationElement.selectAll()
-            })
-
-            // create deselect all button
-            const deselectAllButton = document.createElement("button")
-            deselectAllButton.textContent = "Clear All Selections"
-            deselectAllButton.addEventListener("click", () => {
-                visualizationElement.deselectAll()
-            })
-
-            // add buttons to options dropdown
-            const dropdownButtons = document.getElementsByClassName("option-buttons")[0]
-            dropdownButtons.appendChild(selectAllButton)
-            dropdownButtons.appendChild(deselectAllButton)        
-        }
-
         if (wrapper.classList.contains("editor") || debug) {
             // create set all selectable button
-            const setAllSelectableButton = document.createElement("button")
-            setAllSelectableButton.textContent = "Make All Elements Selectable"
-            setAllSelectableButton.addEventListener("click", () => {
-                visualizationElement.setAllSelectable()
-            })
+            page.addOption(OPTIONTEXT_SET_ALL_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {visualizationElement.setAllSelectable()})
 
             // create set all not selectable button
-            const setAllNotSelectableButton = document.createElement("button")
-            setAllNotSelectableButton.textContent = "Make All Elements Not Selectable"
-            setAllNotSelectableButton.addEventListener("click", () => {
-                visualizationElement.setAllNotSelectable()
-            })
+            page.addOption(OPTIONTEXT_SET_ALL_NOT_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {visualizationElement.setAllNotSelectable()})
 
-            // add buttons to options dropdown
-            const dropdownButtons = document.getElementsByClassName("option-buttons")[0]
-            dropdownButtons.appendChild(setAllSelectableButton)
-            dropdownButtons.appendChild(setAllNotSelectableButton)
-            
-            EnableBox(decoratedVisualizer)
+            createToolButtons()
+
+            EnableBox()
         }
         
     }
 
     decoratedVisualizer.onLoadSvg = function() {
         visualizer.onLoadSvg()
-        EnableSelection(decoratedVisualizer)
+        EnableSelection()
     }
 
-    decoratedVisualizer.onPageLoadDebug = function() {
-        visualizer.onPageLoadDebug()
-        createToolButtons(decoratedVisualizer)
-    }
-
-    decoratedVisualizer.onPageLoadAsEditor = function() {
-        visualizer.onPageLoadAsEditor()
-        createToolButtons(decoratedVisualizer)
+    decoratedVisualizer.onChangeMode = function() {
+        visualizer.onChangeMode()
+        // if entering create mode, disable any default mousedown event (panning)
+        if (page.mode == MODELABEL_CREATE) {
+            wrapper.onmousedown = null
+        }
     }
 
     return decoratedVisualizer
 }
 
-function createToolButtons(visualizer) {
-    document.getElementsByClassName("tools")[0].removeAttribute("hidden")
-
-    // create set selectable button
-    document.getElementById("set-selectable-button").removeAttribute("hidden")
-    document.getElementById("set-selectable-button").addEventListener("click", (evt) => {
-        visualizer.mode = "setSelectable"
-        visualizer.disablePan = false
-    })
-
-    // create create box button
-    document.getElementById("create-button").removeAttribute("hidden")
-    document.getElementById("create-button").addEventListener("click", (evt) => {
-        visualizer.mode = "create"
-        visualizer.disablePan = true
-    })
-
-    // create delete box button
-    document.getElementById("delete-button").removeAttribute("hidden")
-    document.getElementById("delete-button").addEventListener("click", (evt) => {
-        visualizer.mode = "delete"
-        visualizer.disablePan = true
-    })
+function createToolButtons() {
+    // add set selectable tool
+    page.addTool(TOOLTEXT_SET_SELECTABLE, MODELABEL_SET_SELECTABLE)
+    // add create tool
+    page.addTool(TOOLTEXT_CREATE, MODELABEL_CREATE)
+    // add delete tool
+    page.addTool(TOOLTEXT_DELETE, MODELABEL_DELETE)
 }
 
 // Enable user to select/deselect vector elements by clicking on them
-function EnableSelection(visualizer) {
+function EnableSelection() {
     // loop through all visual elements and add event listeners to each
     for(const visualElement of visualizationElement.visualElements) {
-        EnableSelectionOfElement(visualElement, visualizer)
+        EnableSelectionOfElement(visualElement)
     }
 }
 
 // Enable user to select/deselect a single visual element
-function EnableSelectionOfElement(visualElement, visualizer) {
-    // clicking on selectable element as a participant marks/unmarks as "selected"
+function EnableSelectionOfElement(visualElement) {
+    // clicking on selectable element in select element mode marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
-            if (wrapper.classList.contains("participant")) { 
-                visualizationElement.toggleSelection(evt.currentTarget)
-            } 
+        if (page.mode == MODELABEL_SELECT_ELEMENTS)
+            visualizationElement.toggleSelection(evt.currentTarget)
     })
 
     // clicking on element as an editor marks/unmarks as "selectable"
     visualElement.addEventListener("click", evt => { 
-        if (visualizer.mode == "setSelectable") {
-            if (wrapper.classList.contains("editor")) { 
-                visualizationElement.toggleSelectable(evt.currentTarget)
-            } 
+        if (page.mode == MODELABEL_SET_SELECTABLE) { 
+            visualizationElement.toggleSelectable(evt.currentTarget)
         }
     })
 
     // clicking on element in delete mode deletes it (only for custom elements)
     if (visualizationElement.isCustom(visualElement)) {
         visualElement.addEventListener("click", evt => {
-            if (visualizer.mode == "delete") {
+            if (page.mode == MODELABEL_DELETE) {
                 visualizationElement.removeVisualElement(visualElement)
             }
         })
@@ -134,15 +105,15 @@ function EnableSelectionOfElement(visualElement, visualizer) {
 }
 
 // Enable user to draw a selectable box on the screen
-function EnableBox(visualizer) {
-    let box
-    let boxStartingPoint
+function EnableBox() {
+    let box = null
+    let boxStartingPoint = null
     let isStartDrawing = false
     let isDrawingBox = false
 
     // when user presses mouse in select or create mode, enable box drawing
     wrapper.addEventListener("mousedown", evt => {
-        if (visualizer.mode == "create") {
+        if (page.mode == MODELABEL_CREATE) {
             evt.preventDefault()
             isStartDrawing = true
         }
@@ -159,7 +130,7 @@ function EnableBox(visualizer) {
             boxStartingPoint = screenToSVG(evt.clientX, evt.clientY)
             box.setAttribute("x", boxStartingPoint.x)
             box.setAttribute("y", boxStartingPoint.y)
-            box.setAttribute("id", "user-box")
+            box.setAttribute("id", "user-box")  // used for CSS
 
             visualizationElement.svg.appendChild(box)
 
@@ -192,19 +163,14 @@ function EnableBox(visualizer) {
     })
 
     document.addEventListener("mouseup", evt => {
-        // user is not longer drawing on mouse release
+        // user is no longer drawing on mouse release
         isDrawingBox = false
         isStartDrawing = false
+        // if the user was drawing, save the box as a selectable element
         if (box) {
-            if (visualizer.mode == "selectElements") {
-                box.remove()
-                // FUTURE GOAL: box selection
-            } else if (visualizer.mode == "create") {
-                // change from temporary box to actual visual element 
-                box.removeAttribute("id")
-                visualizationElement.addVisualElement(box)
-                EnableSelectionOfElement(box, visualizer)
-            }
+            box.removeAttribute("id")   // used for CSS
+            visualizationElement.addVisualElement(box)
+            EnableSelectionOfElement(box)
 
             box = null
         }
