@@ -1,7 +1,12 @@
+import questionTypes from "./questionTypes.js"
+
 // change min and max label text based on question type
 function ChangeMinMaxText(type, min, max) {
     switch (type.value) {
-        case "Multiple Choice":
+        case questionTypes[0].label:
+            min.textContent = questionTypes[0].minText
+            max.textContent = questionTypes[0].maxText
+            break;
         case "Select Elements":
             min.textContent = "Minimum required selections: "
             max.textContent = "Maximum allowed selections: "

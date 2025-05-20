@@ -1,4 +1,5 @@
 import saveAnswer from "./responseSave.js"
+import questionTypes from "./questionTypes.js"
 
 document.addEventListener('DOMContentLoaded', () => {
     const requirements = document.getElementById("requirements")
@@ -49,22 +50,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // on clicking the next button, check for restrictions
     nextButton.addEventListener('click', () => {
-        if (questionType == "Multiple Choice") {
-            const boxes = document.getElementsByClassName("multiple-choice-box")
-            let total = 0
-            for (let box of boxes) {
-                if (box.checked) {
-                    total += 1
-                }
-            }
+        if (questionType == questionTypes[0].name) {
+            questionTypes[0].checkRequirement(min, max, required, (failText) => { document.getElementById("error-text").textContent = failText }, goToNextPage)
+            // const boxes = document.getElementsByClassName("multiple-choice-box")
+            // let total = 0
+            // for (let box of boxes) {
+            //     if (box.checked) {
+            //         total += 1
+            //     }
+            // }
 
-            if (max > 0 && total > max) {
-                document.getElementById("error-text").textContent = `You cannot select more than ${max} choices`
-            } else if (min > 0 && total < min && required == "true") {
-                document.getElementById("error-text").textContent = `You must select at least ${min} choices`
-            } else {
-                goToNextPage()
-            }
+            // if (max > 0 && total > max) {
+            //     document.getElementById("error-text").textContent = `You cannot select more than ${max} choices`
+            // } else if (min > 0 && total < min && required == "true") {
+            //     document.getElementById("error-text").textContent = `You must select at least ${min} choices`
+            // } else {
+            //     goToNextPage()
+            // }
         } else if (questionType == "Short Answer") {
             const answer = document.getElementsByClassName("answer-entry-box")[0]
 

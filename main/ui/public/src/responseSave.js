@@ -1,19 +1,23 @@
+import questionTypes from "./questionTypes.js"
+
 // gets the text of every answer that was checked as a single string, comma separated 
 // sends response to callback
 function getMultipleChoiceResponse(onGet) {
-    const boxes = document.getElementsByClassName("multiple-choice-box")
+    questionTypes[0].getResponse(onGet)
 
-    let response = ""
-    for (const box of boxes) {
-        if (box.checked) {
-            response += box.value + '|'
-        }
-    }
+    // const boxes = document.getElementsByClassName("multiple-choice-box")
 
-    if (response == "")
-        onGet(response)
-    else
-        onGet(response.slice(0, -1))
+    // let response = ""
+    // for (const box of boxes) {
+    //     if (box.checked) {
+    //         response += box.value + '|'
+    //     }
+    // }
+
+    // if (response == "")
+    //     onGet(response)
+    // else
+    //     onGet(response.slice(0, -1))
 }
 
 // gets whatever the user has input into the short answer box
