@@ -1,3 +1,23 @@
+@keyframes blink {
+    0% {stroke-opacity: 0; fill-opacity: 0;}
+    50% {stroke-opacity: 1; fill-opacity: 1;}
+    100% {stroke-opacity: 0; fill-opacity: 0;}
+}
+
+.mark {
+    r: var(--zoom-scale);
+    stroke-width: var(--mark-outline);
+    stroke: black;
+    fill: red;
+    filter: drop-shadow(var(--mark-shadow) var(--mark-shadow) var(--mark-shadow) black);
+}
+
+.mark-container {
+    animation-name: blink;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -6,6 +26,9 @@ html, body {
 
 body {
     --visual-scale: 1px;
+    --zoom-scale: 1px;
+    --mark-outline: calc(var(--zoom-scale) * 0.375);
+    --mark-shadow: calc(var(--zoom-scale) / 4);
 }
 
 #uploader-container {

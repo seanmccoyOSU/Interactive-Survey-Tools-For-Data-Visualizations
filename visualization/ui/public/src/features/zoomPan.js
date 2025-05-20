@@ -1,3 +1,8 @@
+// Features needed for both zooming and panning
+//
+// This code sets the mousedown behavior on the wrapper to panning, but this can be overwritten by decorators that come after
+// this one by changing wrapper.onmousedown under the onChangeMode function
+
 import { visualizationElement, svgElement, wrapper, debug, screenToSVG, page } from "../visualizer.js"
 
 let startPanning = null
@@ -86,6 +91,9 @@ function EnableZoom() {
         let newSize = visualizationElement.scale * zoomInIntensity
 
         visualizationElement.scale = newSize
+
+        // send scale factor to CSS
+        document.body.style.setProperty("--zoom-scale", visualizationElement.scale / 80 + "px")
     })
 
     // define zoom out event for clicking zoom out button
@@ -93,5 +101,8 @@ function EnableZoom() {
         let newSize = visualizationElement.scale * zoomOutIntensity
 
         visualizationElement.scale = newSize
+
+        // send scale factor to CSS
+        document.body.style.setProperty("--zoom-scale", visualizationElement.scale / 80 + "px")
     })
 }

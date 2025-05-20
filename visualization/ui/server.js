@@ -118,6 +118,11 @@ app.get('/:id', async function(req,res,next) {
                 role: "selectElements",
                 svg: response.data.svg
             })
+        } else if (req.query.markPoints) {
+            res.render("visualizer", {
+                role: "markPoints",
+                svg: response.data.svg
+            })
         } else {
             res.render("visualizer", {
                 svg: response.data.svg

@@ -1,3 +1,9 @@
+// Adds all of the relevant features for the "select elements" question type for both editor and participant roles
+// Includes
+//      - Selecting elements when taking a survey
+//      - Setting elements as selectable as an editor
+//      - Ability to Draw and delete selectable boxes as an editor
+
 const OPTIONTEXT_SELECT_ALL = "Select All Elements"
 const OPTIONTEXT_DESELECT_ALL = "Clear All Selections"
 const OPTIONTEXT_SET_ALL_SELECTABLE = "Make All Elements Selectable"
@@ -20,7 +26,7 @@ export const selectElements = (visualizer) => {
     decoratedVisualizer.onPageLoadAsParticipant = function() {
         visualizer.onPageLoadAsParticipant()
         if (page.mode == MODELABEL_SELECT_ELEMENTS) {
-            console.log(1)
+
             // create select all button
             page.addOption(OPTIONTEXT_SELECT_ALL, MODELABEL_SELECT_ELEMENTS, () => {visualizationElement.selectAll()})
 

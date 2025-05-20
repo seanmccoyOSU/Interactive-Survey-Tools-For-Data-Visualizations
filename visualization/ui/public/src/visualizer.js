@@ -84,6 +84,7 @@ const visualizerBase = {
     onLoadSvg: function() {
         // send scale factor to CSS
         document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
+        document.body.style.setProperty("--zoom-scale", visualizationElement.scale / 80 + "px")
     },
 
     // called when the page mode changes
@@ -178,7 +179,6 @@ export const page = {
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
-    //visualizer = selectElements(zoomPan(exportButton(visualizerBase)))
     visualizer = visualizerDecorator(visualizerBase)
 
     page.addChangeModeListener(visualizer.onChangeMode)
