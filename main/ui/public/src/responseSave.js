@@ -1,4 +1,4 @@
-import questionTypes from "./questionTypes.js"
+import questionTypes from "./questionTypes.mjs"
 
 // save answer as a cookie
 export default function saveAnswer(onDoneSaving) {

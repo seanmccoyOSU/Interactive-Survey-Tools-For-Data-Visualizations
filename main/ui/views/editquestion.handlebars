@@ -10,9 +10,9 @@
     <h5>
         <label for="type">Answer type: </label>
         <select name="type" id="type">
-            <option value="Multiple Choice" {{#if multipleChoice}}selected{{/if}}>Multiple Choice</option>
-            <option value="Short Answer" {{#if shortAnswer}}selected{{/if}}>Short Answer</option>
-            <option value="Select Elements" {{#if selectElements}}selected{{/if}}>Select Elements</option>
+            {{#each questionTypes}}
+                <option value="{{this.name}}" id="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
         </select>
     </h5>
 

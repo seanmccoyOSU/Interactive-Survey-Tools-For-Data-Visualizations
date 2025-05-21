@@ -1,5 +1,5 @@
 import saveAnswer from "./responseSave.js"
-import questionTypes from "./questionTypes.js"
+import questionTypes from "./questionTypes.mjs"
 
 document.addEventListener('DOMContentLoaded', () => {
     const requirements = document.getElementById("requirements")
@@ -11,16 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextButton = document.getElementById("next-button")
     const prevButton = document.getElementById("prev-button")
 
-    // for short answers, display character count
-    if (questionType == "Short Answer") {
-        const currentChars = document.getElementById("current-characters")
-        const answer = document.getElementsByClassName("answer-entry-box")[0]
-        currentChars.textContent = answer.value.length
-
-        answer.addEventListener("input", (evt) => {
-            currentChars.textContent = evt.target.value.length
-        })
-    }
+    const typeInfo = questionTypes.filter(type => type.name == questionType)[0]
+    typeInfo.onPageLoaded?.()
 
     function goToNextPage() {
         saveAnswer(() => {
@@ -46,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // on clicking the next button, check for restrictions
     nextButton.addEventListener('click', () => {
-        const typeInfo = questionTypes.filter(type => type.name == questionType)[0]
         typeInfo.checkRequirement(min, max, required, (failText) => { document.getElementById("error-text").textContent = failText }, goToNextPage)
     })
 })

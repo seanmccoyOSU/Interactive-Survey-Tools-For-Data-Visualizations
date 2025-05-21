@@ -102,7 +102,7 @@ const questionTypes = [
                 requirement = `${min} to ${max} items`
             }
 
-            return `Select ${requirement}`
+            return `Select ${requirement}:`
         },
         checkRequirement: function(min, max, required, onFailure, onSuccess) {
             const boxes = document.getElementsByClassName("multiple-choice-box")
@@ -190,7 +190,7 @@ const questionTypes = [
             // the message will be sent after the message listener has been added
 
             const visualURL = document.getElementById("visualURL").getAttribute("url")
-            
+
             // add message listener
             function messageListener(event) {
                 // if recieve a message from iframe, it might be for the selected element count check
@@ -247,7 +247,18 @@ const questionTypes = [
             // send message to iframe to get selected element ids
             visualWindow.postMessage("ids", visualURL)
         },
+        onVisualLoaded: function() {
+            // get saved ids of selected elements
+            const savedResponse = document.getElementById("savedResponse").getAttribute("response")
+            const selectedIds = savedResponse.split('|')
+        
+            // send message to iframe to highlight selected elements
+            const visualURL = document.getElementById("visualURL").getAttribute("url")
+            const visualWindow = document.getElementById("displayedImage").contentWindow
+            visualWindow.postMessage({ selectIds: selectedIds }, visualURL)  
+        },
     },
+    
     /**************************************************************************** 
      * Short Answer
     *****************************************************************************/
@@ -262,7 +273,7 @@ const questionTypes = [
         maxText: "Maximum allowed characters",
         requiresVisual: false,
         getPromptString: function(min, max) {
-            return "Short answer"
+            return "Short answer:"
         },
         checkRequirement: function(min, max, required, onFailure, onSuccess) {
             const answer = document.getElementsByClassName("answer-entry-box")[0]
@@ -280,6 +291,15 @@ const questionTypes = [
         },
         getResponse: function(onGet) {
             onGet(document.getElementsByClassName("answer-entry-box")[0].value)
+        },
+        onPageLoaded: function() {
+            const currentChars = document.getElementById("current-characters")
+            const answer = document.getElementsByClassName("answer-entry-box")[0]
+            currentChars.textContent = answer.value.length
+
+            answer.addEventListener("input", (evt) => {
+                currentChars.textContent = evt.target.value.length
+            })
         },
         pageRenderOptions: {
             shortAnswer: true

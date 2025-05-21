@@ -1,23 +1,23 @@
-import questionTypes from "./questionTypes.js"
+import questionTypes from "./questionTypes.mjs"
 
 document.addEventListener('DOMContentLoaded', () => {
     // show appropriate content based on specified question type
     const questionType = document.getElementById("type")
     if (questionType) {
-        let typeInfo = questionTypes.filter(type => type.label == questionType.value)[0]
+        let typeInfo = questionTypes.filter(type => type.name == questionType.value)[0]
         const minLabel = document.getElementById("min-label")
         const maxLabel = document.getElementById("max-label")
         const multiChoiceSection = document.getElementById("multiple-choice-section")
-        minLabel.textContent = typeInfo.minText
-        maxLabel.textContent = typeInfo.maxText
+        minLabel.textContent = typeInfo.minText + ": "
+        maxLabel.textContent = typeInfo.maxText + ": "
 
         if (typeInfo.hasChoices)
             multiChoiceSection.removeAttribute("hidden")
 
         questionType.addEventListener("change", () => {
-            typeInfo = questionTypes.filter(type => type.label == questionType.value)[0]
-            minLabel.textContent = typeInfo.minText
-            maxLabel.textContent = typeInfo.maxText
+            typeInfo = questionTypes.filter(type => type.name == questionType.value)[0]
+            minLabel.textContent = typeInfo.minText + ": "
+            maxLabel.textContent = typeInfo.maxText + ": "
             if (typeInfo.hasChoices)
                 multiChoiceSection.removeAttribute("hidden")
             else
