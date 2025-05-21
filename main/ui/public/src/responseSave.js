@@ -23,10 +23,8 @@ export default function saveAnswer(onDoneSaving) {
             headers: {
                 "Content-type": "application/json",
             },    
+            // callback after fetch
         }).then(onDoneSaving)
-
-        // callback
-        //onDoneSaving()
     }
 
     // get response, format of response depends on response type
