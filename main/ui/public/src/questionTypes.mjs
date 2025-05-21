@@ -266,7 +266,7 @@ const questionTypes = [
                 } 
             } 
             
-            window.addEventListener('message', messageListener)
+            window.addEventListener('message', messageListener, {once: true})
 
             // send message to iframe to get selected element count
             const visualWindow = document.getElementById("displayedImage").contentWindow
@@ -294,7 +294,7 @@ const questionTypes = [
                 }
             }
 
-            window.addEventListener('message', messageListener)
+            window.addEventListener('message', messageListener, {once: true})
 
             // send message to iframe to get selected element ids
             visualWindow.postMessage("ids", visualURL)
@@ -362,8 +362,6 @@ const questionTypes = [
                 // if recieve a message from iframe, it might be for the mark point count check
                 
                 if (event.origin === visualURL && event.data.type == "coordinates") {
-                    console.log(event.data.coordinates)
-                    console.log(event.data.coordinates.length)
                     const count = event.data.coordinates.length
                 
                     if (max > 0 && count > max) {
@@ -382,7 +380,7 @@ const questionTypes = [
                 } 
             } 
             
-            window.addEventListener('message', messageListener)
+            window.addEventListener('message', messageListener, {once:true})
 
             // send message to iframe to get selected element count
             const visualWindow = document.getElementById("displayedImage").contentWindow
@@ -410,7 +408,7 @@ const questionTypes = [
                 }
             }
 
-            window.addEventListener('message', messageListener)
+            window.addEventListener('message', messageListener, {once:true})
 
             // send message to iframe to get selected element ids
             visualWindow.postMessage("coordinates", visualURL)
