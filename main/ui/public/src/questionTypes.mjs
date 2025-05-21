@@ -81,7 +81,7 @@ const questionTypes = [
         minText: "Minimum required selections",
         maxText: "Maximum allowed selections",
         requiresVisual: false,
-        visualModeLabel: "selectElements",
+        visualModeLabel: "highlight",
         getPromptString: function(min, max) {
             let requirement = ""
 
@@ -162,7 +162,7 @@ const questionTypes = [
         minText: "Minimum required characters",
         maxText: "Maximum allowed characters",
         requiresVisual: false,
-        visualModeLabel: "selectElements",
+        visualModeLabel: "highlight",
         getPromptString: function(min, max) {
             return "Short answer:"
         },
