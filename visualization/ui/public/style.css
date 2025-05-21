@@ -101,7 +101,7 @@ body {
     position: fixed;
 }
 
-.selectElements .visual-element.selectable:hover, .setSelectable .visual-element:hover, .delete .visual-element.custom:hover {
+.selectElements .visual-element.selectable:hover, .setSelectable .visual-element:hover, .delete .visual-element.custom:hover, .highlightTool .visual-element:hover {
     fill-opacity: 40% !important;
     stroke-opacity: 40% !important;
     filter: saturate(0.3) drop-shadow(0px 0px var(--visual-scale) red) saturate(15);

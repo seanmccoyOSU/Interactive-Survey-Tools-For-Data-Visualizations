@@ -289,12 +289,6 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             participants.forEach(p =>
               p.answers.forEach(a => {
                 records.push({
-                  surveyId:         pub.id,
-                  surveyName:       pub.name,
-                  status:           pub.status,
-                  openDateTime:     new Date(pub.openDateTime).toISOString(),
-                  closeDateTime:    new Date(pub.closeDateTime).toISOString(),
-                  downloadDateTime: new Date().toISOString(),
                   participantId:    p.participantId,
                   questionNumber:   a.questionNumber,
                   response:         a.response,
@@ -305,8 +299,6 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
       
             // defines column order
             const fields = [
-              'surveyId','surveyName','status',
-              'openDateTime','closeDateTime','downloadDateTime',
               'participantId','questionNumber','response','comment'
             ]
             const parser = new Parser({ fields })
@@ -316,7 +308,7 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             .status(200)
             .set({
               'Content-Type':        'text/csv',
-              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-results.csv"`
+              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-${pub.status}-results.csv"`
             })
             .send(csv)
         }
