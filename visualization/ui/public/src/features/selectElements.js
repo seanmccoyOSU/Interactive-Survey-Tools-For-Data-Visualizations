@@ -3,6 +3,7 @@
 //      - Selecting elements when taking a survey
 //      - Setting elements as selectable as an editor
 //      - Ability to Draw and delete selectable boxes as an editor
+//      - Ability to highlight elements as an editor
 
 const OPTIONTEXT_SELECT_ALL = "Select All Elements"
 const OPTIONTEXT_DESELECT_ALL = "Clear All Selections"
@@ -12,11 +13,16 @@ const OPTIONTEXT_SET_ALL_NOT_SELECTABLE = "Make All Elements Not Selectable"
 const TOOLTEXT_SET_SELECTABLE = "Set Selectable"
 const TOOLTEXT_CREATE = "Create"
 const TOOLTEXT_DELETE = "Delete"
+const TOOLTEXT_HIGHLIGHT = "Highlight"
 
 const MODELABEL_SELECT_ELEMENTS = "selectElements"
 const MODELABEL_SET_SELECTABLE = "setSelectable"
 const MODELABEL_CREATE = "create"
 const MODELABEL_DELETE = "delete"
+const MODELABEL_HIGHLIGHT_TOOL = "highlightTool"
+
+const OPTIONTEXT_HIGHLIGHT_ALL = "Highlight All Elements"
+const OPTIONTEXT_CLEAR_HIGHLIGHTS = "Clear All Highlights"
 
 import { visualizationElement, svgElement, page, wrapper, debug, screenToSVG } from "../visualizer.js"
 
@@ -45,6 +51,21 @@ export const selectElements = (visualizer) => {
             // create set all not selectable button
             page.addOption(OPTIONTEXT_SET_ALL_NOT_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {visualizationElement.setAllNotSelectable()})
 
+            // create highlight all button
+            page.addOption(OPTIONTEXT_HIGHLIGHT_ALL, MODELABEL_HIGHLIGHT_TOOL, () => {
+                for (const element of visualizationElement.visualElements) {
+                    element.classList.add("highlight")
+                }
+            })
+
+            // create clear all highlights button
+            page.addOption(OPTIONTEXT_CLEAR_HIGHLIGHTS, MODELABEL_HIGHLIGHT_TOOL, () => {
+                const highlighted = svgElement.getElementsByClassName("highlight")
+                while (highlighted.length > 0) {
+                    highlighted[0].classList.remove("highlight")
+                }
+            })
+
             createToolButtons()
 
             EnableBox()
@@ -69,6 +90,8 @@ export const selectElements = (visualizer) => {
 }
 
 function createToolButtons() {
+    // create highlight tool button
+    page.addTool(TOOLTEXT_HIGHLIGHT, MODELABEL_HIGHLIGHT_TOOL)
     // add set selectable tool
     page.addTool(TOOLTEXT_SET_SELECTABLE, MODELABEL_SET_SELECTABLE)
     // add create tool
@@ -108,6 +131,13 @@ function EnableSelectionOfElement(visualElement) {
             }
         })
     }
+
+    // clicking on element in highlight mode highlights it
+    visualElement.addEventListener("click", evt => { 
+        if (page.mode == MODELABEL_HIGHLIGHT_TOOL) { 
+            evt.currentTarget.classList.toggle("highlight")
+        }
+    })
 }
 
 // Enable user to draw a selectable box on the screen
