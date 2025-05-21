@@ -48,5 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
             form.submit()
         })
     }
+
+    // making min connected to required
+    const requiredElement = document.getElementById("required")
+    const minElement = document.getElementById("min")
+    if (!requiredElement.checked) {
+        minElement.value = 0
+        minElement.setAttribute("readonly", "true")
+    }
+    requiredElement.addEventListener("change", (evt) => {
+        if (!requiredElement.checked) {
+            minElement.value = 0
+            minElement.setAttribute("readonly", "true")
+        } else {
+            minElement.removeAttribute("readonly")
+        }
+    })
+    
+
 })
 

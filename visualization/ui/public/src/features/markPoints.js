@@ -1,3 +1,5 @@
+// enables marking coordinate points on a visual as a participant
+
 const MODELABEL_MARK_POINTS = "markPoints"
 const OPTIONTEXT_UNDO_MARK = "Undo last mark"
 const OPTIONTEXT_CLEAR_MARKS = "Clear all marks"

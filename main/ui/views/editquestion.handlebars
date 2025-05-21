@@ -25,6 +25,14 @@
         <br>
     </section>
 
+    <h5><label for="allowComment">Allow comment? </label>
+    <input type="checkbox" id="allowComment" name="allowComment" value="true" {{#if allowComment}}checked{{/if}}>
+    </h5>
+
+    <h5><label for="required">Required? </label>
+    <input type="checkbox" id="required" name="required" {{#if required}}checked{{/if}}>
+    </h5>
+
     <h5><label for="min" id="min-label">min: </label>
     <input type="text" id="min" name="min" value="{{min}}">
     </h5>
@@ -32,6 +40,8 @@
     <h5><label for="max" id="max-label">max: </label>
     <input type="text" id="max" name="max" value="{{max}}">
     </h5>
+
+    <br>
 
     <h5>
         <label for="visualizationId">Import visualization: </label>
@@ -55,17 +65,7 @@
         <br>
         <button class="remove-visualization-button">Remove</button>
         <br>
-    {{/if}}
-
-    
-
-    <h5><label for="required">Required? </label>
-    <input type="checkbox" id="required" name="required" {{#if required}}checked{{/if}}>
-    </h5>
-
-    <h5><label for="allowComment">Allow comment? </label>
-    <input type="checkbox" id="allowComment" name="allowComment" value="true" {{#if allowComment}}checked{{/if}}>
-    </h5>
+    {{/if}}    
 
     <br>
     <button class="save-question-button">Save Changes</button>

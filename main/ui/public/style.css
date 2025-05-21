@@ -28,3 +28,7 @@
     text-decoration: none; 
     border-radius: 3px;
 }
+
+input[readonly] {
+    background-color: lightgray;
+}
