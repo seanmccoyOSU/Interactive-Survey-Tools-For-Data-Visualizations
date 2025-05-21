@@ -45,18 +45,19 @@
                 <div class="box answer-box">
                     <meta id="requirements" number={{number}} min={{min}} max={{max}} required={{required}} questionType="{{questionType}}">
                     <span><strong>{{prompt}}</strong></span>
-                    {{#if shortAnswer}}
-                        {{#if min}} must be at least {{min}} characters{{/if}}
-                        <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer">{{response}}</textarea>
-                        <span id="character-tracker"><span id="current-characters"></span>{{#if max}} / {{max}}{{/if}}</span>
-                    {{/if}}
-                    
-                    {{#if multipleChoice}}
-                        <br>
-                        {{#each choices}}
-                            {{> choiceCheckItem}}
-                        {{/each}}
-                    {{/if}}
+                    <div class="answer-space">
+                        {{#if shortAnswer}}
+                            {{#if min}} must be at least {{min}} characters{{/if}}
+                            <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer">{{response}}</textarea>
+                            <span id="character-tracker"><span id="current-characters"></span>{{#if max}} / {{max}}{{/if}}</span>
+                        {{/if}}
+                        
+                        {{#if multipleChoice}}
+                            {{#each choices}}
+                                {{> choiceCheckItem}}
+                            {{/each}}
+                        {{/if}}
+                    </div>
                 </div>
 
                 {{#if allowComment}}

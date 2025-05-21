@@ -25,6 +25,20 @@ body {
     gap: 20px;
 }
 
+.title-container {
+    display: block;
+    height: 90%;
+}
+
+.survey-title {
+    justify-self: center;
+    margin: 10px;
+}
+
+.intro-text {
+    white-space: pre-wrap;
+}
+
 .image-section {
     position: relative;
     border: 3px solid #ddd;
@@ -90,6 +104,10 @@ body {
     font-weight: bold;
 }
 
+.title-button-container {
+    justify-self: center;
+}
+
 .nav-button {
     background-color: #d9bc66;
     border: none;
@@ -131,9 +149,9 @@ body {
 
 .welcome-box {
     justify-self: center;
-    position: absolute;
     background: lightgoldenrodyellow;
-    height: 50%;
+    height: 80vh;
+    width: 700px;
 }
 
 .conclusion-box {
@@ -145,10 +163,18 @@ body {
 
 .answer-box {
     background: salmon;
+    max-height: 182px;
+    display: flex;
+    flex-direction: column;
+}
+
+.answer-space {
+    overflow-y: auto;
 }
 
 .answer-entry-box {
     background: pink;
+    height: 105px;
 }
 
 #required {
