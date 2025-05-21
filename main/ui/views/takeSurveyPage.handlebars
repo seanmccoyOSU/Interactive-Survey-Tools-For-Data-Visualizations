@@ -19,7 +19,7 @@
                 
                 <div class="image-section">
                     {{#unless DEBUG}}
-                        <iframe id="displayedImage" src="{{visualURL}}/{{visualizationContentId}}?selectElements=true" height="100%" width="100%"></iframe>
+                        <iframe id="displayedImage" src="{{visualURL}}/{{visualizationContentId}}?{{visualModeLabel}}=true" height="100%" width="100%"></iframe>
                     {{/unless}}
                     {{#if DEBUG}}
                         <iframe id="displayedImage" src="{{visualURL}}" height="100%" width="100%"></iframe>

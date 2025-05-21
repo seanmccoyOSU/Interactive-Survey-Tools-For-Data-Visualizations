@@ -33,9 +33,13 @@ function enableMarkPoints() {
         if (!mouseDrag) {
             // make container in SVG to hold marks
             if (!markContainer) {
-                markContainer = document.createElementNS("http://www.w3.org/2000/svg", "g")
-                visualizationElement.svg.appendChild(markContainer)
-                markContainer.classList.add("mark-container")
+                if (document.getElementsByClassName("mark-container").length > 0)
+                    markContainer = document.getElementsByClassName("mark-container")[0]
+                else {
+                    markContainer = document.createElementNS("http://www.w3.org/2000/svg", "g")
+                    visualizationElement.svg.appendChild(markContainer)
+                    markContainer.classList.add("mark-container")
+                }
             }
 
             // create the circle element within the container to represent the mark

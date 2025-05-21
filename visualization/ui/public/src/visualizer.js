@@ -334,11 +334,32 @@ window.addEventListener('message', (event) => {
         event.source.postMessage({ type: "count", count: visualizationElement.getNumberOfSelectedElements() }, "*")
     else if (event.data == "ids")
         event.source.postMessage({ type: "ids", ids: visualizationElement.getSelectedIds() }, "*")
-    else if (event.data.selectIds) {
+    else if (event.data == "coordinates") {
+        let coordinates = []
+        const markContainer = document.getElementsByClassName("mark-container")[0]
+        if (markContainer) {
+            for (const mark of markContainer.getElementsByClassName("mark")) {
+                coordinates.push("x:" + mark.cx.baseVal.value + "y:" + mark.cy.baseVal.value)
+            }
+        }
+        event.source.postMessage({ type: "coordinates", coordinates: coordinates }, "*")
+    } else if (event.data.selectIds) {
         for (const id of event.data.selectIds) {
             const elementToSelect = visualizationElement.getElementById(id)
             if (elementToSelect)
                 visualizationElement.select(elementToSelect)
+        }
+    } else if (event.data.markCoordinates) {
+        const markContainer = document.createElementNS("http://www.w3.org/2000/svg", "g")
+        visualizationElement.svg.appendChild(markContainer)
+        markContainer.classList.add("mark-container")
+
+        for (const coordinate of event.data.markCoordinates) {
+            const x = coordinate.split(":")[1].slice(0,-1)
+            const y = coordinate.split(":")[2]
+            const point = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+            markContainer.appendChild(point)
+            point.outerHTML = `<circle cx=\"${x}\" cy=\"${y}\" class=\"mark\"></circle>`
         }
     }
 })

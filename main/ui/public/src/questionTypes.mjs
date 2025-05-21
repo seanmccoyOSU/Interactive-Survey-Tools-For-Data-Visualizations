@@ -33,6 +33,9 @@
  *      requiresVisual: bool
  *          // true if the question type requires a visual
  * 
+ *      visualModeLabel: string
+ *          // the string associated with the mode to enter in when a visual is displayed
+ * 
  *      getPromptString: function(min: int, max: int) -> string
  *          // function that returns a string for the prompt that is displayed while taking the survey
  *          // the prompt is usually based on the minimum and maximum requirement for the question
@@ -78,6 +81,7 @@ const questionTypes = [
         minText: "Minimum required selections",
         maxText: "Maximum allowed selections",
         requiresVisual: false,
+        visualModeLabel: "selectElements",
         getPromptString: function(min, max) {
             let requirement = ""
 
@@ -146,6 +150,53 @@ const questionTypes = [
         }
     },
     /**************************************************************************** 
+     * Short Answer
+    *****************************************************************************/
+    {
+        name: "Short Answer",
+        label: "Short Answer",
+        description: "User writes an answer in a scrollable text box.",
+        hasRequired: true,
+        hasMinMax: true,
+        hasChoices: false,
+        minText: "Minimum required characters",
+        maxText: "Maximum allowed characters",
+        requiresVisual: false,
+        visualModeLabel: "selectElements",
+        getPromptString: function(min, max) {
+            return "Short answer:"
+        },
+        checkRequirement: function(min, max, required, onFailure, onSuccess) {
+            const answer = document.getElementsByClassName("answer-entry-box")[0]
+
+            if (max > 0 && answer.value.length > max) {
+                onFailure(`Your answer may not exceed ${max} characters`)
+            } else if (min > 0 && answer.value.length < min) {
+                if (min > 1)
+                    onFailure(`Your answer must be at least ${min} characters`)
+                else
+                    onFailure("Your answer must be at least 1 character")
+            } else {
+                onSuccess()
+            }
+        },
+        getResponse: function(onGet) {
+            onGet(document.getElementsByClassName("answer-entry-box")[0].value)
+        },
+        onPageLoaded: function() {
+            const currentChars = document.getElementById("current-characters")
+            const answer = document.getElementsByClassName("answer-entry-box")[0]
+            currentChars.textContent = answer.value.length
+
+            answer.addEventListener("input", (evt) => {
+                currentChars.textContent = evt.target.value.length
+            })
+        },
+        pageRenderOptions: {
+            shortAnswer: true
+        }
+    },
+    /**************************************************************************** 
      * Select Elements
     *****************************************************************************/
     {
@@ -158,6 +209,7 @@ const questionTypes = [
         minText: "Minimum required selections",
         maxText: "Maximum allowed selections",
         requiresVisual: true,
+        visualModeLabel: "selectElements",
         getPromptString: function(min, max) {
             let requirement = ""
 
@@ -258,52 +310,121 @@ const questionTypes = [
             visualWindow.postMessage({ selectIds: selectedIds }, visualURL)  
         },
     },
-    
     /**************************************************************************** 
-     * Short Answer
+     * Mark Points
     *****************************************************************************/
     {
-        name: "Short Answer",
-        label: "Short Answer",
-        description: "User writes an answer in a scrollable text box.",
+        name: "Mark Points",
+        label: "Mark Points",
+        description: "User marks coordinate locations on a visual as a response.",
         hasRequired: true,
         hasMinMax: true,
         hasChoices: false,
-        minText: "Minimum required characters",
-        maxText: "Maximum allowed characters",
-        requiresVisual: false,
+        minText: "Minimum required marks",
+        maxText: "Maximum allowed marks",
+        requiresVisual: true,
+        visualModeLabel: "markPoints",
         getPromptString: function(min, max) {
-            return "Short answer:"
+            let requirement = ""
+
+            if (min < 1 && max < 1) {
+                requirement = "points"
+            } else if (min == max) {
+                if (min == 1)
+                    requirement = "exactly 1 points"
+                else 
+                    requirement = `exactly ${min} points`
+            } else if (max < 1) {
+                if (min == 1)
+                    requirement = "at least 1 point"
+                else
+                    requirement = `at least ${min} points`
+            } else if (min < 1) {
+                if (max == 1)
+                    requirement = "at most 1 point"
+                else
+                    requirement = `at most ${max} point`
+            } else {
+                requirement = `${min} to ${max} points`
+            }
+
+            return `Mark ${requirement} on the visual to the left`
         },
         checkRequirement: function(min, max, required, onFailure, onSuccess) {
-            const answer = document.getElementsByClassName("answer-entry-box")[0]
+            
+            // we want to send a message to the visual window in order to check the requirement
+            // the message will be sent after the message listener has been added
 
-            if (max > 0 && answer.value.length > max) {
-                onFailure(`Your answer may not exceed ${max} characters`)
-            } else if (min > 0 && answer.value.length < min) {
-                if (min > 1)
-                    onFailure(`Your answer must be at least ${min} characters`)
-                else
-                    onFailure("Your answer must be at least 1 character")
-            } else {
-                onSuccess()
-            }
+            const visualURL = document.getElementById("visualURL").getAttribute("url")
+
+            // add message listener
+            function messageListener(event) {
+                // if recieve a message from iframe, it might be for the mark point count check
+                
+                if (event.origin === visualURL && event.data.type == "coordinates") {
+                    console.log(event.data.coordinates)
+                    console.log(event.data.coordinates.length)
+                    const count = event.data.coordinates.length
+                
+                    if (max > 0 && count > max) {
+                        if (max > 1)
+                            onFailure(`You cannot mark more than ${max} points`)
+                        else 
+                            onFailure("You cannot mark more than 1 point")
+                    } else if (min > 0 && count < min) {
+                        if (min > 1)
+                            onFailure(`You must mark at least ${min} points`)
+                        else
+                            onFailure("You must mark at least 1 point")
+                    } else {
+                        onSuccess()
+                    }
+                } 
+            } 
+            
+            window.addEventListener('message', messageListener)
+
+            // send message to iframe to get selected element count
+            const visualWindow = document.getElementById("displayedImage").contentWindow
+            visualWindow.postMessage("coordinates", visualURL) 
         },
         getResponse: function(onGet) {
-            onGet(document.getElementsByClassName("answer-entry-box")[0].value)
-        },
-        onPageLoaded: function() {
-            const currentChars = document.getElementById("current-characters")
-            const answer = document.getElementsByClassName("answer-entry-box")[0]
-            currentChars.textContent = answer.value.length
+            // the visualization is in an iframe
+            // we need to send a request message to the iframe for the coordinates
+            // then wait for a response that contains the coordinates
+            const visualURL = document.getElementById("visualURL").getAttribute("url")
+            const visualWindow = document.getElementById("displayedImage").contentWindow
 
-            answer.addEventListener("input", (evt) => {
-                currentChars.textContent = evt.target.value.length
-            })
+            function messageListener(event) {
+                // if receive a message from iframe, it might be for the ids of visual elements
+                if (event.origin === visualURL && event.data.type == "coordinates") {
+                    let response = ""
+                    for (const coordinate of event.data.coordinates) {
+                        response += coordinate + '|'
+                    }
+                
+                    if (response == "")
+                        onGet(response)
+                    else
+                        onGet(response.slice(0, -1))
+                }
+            }
+
+            window.addEventListener('message', messageListener)
+
+            // send message to iframe to get selected element ids
+            visualWindow.postMessage("coordinates", visualURL)
         },
-        pageRenderOptions: {
-            shortAnswer: true
-        }
+        onVisualLoaded: function() {
+            // get saved ids of selected elements
+            const savedResponse = document.getElementById("savedResponse").getAttribute("response")
+            const coordinates = savedResponse.split('|')
+        
+            // send message to iframe to highlight selected elements
+            const visualURL = document.getElementById("visualURL").getAttribute("url")
+            const visualWindow = document.getElementById("displayedImage").contentWindow
+            visualWindow.postMessage({ markCoordinates: coordinates }, visualURL)  
+        },
     },
 ]
 
