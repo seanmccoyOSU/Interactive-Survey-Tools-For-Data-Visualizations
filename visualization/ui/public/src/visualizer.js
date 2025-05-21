@@ -268,14 +268,14 @@ function loadSvgFromText(svgText) {
         visualizer.onFirstLoadSvg();
 }
 
-function loadRaster(file) {
+async function loadRaster(file) {
     // send request to upload image
     const formData = new FormData()
     const urlParts = window.location.href.split('/')
     const fileParts = file.name.split('.')
     const fileUrl = window.location.href.split('?')[0] + "/photo"
     formData.append('file', file, urlParts[urlParts.length-1].split('?')[0] + '.' + fileParts[fileParts.length-1]);
-    fetch(fileUrl, { 
+    await fetch(fileUrl, { 
         method: "POST",
         body: formData
     })
@@ -307,8 +307,6 @@ function loadRaster(file) {
             "Content-type": "application/json",
         },    
     })
-
-    window.location.replace(window.location.href)
   
     // Re-initialize pan/zoom
     visualizer.onLoadSvg();
