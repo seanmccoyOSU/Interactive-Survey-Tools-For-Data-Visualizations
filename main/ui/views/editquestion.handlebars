@@ -1,3 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Question {{number}}</title>
+
+        <script type="module" src="/src/questionEdit.js" charset="utf-8" defer></script>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+
+
+
 <h1>Question {{number}}</h1>
 <a class="new-button" href="/surveyDesigns/{{surveyDesignId}}">Return to survey overview</a>
 <br>
@@ -16,7 +30,7 @@
         </select>
     </h5>
 
-    <section id="multiple-choice-section" hidden>
+    <section id="multiple-choice-section">
         <br>
         <h5><label for="choices">Choices: </label></h5>
         <p>All possible choices for a multiple choice question. Separate Choices using the | character.</p>
@@ -29,15 +43,15 @@
     <input type="checkbox" id="allowComment" name="allowComment" value="true" {{#if allowComment}}checked{{/if}}>
     </h5>
 
-    <h5><label for="required">Required? </label>
+    <h5 id="required-line"><label for="required">Required? </label>
     <input type="checkbox" id="required" name="required" {{#if required}}checked{{/if}}>
     </h5>
 
-    <h5><label for="min" id="min-label">min: </label>
+    <h5 id="min-line"><label for="min" id="min-label">min: </label>
     <input type="text" id="min" name="min" value="{{min}}">
     </h5>
 
-    <h5><label for="max" id="max-label">max: </label>
+    <h5 id="max-line"><label for="max" id="max-label">max: </label>
     <input type="text" id="max" name="max" value="{{max}}">
     </h5>
 
@@ -70,3 +84,10 @@
     <br>
     <button class="save-question-button">Save Changes</button>
 </form>
+
+
+
+
+
+    </body>
+</html>

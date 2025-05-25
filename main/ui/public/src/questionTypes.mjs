@@ -424,6 +424,93 @@ const questionTypes = [
             visualWindow.postMessage({ markCoordinates: coordinates }, visualURL)  
         },
     },
+    /**************************************************************************** 
+     * Radio Choice
+    *****************************************************************************/
+    {
+        name: "Radio Choice",
+        label: "Radio Choice",
+        description: "User selects one choice from a list of pre-written choices as a response.",
+        hasRequired: true,
+        hasMinMax: false,
+        hasChoices: true,
+        minText: "",
+        maxText: "",
+        requiresVisual: false,
+        visualModeLabel: "highlight",
+        getPromptString: function(min, max) {
+            return "Select 1 choice:"
+        },
+        checkRequirement: function(min, max, required, onFailure, onSuccess) {
+            if (required) {
+                const boxes = document.getElementsByClassName("radio-choice")
+                let checked = false
+                for (let i = 0; i < boxes.length && !checked; i++) {
+                    checked = boxes[i].checked
+                }
+
+                if (!checked) {
+                    onFailure("You must select 1 choice")
+                } else {
+                    onSuccess()
+                }
+
+
+            } else {
+                onSuccess()
+            }         
+        },
+        getResponse: function(onGet) {
+            const boxes = document.getElementsByClassName("radio-choice")
+            let response = ""
+            for (let i = 0; i < boxes.length && !response; i++) {
+                if (boxes[i].checked)
+                    response = boxes[i].value
+            }
+
+            onGet(response)
+        },
+        pageRenderOptions: {
+            radioChoice: true
+        }
+    },
+    /**************************************************************************** 
+     * Write-in Answer
+    *****************************************************************************/
+    {
+        name: "Write-in",
+        label: "Write-in",
+        description: "User writes an answer in a single line input field.",
+        hasRequired: true,
+        hasMinMax: false,
+        hasChoices: false,
+        minText: "",
+        maxText: "",
+        requiresVisual: false,
+        visualModeLabel: "highlight",
+        getPromptString: function(min, max) {
+            return "Write-in answer:"
+        },
+        checkRequirement: function(min, max, required, onFailure, onSuccess) {
+            if (required) {
+                const answer = document.getElementsByClassName("write-in-field")[0]
+
+                if (!answer.value.trim()) {
+                    onFailure("You must write in an answer.")
+                } else {
+                    onSuccess()
+                }
+            } else {
+                onSuccess()
+            }
+        },
+        getResponse: function(onGet) {
+            onGet(document.getElementsByClassName("write-in-field")[0].value)
+        },
+        pageRenderOptions: {
+            writeInAnswer: true
+        }
+    },
 ]
 
 export default questionTypes

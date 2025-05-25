@@ -242,6 +242,7 @@ app.get('/questions/:id', async (req, res, next) => {
         }
         
         res.render("editquestion", {
+            layout: false,
             number: response.data.number,
             id: response.data.id,
             surveyDesignId: response.data.surveyDesignId,

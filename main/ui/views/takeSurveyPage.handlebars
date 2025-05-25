@@ -54,8 +54,22 @@
                         
                         {{#if multipleChoice}}
                             {{#each choices}}
-                                {{> choiceCheckItem}}
+                                <input class="multiple-choice-box" type="checkbox" id="{{this.id}}" name="{{this.id}}" value="{{this.choice}}" {{#if this.checked}}checked{{/if}}>
+                                <label for="{{this.id}}"> {{this.choice}}</label>
+                                <br>
                             {{/each}}
+                        {{/if}}
+
+                        {{#if radioChoice}}
+                            {{#each choices}}
+                                <input class="radio-choice" type="radio" id="{{this.id}}" name="radio" value="{{this.choice}}" {{#if this.checked}}checked{{/if}}>
+                                <label for="{{this.id}}"> {{this.choice}}</label>
+                                <br>
+                            {{/each}}
+                        {{/if}}
+
+                        {{#if writeInAnswer}}
+                            <input class="write-in-field" type="text" id="write-in" name="write-in" value="{{response}}">
                         {{/if}}
                     </div>
                 </div>

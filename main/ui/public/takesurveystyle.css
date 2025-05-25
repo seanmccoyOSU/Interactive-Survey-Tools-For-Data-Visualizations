@@ -177,6 +177,13 @@ body {
     height: 105px;
 }
 
+.write-in-field {
+    background: pink;
+    width: 50%;
+    border-width: thin;
+    padding: 2px;
+}
+
 #required {
     color: red;
     font-size: 10px;
