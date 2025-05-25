@@ -1,22 +1,20 @@
 #!/bin/sh
 
-HOST="$1"
+# wait-for.sh host:port -- command args...
+HOST_PORT=$1
 shift
-PORT="$1"
-shift
+
+# Wait for service
+HOST=$(echo "$HOST_PORT" | cut -d: -f1)
+PORT=$(echo "$HOST_PORT" | cut -d: -f2)
 
 echo "Waiting for $HOST:$PORT..."
 
-while ! nc -z "$HOST" "$PORT"; do
-  sleep 1
+until nc -z "$HOST" "$PORT"; do
+  sleep 2
 done
 
 echo "$HOST:$PORT is available. Starting application..."
 
-# Run the rest of the command passed
-if [ "$#" -eq 0 ]; then
-  echo "Error: No command specified to run after wait"
-  exit 1
-fi
-
+# Run the rest of the command
 exec "$@"
