@@ -160,6 +160,7 @@ app.get('/visualizations/:id', async (req, res, next) => {
 
         // on success, refresh page
         res.render("visualization", {
+            layout: false,
             name: response.data.name,
             id: response.data.contentId,
             visualURL: process.env.VISUAL_UI_URL

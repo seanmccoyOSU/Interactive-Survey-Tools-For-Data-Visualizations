@@ -25,6 +25,20 @@ body {
     gap: 20px;
 }
 
+.edit-visual-container {
+    width: 100%;
+    height: 100%;
+    justify-items: center;
+}
+
+.go-home-button {
+    background-color: cornflowerblue;
+    color: white;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 5%;
+}
+
 .title-container {
     display: block;
     height: 90%;
