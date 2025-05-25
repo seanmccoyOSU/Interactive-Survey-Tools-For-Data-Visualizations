@@ -1,26 +1,7 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Visualization edit - {{name}}</title>
-
-        <link rel="stylesheet" href="/takesurveystyle.css">
-    </head>
-    <body>
-
-<div class="edit-visual-container">
-    <h1>{{name}}</h1>
-    <br>
-    <div class="container">
-        <div class="image-section">
-            <iframe src="{{visualURL}}/{{id}}?editor=true" height="100%" width="100%"></iframe>
-        </div>
-    </div>
-    <br>
-    <a class="go-home-button" href="/">↵ Go Home</a>
+<h1>{{name}}</h1>
+<br>
+<div class="visual-edit-container">
+    <iframe src="{{visualURL}}/{{id}}?editor=true" height="100%" width="100%"></iframe>
 </div>
-
-
-    </body>
-</html> 
+<br>
+<a href="/">↵ Go Home</a>
