@@ -46,3 +46,8 @@ input[readonly] {
     font-weight: 500;
     margin: 3px;
 }
+
+#type-description {
+    font-weight: lighter;
+    font-size: 70%;
+}

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const requiredLine = document.getElementById("required-line")
     const requiredElement = document.getElementById("required")
     const minElement = document.getElementById("min")
+    const typeDescription = document.getElementById("type-description")
     let typeInfo = null
 
 
@@ -35,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateContent() {
         // get info about question type
         typeInfo = questionTypes.filter(type => type.name == questionType.value)[0]
+
+        // update description
+        typeDescription.textContent = typeInfo.description
 
         // update min/max section
         if (typeInfo.hasMinMax) {
