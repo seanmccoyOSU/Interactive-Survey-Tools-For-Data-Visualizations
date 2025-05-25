@@ -227,18 +227,27 @@ app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
 // Edit survey question
 app.get('/questions/:id', async (req, res, next) => {
     try {
+        const questionTypes = (await import("./public/src/questionTypes.mjs")).default
         const response = await api.get(req.originalUrl)
         const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`)
         const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`)
+
+        let editQuestionTypes = []
+        for (const type of questionTypes) {
+            editQuestionTypes.push({
+                name: type.name,
+                label: type.label,
+                selected: response.data.type == type.name
+            })
+        }
         
         res.render("editquestion", {
+            layout: false,
             number: response.data.number,
             id: response.data.id,
             surveyDesignId: response.data.surveyDesignId,
             text: response.data.text,
-            multipleChoice: response.data.type == "Multiple Choice",
-            shortAnswer: response.data.type == "Short Answer",
-            selectElements: response.data.type == "Select Elements",
+            questionTypes: editQuestionTypes,
             choices: response.data.choices,
             min: response.data.min,
             max: response.data.max,
@@ -281,12 +290,6 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             participants.forEach(p =>
               p.answers.forEach(a => {
                 records.push({
-                  surveyId:         pub.id,
-                  surveyName:       pub.name,
-                  status:           pub.status,
-                  openDateTime:     new Date(pub.openDateTime).toISOString(),
-                  closeDateTime:    new Date(pub.closeDateTime).toISOString(),
-                  downloadDateTime: new Date().toISOString(),
                   participantId:    p.participantId,
                   questionNumber:   a.questionNumber,
                   response:         a.response,
@@ -297,8 +300,6 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
       
             // defines column order
             const fields = [
-              'surveyId','surveyName','status',
-              'openDateTime','closeDateTime','downloadDateTime',
               'participantId','questionNumber','response','comment'
             ]
             const parser = new Parser({ fields })
@@ -308,7 +309,7 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             .status(200)
             .set({
               'Content-Type':        'text/csv',
-              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-results.csv"`
+              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-${pub.status}-results.csv"`
             })
             .send(csv)
         }
@@ -359,6 +360,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                 const parsedAnswers = JSON.parse(req.cookies.answers)
                 await api.patch(req.originalUrl, { answers: parsedAnswers.answers })
             } else {
+                const questionTypes = (await import("./public/src/questionTypes.mjs")).default
                 const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
 
                 let comment = ""
@@ -377,52 +379,33 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     }
                 }
 
+                const typeInfo = questionTypes.filter(type => type.name == question.type)[0]
+
                 let choices = []
-                if (question.type == "Multiple Choice") {
+                if (typeInfo.hasChoices) {
                     const qChoices = question.choices.split('|')
                     const userSelections = userResponse.split('|')
 
                     for (let i = 0; i < qChoices.length; i++)
                         choices.push({ id: `choice${i}`, choice: qChoices[i], checked: userSelections.includes(qChoices[i]) })
-                }
-                
-                let choiceRequirement = ""
-                if (question.max == 0) {
-                    choiceRequirement = ""
-                } else if (question.min > 0) {
-                    if (question.max == question.min) {
-                        choiceRequirement = `exactly ${question.min} `
-                    } else if (question.max < choices.length) {
-                        choiceRequirement = `${question.min} to ${question.max} `
-                    } else {
-                        choiceRequirement = `at least ${question.min} `
-                    }
-                } else if (question.max < choices.length) {
-                    choiceRequirement = `up to ${question.max} `
-                } 
-
-                
+                }        
 
                 res.render("takeSurveyPage", {
                     layout: false,
                     linkHash: response.data.linkHash,
                     text: question.text,
                     visualURL: process.env.VISUAL_UI_URL,
+                    visualModeLabel: typeInfo.visualModeLabel,
                     visualizationContentId: question.visualizationContentId,
                     number: question.number,
                     progress: question.number-1,
                     total: response.data.questions.length,
                     percent: (((question.number-1) / response.data.questions.length) * 100).toFixed(2),
-                    multipleChoice: question.type == "Multiple Choice",
-                    selectElements: question.type == "Select Elements",
-                    shortAnswer: question.type == "Short Answer",
                     choices: choices,
-                    choiceRequirement: choiceRequirement,
-                    shortAnswerRequirement: (question.min > 0) ? ` must be at least ${question.min} characters` : "",
+                    prompt: typeInfo.getPromptString(question.min, question.max),
                     allowComment: question.allowComment,
                     min: question.min,
                     max: question.max,
-                    hasMax: question.max > 0,
                     required: question.required,
                     questionType: question.type,
                     comment: comment,
@@ -430,7 +413,8 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
-                    DEBUG: DEBUG
+                    DEBUG: DEBUG,
+                    ...typeInfo?.pageRenderOptions
                 })
             }
         } else if (!req.query.page || req.query.page == 0) {

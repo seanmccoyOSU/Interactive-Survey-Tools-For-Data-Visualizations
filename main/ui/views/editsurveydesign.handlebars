@@ -1,5 +1,5 @@
 <h1>Editing Survey Design "{{name}}"</h1>
-<a class="new-button" href="/">go home</a>
+<a href="/">↵ Go Home</a>
 <br><br>
 
 <h2>Questions</h2>
@@ -20,11 +20,11 @@
 
     <h3>Introduction Text</h3>
     <p>This is the text the participant sees before starting the survey.</p>
-    <textarea type="text" id="introText" name="introText" rows="4" cols="50">{{introText}}</textarea>
+    <textarea type="text" id="introText" name="introText" rows="4" cols="50" placeholder="Your introduction text here">{{introText}}</textarea>
 
     <h3>Conclusion Text</h3>
     <p>This is the text the participant sees after completing the survey.</p>
-    <textarea type="text" id="conclusionText" name="conclusionText" rows="4" cols="50">{{conclusionText}}</textarea>
+    <textarea type="text" id="conclusionText" name="conclusionText" rows="4" cols="50" placeholder="Your conclusion text here">{{conclusionText}}</textarea>
 
     <br>
     <br>
@@ -43,10 +43,10 @@
         <form action="/surveyDesigns/{{id}}/publishedSurveys" method="POST">
             
             <label for="openDateTime">Open time: </label>
-            <input type="datetime-local" id="openDateTime" name="openDateTime" value="{{today}}"/>
+            <input type="datetime-local" id="openDateTime" name="openDateTime" value="{{today}}" min="{{today}}"/>
 
             <label for="closeDateTime">Close time: </label>
-            <input type="datetime-local" id="closeDateTime" name="closeDateTime" value="{{tomorrow}}"/>
+            <input type="datetime-local" id="closeDateTime" name="closeDateTime" value="{{tomorrow}}" min="{{today}}"/>
 
             <label for="name">Name: </label>
             <input type="text" name="name" placeholder="survey name" value="{{name}}">

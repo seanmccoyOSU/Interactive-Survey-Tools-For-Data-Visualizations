@@ -14,17 +14,27 @@
     text-align: center;
 }
 
-
 .popup:target {
     display: flex;
 }
 
-.popup-cancel-button {
-    display: inline-block; 
-    margin-top: 10px; 
-    padding: 5px 10px; 
-    background-color: #dc3545; 
-    color: #fff; 
-    text-decoration: none; 
-    border-radius: 3px;
+input[readonly] {
+    background-color: lightgray;
+}
+
+#displayedImage {
+    width: 100%;
+    border: 3px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    resize: both;
+}
+
+.visual-edit-container {
+    height: 65vh;
+    width: 65vw;
+    justify-self: center;
+    border: 3px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
 }

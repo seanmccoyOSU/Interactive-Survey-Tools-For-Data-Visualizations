@@ -108,11 +108,27 @@ app.get('/:id/photo', async function(req,res,next) {
 app.get('/:id', async function(req,res,next) {
     try {
         const response = await api.get(`/${req.params.id}`)
-        if (req.query.editor) {
+        const firstQuery = Object.keys(req.query)[0];
+        if (firstQuery) {
             res.render("visualizer", {
-                role: "editor",
+                role: firstQuery,
                 svg: response.data.svg
             })
+        // if (req.query.editor) {
+        //     res.render("visualizer", {
+        //         role: "editor",
+        //         svg: response.data.svg
+        //     })
+        // } else if (req.query.selectElements) {
+        //     res.render("visualizer", {
+        //         role: "selectElements",
+        //         svg: response.data.svg
+        //     })
+        // } else if (req.query.markPoints) {
+        //     res.render("visualizer", {
+        //         role: "markPoints",
+        //         svg: response.data.svg
+        //     })
         } else {
             res.render("visualizer", {
                 svg: response.data.svg
