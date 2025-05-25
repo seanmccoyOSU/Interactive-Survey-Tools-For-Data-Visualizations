@@ -8,7 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const minLine = document.getElementById("min-line")
     const maxLine = document.getElementById("max-line")
     const requiredLine = document.getElementById("required-line")
+    const requiredElement = document.getElementById("required")
+    const minElement = document.getElementById("min")
     let typeInfo = null
+
+
+    // making min connected to required
+    // if not required min should be 0 and the input field is readonly
+    function updateMinReadOnlyStatus() {
+        if (!requiredElement.checked) {
+            minElement.value = 0
+            minElement.setAttribute("readonly", "true")
+        } else {
+            minElement.removeAttribute("readonly")
+        }
+    }
+
+    // update on page load
+    updateMinReadOnlyStatus()
+
+    // update whenever required box is checked/unchecked
+    requiredElement.addEventListener("change", updateMinReadOnlyStatus)
+
 
     // show appropriate content based on specified question type
     function updateContent() {
@@ -33,10 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
             multiChoiceSection.setAttribute("hidden", "true")
 
         // show required line?
-        if (typeInfo.hasRequired)
+        if (typeInfo.hasRequired) 
             requiredLine.removeAttribute("hidden")
-        else
-            requiredLine.setAttribute("hidden", "true")
+        else {
+           requiredLine.setAttribute("hidden", "true") 
+           requiredElement.checked = false
+           updateMinReadOnlyStatus()
+        }
     }
 
     // update on page load
@@ -44,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
     // update whenever question type is changed
     questionType.addEventListener("change", updateContent)
+
 
     // save button behavior
     const saveQuestionButton = document.getElementsByClassName("save-question-button")[0]
@@ -56,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.submit()
     })
 
+    
     // removing a visual
     const removeVisualButton = document.getElementsByClassName("remove-visualization-button")[0]
     if (removeVisualButton) {
@@ -68,24 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
-    // making min connected to required
-    const requiredElement = document.getElementById("required")
-    const minElement = document.getElementById("min")
-
-    // if not required min should be 0 and the input field is readonly
-    function updateMinReadOnlyStatus() {
-        if (!requiredElement.checked) {
-            minElement.value = 0
-            minElement.setAttribute("readonly", "true")
-        } else {
-            minElement.removeAttribute("readonly")
-        }
-    }
-
-    // update on page load
-    updateMinReadOnlyStatus()
-
-    // update whenever required box is checked/unchecked
-    requiredElement.addEventListener("change", updateMinReadOnlyStatus)
+    
 })
 
