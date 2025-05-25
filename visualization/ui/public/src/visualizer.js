@@ -21,7 +21,16 @@ const visualizerBase = {
         const uploader = document.getElementById("svg-uploader");
         const uploaderContainer = document.getElementById("uploader-container");
         uploaderContainer.removeAttribute('hidden')
-        uploader.addEventListener("change", handleSvgUpload);  
+        uploader.addEventListener("change", handleSvgUpload);
+        
+        // help button
+        document.getElementById("help-button").removeAttribute("hidden")
+        document.getElementById("help-button").addEventListener("click", () => {
+            document.getElementById("help-window").removeAttribute("hidden")
+        })
+        document.getElementById("close-help-window-button").addEventListener("click", () => {
+            document.getElementById("help-window").setAttribute("hidden", "true")
+        })
     },
     
     // called when the page loads as a participant
