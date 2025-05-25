@@ -2,7 +2,7 @@
 <a href="/">↵ Go Home</a>
 <br><br>
 
-<h2>Questions</h2>
+<h2>Questions<a class="help" href="/faq.html#7" target="_blank">?</a></h2>
     {{#each questions}}
         {{> questionListItem}}
     {{/each}}
@@ -13,7 +13,7 @@
 <br>
 
 <form action="/surveyDesigns/{{id}}/PATCH" method="POST">
-    <h2>Survey Details</h2>
+    <h2>Survey Details<a class="help" href="/faq.html#7" target="_blank">?</a></h2>
     <h3>Survey Title</h3>
     <p>This is the title that is visible to participants.</p>
     <input type="text" id="title" name="title" value="{{title}}">
@@ -32,7 +32,7 @@
 </form>
 
 <br>
-<a class="new-button" href="#publishSurveyPopup">Publish</a>
+<a href="#publishSurveyPopup">Publish<a class="help" href="/faq.html#14" target="_blank">?</a></a>
 
 <!-- popup windows -->
 
@@ -42,13 +42,13 @@
         <h2>Publish your survey</h2>
         <form action="/surveyDesigns/{{id}}/publishedSurveys" method="POST">
             
-            <label for="openDateTime">Open time: </label>
+            <label for="openDateTime">Open time:<a class="help" href="/faq.html#15" target="_blank">?</a></label>
             <input type="datetime-local" id="openDateTime" name="openDateTime" value="{{today}}" min="{{today}}"/>
 
-            <label for="closeDateTime">Close time: </label>
+            <label for="closeDateTime">Close time:<a class="help" href="/faq.html#15" target="_blank">?</a></label>
             <input type="datetime-local" id="closeDateTime" name="closeDateTime" value="{{tomorrow}}" min="{{today}}"/>
 
-            <label for="name">Name: </label>
+            <label for="name">Name:<a class="help" href="/faq.html#8" target="_blank">?</a></label>
             <input type="text" name="name" placeholder="survey name" value="{{name}}">
 
             <button class="popup-create-button" id="publish-survey-button">Publish</button>
