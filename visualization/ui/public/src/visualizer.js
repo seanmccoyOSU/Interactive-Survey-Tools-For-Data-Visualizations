@@ -61,15 +61,16 @@ const visualizerBase = {
             
 
             page.addFileButton("Save", () => {
-                fetch(window.location.href, { 
-                    method: "PUT",
-                    body: JSON.stringify({
-                        svg: svgElement.outerHTML
-                    }),
-                    headers: {
-                        "Content-type": "application/json",
-                    },    
-                })
+                // fetch(window.location.href, { 
+                //     method: "PUT",
+                //     body: JSON.stringify({
+                //         svg: svgElement.outerHTML
+                //     }),
+                //     headers: {
+                //         "Content-type": "application/json",
+                //     },    
+                // })
+                autosave.save()
             })
 
             document.getElementById("uploader-container").setAttribute("hidden", "true")
@@ -175,6 +176,31 @@ export const page = {
     }
 }
 
+export const autosave = {
+    statusText: "",
+    set statusText(s) {
+        this.value = s
+        document.getElementById("save-status").textContent = s
+    },
+    save: function() {
+        this.statusText = "Saving..."
+        fetch(window.location.href, { 
+            method: "PUT",
+            body: JSON.stringify({
+                svg: svgElement.outerHTML
+            }),
+            headers: {
+                "Content-type": "application/json",
+            },    
+        }).then(response => {
+            if (response.ok) {
+                this.statusText = "Changes saved"
+            } else {
+                this.statusText = "There was an error saving changes!"
+            }
+        })
+    }
+}
 
 
 // start loading svg once page has loaded
@@ -251,15 +277,16 @@ function loadSvgFromText(svgText) {
     visualizationElement = new VisualizationElement(svgElement)
 
     if (!debug) {
-        fetch(window.location.href, { 
-            method: "PUT",
-            body: JSON.stringify({
-                svg: svgElement.outerHTML
-            }),
-            headers: {
-                "Content-type": "application/json",
-            },    
-        })
+        // fetch(window.location.href, { 
+        //     method: "PUT",
+        //     body: JSON.stringify({
+        //         svg: svgElement.outerHTML
+        //     }),
+        //     headers: {
+        //         "Content-type": "application/json",
+        //     },    
+        // })
+        autosave.save()
     }
   
     // Re-initialize pan/zoom
@@ -298,15 +325,16 @@ async function loadRaster(file) {
 
     visualizationElement = new VisualizationElement(svgElement)
 
-    fetch(window.location.href, { 
-        method: "PUT",
-        body: JSON.stringify({
-            svg: svgElement.outerHTML
-        }),
-        headers: {
-            "Content-type": "application/json",
-        },    
-    })
+    autosave.save()
+    // fetch(window.location.href, { 
+    //     method: "PUT",
+    //     body: JSON.stringify({
+    //         svg: svgElement.outerHTML
+    //     }),
+    //     headers: {
+    //         "Content-type": "application/json",
+    //     },    
+    // })
   
     // Re-initialize pan/zoom
     visualizer.onLoadSvg();
