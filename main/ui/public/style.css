@@ -38,3 +38,16 @@ input[readonly] {
     border-radius: 10px;
     overflow: hidden;
 }
+
+.help {
+    vertical-align: super;
+    font-size: 70%;
+    color: grey !important;
+    font-weight: 500;
+    margin: 3px;
+}
+
+#type-description {
+    font-weight: lighter;
+    font-size: 70%;
+}

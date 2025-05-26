@@ -87,6 +87,7 @@ app.post('/', async function(req,res,next) {
 app.put('/:id', async function(req,res,next) {
     try {
         const response = await api.put(req.originalUrl, req.body)
+        res.send().status(200)
     } catch (e) {
         next(e)
     }

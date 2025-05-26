@@ -24,7 +24,7 @@ const MODELABEL_HIGHLIGHT_TOOL = "highlightTool"
 const OPTIONTEXT_HIGHLIGHT_ALL = "Highlight All Elements"
 const OPTIONTEXT_CLEAR_HIGHLIGHTS = "Clear All Highlights"
 
-import { visualizationElement, svgElement, page, wrapper, debug, screenToSVG } from "../visualizer.js"
+import { visualizationElement, svgElement, page, wrapper, debug, screenToSVG, autosave } from "../visualizer.js"
 
 export const selectElements = (visualizer) => {
     const decoratedVisualizer = Object.create(visualizer)
@@ -46,16 +46,23 @@ export const selectElements = (visualizer) => {
 
         if (wrapper.classList.contains("editor") || debug) {
             // create set all selectable button
-            page.addOption(OPTIONTEXT_SET_ALL_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {visualizationElement.setAllSelectable()})
+            page.addOption(OPTIONTEXT_SET_ALL_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {
+                visualizationElement.setAllSelectable()
+                autosave.save()
+            })
 
             // create set all not selectable button
-            page.addOption(OPTIONTEXT_SET_ALL_NOT_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {visualizationElement.setAllNotSelectable()})
+            page.addOption(OPTIONTEXT_SET_ALL_NOT_SELECTABLE, MODELABEL_SET_SELECTABLE, () => {
+                visualizationElement.setAllNotSelectable()
+                autosave.save()
+            })
 
             // create highlight all button
             page.addOption(OPTIONTEXT_HIGHLIGHT_ALL, MODELABEL_HIGHLIGHT_TOOL, () => {
                 for (const element of visualizationElement.visualElements) {
                     element.classList.add("highlight")
                 }
+                autosave.save()
             })
 
             // create clear all highlights button
@@ -64,6 +71,7 @@ export const selectElements = (visualizer) => {
                 while (highlighted.length > 0) {
                     highlighted[0].classList.remove("highlight")
                 }
+                autosave.save()
             })
 
             createToolButtons()
@@ -112,7 +120,7 @@ function EnableSelection() {
 function EnableSelectionOfElement(visualElement) {
     // clicking on selectable element in select element mode marks/unmarks as "selected"
     visualElement.addEventListener("click", evt => { 
-        if (page.mode == MODELABEL_SELECT_ELEMENTS)
+        if (page.mode == MODELABEL_SELECT_ELEMENTS) 
             visualizationElement.toggleSelection(evt.currentTarget)
     })
 
@@ -120,6 +128,7 @@ function EnableSelectionOfElement(visualElement) {
     visualElement.addEventListener("click", evt => { 
         if (page.mode == MODELABEL_SET_SELECTABLE) { 
             visualizationElement.toggleSelectable(evt.currentTarget)
+            autosave.save()
         }
     })
 
@@ -128,6 +137,7 @@ function EnableSelectionOfElement(visualElement) {
         visualElement.addEventListener("click", evt => {
             if (page.mode == MODELABEL_DELETE) {
                 visualizationElement.removeVisualElement(visualElement)
+                autosave.save()
             }
         })
     }
@@ -136,6 +146,7 @@ function EnableSelectionOfElement(visualElement) {
     visualElement.addEventListener("click", evt => { 
         if (page.mode == MODELABEL_HIGHLIGHT_TOOL) { 
             evt.currentTarget.classList.toggle("highlight")
+            autosave.save()
         }
     })
 }
@@ -207,6 +218,7 @@ function EnableBox() {
             box.removeAttribute("id")   // used for CSS
             visualizationElement.addVisualElement(box)
             EnableSelectionOfElement(box)
+            autosave.save()
 
             box = null
         }

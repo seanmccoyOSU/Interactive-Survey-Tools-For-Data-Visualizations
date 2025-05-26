@@ -10,6 +10,22 @@
     100% {}
 }
 
+#help-window {
+    position: fixed;
+    z-index: 25;
+    height: 80%;
+    width: 80%;
+    padding: 10px;
+    background-color: lightgray;
+    border-radius: 1%;
+}
+
+#close-help-window-button {
+    margin-left: 95%;
+    border: 0;
+    background-color: transparent;
+}
+
 .mark {
     r: var(--zoom-scale);
     stroke-width: var(--mark-outline);
@@ -248,4 +264,5 @@ button, input {
     font-weight: bold;
     font-family: sans-serif;
     max-height: 5vh;
+    cursor: pointer;
 }
