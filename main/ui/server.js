@@ -6,8 +6,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const path = require('path');
-app.use(express.static(path.join(__dirname, "public")))
-const fs = require('fs')
+app.use(express.static(path.join(__dirname, "public"), { extensions: ['html'] }))
 
 // setup required for processing cookies
 const cookieParser = require('cookie-parser');
@@ -25,6 +24,9 @@ const api = (DEBUG) ? (
         baseURL: process.env.MAIN_API_URL
     })
 )
+
+// use this function as a parameter in an API call to send auth data
+// this function just returns the authorization header using the parameter 'token'
 function withAuth(token) {
     return { headers: { Authorization: `Bearer ${token}` } }
 }
@@ -45,17 +47,12 @@ app.engine("handlebars", exphbs.engine({
 }))
 app.set("view engine", "handlebars")
 
-// map certain API endpoints to name of page to render
-const apiPageNames = {
-    '/users': 'register',
-    '/users/login': 'login'
-}
+
 
 // some browsers request this automatically, ignoring for now
 app.get('/favicon.ico', (req, res, next) => {
     return
 })
-
 
 
 // Default path
@@ -70,7 +67,7 @@ app.get('/', async (req, res, next) => {
     } catch (error) {
         if (error.response) {
             // if not logged in, display generic home page
-            res.render("home")
+            res.sendFile(path.join(__dirname, "public/home.html"))
         } else {
             next(error)
         }
@@ -131,6 +128,13 @@ app.get('/login', (req, res) => {
 
 // handles what to do on ui registration, login, or logout
 app.post('/users(/*)?', async (req, res, next) => {
+
+    // map certain API endpoints to name of page to render
+    const apiPageNames = {
+        '/users': 'register',
+        '/users/login': 'login'
+    }
+
     try {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
@@ -492,7 +496,7 @@ app.post('/:resource/:id?/:method?', async (req, res, next) => {
 
 // anything else is 404
 app.use('*', function (req, res, next) {
-    res.render("404page")
+    res.sendFile(path.join(__dirname, "public/404.html"))
 })
 
 // error case
