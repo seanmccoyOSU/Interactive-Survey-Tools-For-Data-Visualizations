@@ -177,7 +177,7 @@ app.get('/visualizations/:id', async (req, res, next) => {
 
 // Edit survey design
 app.get('/surveyDesigns/:id', async (req, res, next) => {
-    let response
+    let response = null
 
     try {
         response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
@@ -185,36 +185,38 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
         next(error)
     }
 
-    const localOffset = new Date(Date.now()).getTimezoneOffset()
-    const today = new Date(Date.now() - (localOffset * 60000))
-	const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
+    if (response) {
 
-    try {
-        const questionResponse = await api.get(req.originalUrl + "/questions", withAuth(req.cookies.access_token))
-        
-        res.render("editsurveydesign", {
-            name: response.data.name,
-            id: response.data.id,
-            title: response.data.title,
-            introText: response.data.introText,
-            questions: questionResponse.data.questions,
-            conclusionText: response.data.conclusionText,
-            today: today.toISOString().substring(0, 16),
-            tomorrow: tomorrow.toISOString().substring(0, 16)
-        })
-    } catch (error) {
-        res.render("editsurveydesign", {
-            name: response.data.name,
-            id: response.data.id,
-            title: response.data.title,
-            introText: response.data.introText,
-            questionError: "Unable to load questions",
-            conclusionText: response.data.conclusionText,
-            today: today.toISOString().substring(0, 16),
-            tomorrow: tomorrow.toISOString().substring(0, 16)
-        })
+        const localOffset = new Date(Date.now()).getTimezoneOffset()
+        const today = new Date(Date.now() - (localOffset * 60000))
+        const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
+
+        try {
+            const questionResponse = await api.get(req.originalUrl + "/questions", withAuth(req.cookies.access_token))
+            
+            res.render("editsurveydesign", {
+                name: response.data.name,
+                id: response.data.id,
+                title: response.data.title,
+                introText: response.data.introText,
+                questions: questionResponse.data.questions,
+                conclusionText: response.data.conclusionText,
+                today: today.toISOString().substring(0, 16),
+                tomorrow: tomorrow.toISOString().substring(0, 16)
+            })
+        } catch (error) {
+            res.render("editsurveydesign", {
+                name: response.data.name,
+                id: response.data.id,
+                title: response.data.title,
+                introText: response.data.introText,
+                questionError: "Unable to load questions",
+                conclusionText: response.data.conclusionText,
+                today: today.toISOString().substring(0, 16),
+                tomorrow: tomorrow.toISOString().substring(0, 16)
+            })
+        }
     }
-        
 
     
 });
@@ -501,12 +503,21 @@ app.use('*', function (req, res, next) {
 
 // error case
 app.use('*', function (err, req, res, next) {
-    console.error("== Error:", err)
-    
-    res.status(500).send({
-        error: "Server error.  Please try again later."
-        
-    })
+    switch(err.response?.status) {
+        case 400:
+            res.sendFile(path.join(__dirname, "public/badrequest.html"))
+            break;
+        case 401:
+        case 403:
+            res.sendFile(path.join(__dirname, "public/unauthorized.html"))
+            break;
+        case 404:
+            res.sendFile(path.join(__dirname, "public/404.html"))
+            break;
+        default:
+            console.error("== Error:", err)
+            res.sendFile(path.join(__dirname, "public/internalerror.html"))
+    }
 })
 
 // start server
