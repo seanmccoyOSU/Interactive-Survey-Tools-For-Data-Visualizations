@@ -28,7 +28,9 @@ router.get('/', requireAuthentication, handleErrors( async (req, res, next) => {
 router.post('/', handleErrors( async (req, res, next) => {
 	// create new user entry in database
 	const user = await User.create(req.body, UserClientFields)
-	res.status(201).send({ id: user.id })
+	// send authentication
+	const token = generateAuthToken(user.id)
+	res.status(201).send({ id: user.id, token: token })
 }))
 
 // Login user
@@ -41,8 +43,8 @@ router.post('/login', handleErrors( async (req, res, next) => {
 		// send authentication token back as a cookie
 		// this token lets API know who the user is and whether they have an authenticated login 
 		const token = generateAuthToken(user.id)
-		res.cookie("access_token", token, { httpOnly: true })
-		res.status(200).send()
+		//res.cookie("access_token", token, { httpOnly: true })
+		res.status(200).send({ token: token })
 	} else {
 		// invalid login attempt
 		res.status(401).send({
@@ -54,8 +56,8 @@ router.post('/login', handleErrors( async (req, res, next) => {
 // logout user
 router.post('/logout', handleErrors( async (req, res, next) => {
 	// simply get rid of the authentication token
-	res.cookie("access_token", null, { httpOnly: true })
-	res.status(200).send()
+	//res.cookie("access_token", null, { httpOnly: true })
+	res.status(200).send({ token: null })
 }))
 
 

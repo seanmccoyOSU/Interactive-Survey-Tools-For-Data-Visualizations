@@ -12,9 +12,6 @@ const fs = require('fs')
 // setup required for processing cookies
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-const { wrapper } = require('axios-cookiejar-support')
-const tough = require('tough-cookie');
-const cookieJar = new tough.CookieJar();
 
 // setup axios API interface
 const DEBUG = process.argv[2] == "-debug"
@@ -24,12 +21,13 @@ const api = (DEBUG) ? (
     require('./debugApi')
 ) : (
     // else, use the real API
-    wrapper(axios.create({
-        baseURL: process.env.MAIN_API_URL,
-        jar: cookieJar,
-        withCredentials: true
-    }))
+    axios.create({
+        baseURL: process.env.MAIN_API_URL
+    })
 )
+function withAuth(token) {
+    return { headers: { Authorization: `Bearer ${token}` } }
+}
 
 // body-parser setup
 // needed to parse HTML form submissions for API requests
@@ -67,7 +65,7 @@ app.get('/', async (req, res, next) => {
     
     try {
         // get user info
-        const response = await api.get('/users')
+        const response = await api.get('/users', withAuth(req.cookies.access_token))
         user = response.data
     } catch (error) {
         if (error.response) {
@@ -90,19 +88,19 @@ app.get('/', async (req, res, next) => {
         let pSurError = ""
 
         try {
-            userVisualizations = await api.get(`/users/${user.id}/visualizations`)
+            userVisualizations = await api.get(`/users/${user.id}/visualizations`, withAuth(req.cookies.access_token))
         } catch {
             visError = "Unable to load visualizations."
         }
         
         try {
-            userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
+            userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`, withAuth(req.cookies.access_token))
         } catch {
             surError = "Unable to load survey designs."
         }
 
         try {
-            userPublishedSurveys = await api.get(`/users/${user.id}/publishedSurveys`)
+            userPublishedSurveys = await api.get(`/users/${user.id}/publishedSurveys`, withAuth(req.cookies.access_token))
         } catch {
             pSurError = "Unable to load published surveys."
         }
@@ -137,6 +135,9 @@ app.post('/users(/*)?', async (req, res, next) => {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
 
+        // save credentials as a cookie
+        res.cookie("access_token", response.data.token, { httpOnly: true })
+
         // on success, go back to home page
         res.redirect(req.protocol + "://" + req.get("host"))
 
@@ -156,7 +157,7 @@ app.post('/users(/*)?', async (req, res, next) => {
 app.get('/visualizations/:id', async (req, res, next) => {
     try {
         // relay post request to api
-        const response = await api.get(req.originalUrl)
+        const response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
 
         // on success, refresh page
         res.render("visualization", {
@@ -175,7 +176,7 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
     let response
 
     try {
-        response = await api.get(req.originalUrl)
+        response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
     } catch (error) {
         next(error)
     }
@@ -185,7 +186,7 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
 	const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
 
     try {
-        const questionResponse = await api.get(req.originalUrl + "/questions")
+        const questionResponse = await api.get(req.originalUrl + "/questions", withAuth(req.cookies.access_token))
         
         res.render("editsurveydesign", {
             name: response.data.name,
@@ -217,7 +218,7 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
 // button for publishing survey design
 app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
     try {
-        await api.post(req.originalUrl, req.body)
+        await api.post(req.originalUrl, req.body, withAuth(req.cookies.access_token))
         res.redirect(req.protocol + "://" + req.get("host"))
     } catch (error) {
         next(error)
@@ -228,9 +229,9 @@ app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
 app.get('/questions/:id', async (req, res, next) => {
     try {
         const questionTypes = (await import("./public/src/questionTypes.mjs")).default
-        const response = await api.get(req.originalUrl)
-        const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`)
-        const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`)
+        const response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
+        const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`, withAuth(req.cookies.access_token))
+        const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`, withAuth(req.cookies.access_token))
 
         let editQuestionTypes = []
         for (const type of questionTypes) {
@@ -267,7 +268,7 @@ app.get('/questions/:id', async (req, res, next) => {
 // View published survey
 app.get('/publishedSurveys/:id', async (req, res, next) => {
     try {
-        const response = await api.get(req.originalUrl)
+        const response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
         let openDateTime
         let closeDateTime
         if (response.data.openDateTime instanceof Date) {
@@ -283,7 +284,7 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
         }
 
         if (req.query.downloadCSV) {
-            const { data: pub } = await api.get(req.originalUrl)
+            const { data: pub } = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
             const participants = pub.results?.participants || []
             // build one flat row per answer
             const records = []
@@ -336,7 +337,7 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
         req.body.allowComment = !!req.body.allowComment
         req.body.required = !!req.body.required
 
-        const response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body)
+        const response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body, withAuth(req.cookies.access_token))
         res.redirect(req.get('Referrer'))
     } catch (error) {
         next(error)
@@ -460,10 +461,6 @@ app.patch('/takeSurvey/:hash', async (req, res, next) => {
     res.send()
 })
 
-// for submitting survey responses
-// app.post('/takeSurvey/:hash', async (req, res, next) => {
-// }
-
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
 app.post('/:resource/:id?/:method?', async (req, res, next) => {
     let response
@@ -472,16 +469,16 @@ app.post('/:resource/:id?/:method?', async (req, res, next) => {
         // relay request to api
         switch (req.params.method) {
             case 'PATCH':
-                response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body)
+                response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body, withAuth(req.cookies.access_token))
                 break;
             case 'DELETE':
-                response = await api.delete(req.originalUrl.split('/DELETE')[0], req.body)
+                response = await api.delete(req.originalUrl.split('/DELETE')[0], withAuth(req.cookies.access_token))
                 break;
             case 'POST':
-                response = await api.post(req.originalUrl.split('/POST')[0], req.body)
+                response = await api.post(req.originalUrl.split('/POST')[0], req.body, withAuth(req.cookies.access_token))
                 break;
             default:
-                response = await api.post(req.originalUrl, req.body)
+                response = await api.post(req.originalUrl, req.body, withAuth(req.cookies.access_token))
         }
 
         // refresh
