@@ -12,6 +12,8 @@
 *       page - interface for managing the page mode and adding new options, tools, and file buttons (see ../visualizer.js)
 *       visualContainer - div DOM element that spans the whole page and contains the visualization 
 *       autosave - interface for autosaving (calling autosave.save() will save the visual)
+*
+* Do note that each function in this template is optional, so if no new code is added, it's best to delete it to save on memory.
 */
 
 import { visualizationElement, svgElement, wrapper, debug, screenToSVG, page, visualContainer, autosave } from "../visualizer.js"

@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="box answer-box">
-                    <meta id="requirements" number={{number}} min={{min}} max={{max}} required={{required}} questionType="{{questionType}}">
+                    <meta id="requirements" number={{number}} min={{min}} max={{max}} {{#if required}}required="true"{{/if}} questionType="{{questionType}}">
                     <span><strong>{{prompt}}</strong></span>
                     <div class="answer-space">
                         {{#if shortAnswer}}
