@@ -525,6 +525,6 @@ app.use('*', function (err, req, res, next) {
 })
 
 // start server
-app.listen(process.env.MAIN_UI_PORT, function () {
+app.listen(process.env.MAIN_UI_PORT, '0.0.0.0', function () {
     console.log("== Server is running on port", process.env.MAIN_UI_PORT)
-})
+});
