@@ -9,24 +9,48 @@
   </head>
   <body id="body">
     <div id="wrapper" class={{role}}>
-      <button id = "zoom-in">+</button>
-      <button id = "zoom-out">-</button>
+      <div id="help-window" hidden>
+        <button id="close-help-window-button">X</button>
+        <iframe height="90%" width="90%" src="/help.html"></iframe>
+      </div>
+
+      <button id = "zoom-in" class="zoom-button">+</button>
+      <button id = "zoom-out" class="zoom-button">−</button>
       <button id = "editor-button" hidden>editor mode</button>
       <button id = "participant-button" hidden>participant mode</button>
-      <input 
+      <div id="uploader-container" hidden>
+        <input 
         type="file" 
         id="svg-uploader" 
         accept=".svg, .jpg, .png" 
         style="margin: 10px;"
-        hidden
-      />
-      <button id="save-svg" hidden>Save SVG</button>
-      <button id="pan-button" hidden>Pan/Select</button>
-      <!-- <button id="select-button" hidden>Select</button> -->
-      <button id="create-button" hidden>Create</button>
-      <button id="delete-button" hidden>Delete</button>
-      <button id="set-all-selectable-button" hidden>Make All Elements Selectable</button>
-      <button id="set-all-not-selectable-button" hidden>Make All Elements Not Selectable</button>
+        />
+      </div>
+      
+      <div id="button-header">
+
+        <small id="save-status"></small>
+        
+        <div class="file dropdown" hidden>
+          File
+          <div class="dropdown-buttons file-buttons">
+          </div>
+        </div>
+        <div class="options dropdown" hidden>
+          Options
+          <div class="dropdown-buttons option-buttons">
+          </div>
+        </div>
+        <div class="tools dropdown" hidden>
+          Tools
+          <div class="dropdown-buttons tool-buttons">
+          </div>
+        </div>
+
+        <button id="help-button" hidden>?</button>
+
+      </div>
+      
       <div id="visual-container">{{{svg}}}</div>
       
     </div>

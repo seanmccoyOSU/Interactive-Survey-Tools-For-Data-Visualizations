@@ -25,6 +25,34 @@ body {
     gap: 20px;
 }
 
+.edit-visual-container {
+    width: 100%;
+    height: 100%;
+    justify-items: center;
+}
+
+.go-home-button {
+    background-color: cornflowerblue;
+    color: white;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 5%;
+}
+
+.title-container {
+    display: block;
+    height: 90%;
+}
+
+.survey-title {
+    justify-self: center;
+    margin: 10px;
+}
+
+.intro-text {
+    white-space: pre-wrap;
+}
+
 .image-section {
     position: relative;
     border: 3px solid #ddd;
@@ -90,6 +118,10 @@ body {
     font-weight: bold;
 }
 
+.title-button-container {
+    justify-self: center;
+}
+
 .nav-button {
     background-color: #d9bc66;
     border: none;
@@ -131,9 +163,9 @@ body {
 
 .welcome-box {
     justify-self: center;
-    position: absolute;
     background: lightgoldenrodyellow;
-    height: 50%;
+    height: 80vh;
+    width: 700px;
 }
 
 .conclusion-box {
@@ -145,10 +177,25 @@ body {
 
 .answer-box {
     background: salmon;
+    max-height: 182px;
+    display: flex;
+    flex-direction: column;
+}
+
+.answer-space {
+    overflow-y: auto;
 }
 
 .answer-entry-box {
     background: pink;
+    height: 105px;
+}
+
+.write-in-field {
+    background: pink;
+    width: 50%;
+    border-width: thin;
+    padding: 2px;
 }
 
 #required {

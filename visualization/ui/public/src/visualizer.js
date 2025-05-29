@@ -1,130 +1,245 @@
 import {VisualizationElement} from "./visualizationElement.js"
+import {visualizerDecorator} from "./features/visualizerDecorator.js"
 
-let debug = false
-let mouseMode = "pan"
-let visualizationElement
-let svgElement
-const wrapper = document.getElementById("wrapper")                      // container that covers entire page
-const visualContainer = document.getElementById("visual-container")     // container for the visual
+export let debug = false
+let visualizer
+export let visualizationElement
+export let svgElement
+export const wrapper = document.getElementById("wrapper")                      // container that covers entire page
+export const visualContainer = document.getElementById("visual-container")     // container for the visual
 
-document.getElementById("pan-button").addEventListener("click", (evt) => {
-    mouseMode = "pan" 
-    wrapper.style.cursor = "grab"
-})
 
-// document.getElementById("select-button").addEventListener("click", (evt) => {
-//     mouseMode = "select" 
-//     wrapper.style.cursor = "default"
-// })
+const visualizerBase = {
+    // called when the page loads regardless of role
+    onPageLoad: function() {
+        
+    },
+    
+    // called when the page loads as an editor
+    onPageLoadAsEditor: function() {
+        // create file uploader
+        const uploader = document.getElementById("svg-uploader");
+        const uploaderContainer = document.getElementById("uploader-container");
+        uploaderContainer.removeAttribute('hidden')
+        uploader.addEventListener("change", handleSvgUpload);
+        
+        // help button
+        document.getElementById("help-button").removeAttribute("hidden")
+        document.getElementById("help-button").addEventListener("click", () => {
+            document.getElementById("help-window").removeAttribute("hidden")
+        })
+        document.getElementById("close-help-window-button").addEventListener("click", () => {
+            document.getElementById("help-window").setAttribute("hidden", "true")
+        })
+    },
+    
+    // called when the page loads as a participant
+    onPageLoadAsParticipant: function() {
+    
+    },
+    
+    // called when the page loads in debug mode
+    onPageLoadDebug: function() {
+        // debug mode set up
+        debug = true
+    
+        // create file uploader
+        const uploader = document.getElementById("svg-uploader");
+        const uploaderContainer = document.getElementById("uploader-container");
+        uploaderContainer.removeAttribute('hidden')
+        uploader.addEventListener("change", handleSvgUpload);  
+    
+        // create debug mode buttons
+        document.getElementById("editor-button").removeAttribute("hidden")
+        document.getElementById("participant-button").removeAttribute("hidden")
+    
+        document.getElementById("editor-button").addEventListener("click", (evt) => {
+            wrapper.classList.remove("participant") 
+            wrapper.classList.add("editor") 
+        })
+    
+        document.getElementById("participant-button").addEventListener("click", (evt) => {
+            wrapper.classList.remove("editor") 
+            wrapper.classList.add("participant") 
+        })
+    },
 
-document.getElementById("create-button").addEventListener("click", (evt) => {
-    mouseMode = "create" 
-    wrapper.style.cursor = "crosshair"
-})
+    // called when the SVG loads for the first time
+    onFirstLoadSvg: function() {
+        if (wrapper.classList.contains("editor") || debug) {
+            
 
-document.getElementById("delete-button").addEventListener("click", (evt) => {
-    mouseMode = "delete" 
-    wrapper.style.cursor = "default"
-})
+            page.addFileButton("Save", () => {
+                // fetch(window.location.href, { 
+                //     method: "PUT",
+                //     body: JSON.stringify({
+                //         svg: svgElement.outerHTML
+                //     }),
+                //     headers: {
+                //         "Content-type": "application/json",
+                //     },    
+                // })
+                autosave.save()
+            })
+
+            document.getElementById("uploader-container").setAttribute("hidden", "true")
+
+            page.addFileButton("Import", () => {
+                document.getElementById("svg-uploader").click()
+            })
+        }
+    },
+
+    // called each time the SVG loads
+    onLoadSvg: function() {
+        // send scale factor to CSS
+        document.body.style.setProperty("--visual-scale", visualizationElement.scale / 80 + "px")
+        document.body.style.setProperty("--zoom-scale", visualizationElement.scale / 80 + "px")
+    },
+
+    // called when the page mode changes
+    onChangeMode: function() {
+
+    }
+}
+
+export const page = {
+    changeModeListeners: [],
+    mode: "",
+    set mode(s) {
+        // change class in wrapper for CSS
+        wrapper.classList.remove(this.value)
+        wrapper.classList.add(s)
+
+        // set the mode
+        this.value = s
+
+        // call listeners after changing the mode
+        for (const listener of this.changeModeListeners) {
+            listener()
+        }
+    },
+    get mode() {
+        return this.value
+    },
+
+    // takes a function listener
+    // makes it so function listener will be called when the page mode changes
+    addChangeModeListener: function(listener) {
+        this.changeModeListeners.push(listener)
+    },
+
+    addTool: function(toolName, toolMode) {
+        // tools dropdown is hidden by default, remove
+        document.getElementsByClassName("tools")[0].removeAttribute("hidden")
+
+        // create the button element
+        const newTool = document.createElement("button")
+        newTool.textContent = toolName
+
+        // clicking the button will change the mode accordingly
+        newTool.addEventListener("click", () => {this.mode = toolMode})
+
+        // add button to DOM
+        const toolButtons = document.getElementsByClassName("tool-buttons")[0]
+        toolButtons.appendChild(newTool)
+    },
+
+    addOption: function(optionName, mode, onClick) {
+        // options dropdown is hidden by default, remove
+        document.getElementsByClassName("options")[0].removeAttribute("hidden")
+
+        // create the button
+        const newOption = document.createElement("button")
+        newOption.textContent = optionName
+        newOption.addEventListener("click", onClick)
+
+        // button will only be visible in the right mode
+        if (this.mode != mode)
+            newOption.setAttribute("hidden", "true")
+        this.addChangeModeListener(() => {
+            if (this.mode == mode) {
+                newOption.removeAttribute("hidden")
+            } else {
+                newOption.setAttribute("hidden", "true")
+            }
+        })
+
+        // add button to DOM
+        const optionButtons = document.getElementsByClassName("option-buttons")[0]
+        optionButtons.appendChild(newOption)
+    },
+
+    addFileButton: function(buttonText, onClick) {
+        // file dropdown is hidden by default, remove
+        document.getElementsByClassName("file")[0].removeAttribute("hidden")
+
+        // create the button
+        const newFileButton = document.createElement("button")
+        newFileButton.textContent = buttonText
+        newFileButton.addEventListener("click", onClick)
+
+        // add button to DOM
+        const fileButtons = document.getElementsByClassName("file-buttons")[0]
+        fileButtons.appendChild(newFileButton)
+    }
+}
+
+export const autosave = {
+    statusText: "",
+    set statusText(s) {
+        this.value = s
+        document.getElementById("save-status").textContent = s
+    },
+    save: function() {
+        this.statusText = "Saving..."
+        fetch(window.location.href, { 
+            method: "PUT",
+            body: JSON.stringify({
+                svg: svgElement.outerHTML
+            }),
+            headers: {
+                "Content-type": "application/json",
+            },    
+        }).then(response => {
+            if (response.ok) {
+                this.statusText = "Changes saved"
+            } else {
+                this.statusText = "There was an error saving changes!"
+            }
+        })
+    }
+}
+
 
 // start loading svg once page has loaded
 addEventListener("DOMContentLoaded", () => {
+    visualizer = visualizerDecorator(visualizerBase)
+
+    page.addChangeModeListener(visualizer.onChangeMode)
+
+    visualizer.onPageLoad()
+
     if (wrapper.classList.contains("editor")) {
-        document.getElementById("pan-button").removeAttribute("hidden")
-        document.getElementById("create-button").removeAttribute("hidden")
-        document.getElementById("delete-button").removeAttribute("hidden")
-        
-        const uploader = document.getElementById("svg-uploader");
-        uploader.removeAttribute("hidden")
-        uploader.addEventListener("change", handleSvgUpload);  
-
-        document.getElementById("save-svg").removeAttribute("hidden")
-
-        // save changes to database
-        document.getElementById("save-svg").addEventListener("click", () => {
-            fetch(window.location.href, { 
-                method: "PUT",
-                body: JSON.stringify({
-                    svg: svgElement.outerHTML
-                }),
-                headers: {
-                    "Content-type": "application/json",
-                },    
-            })
-        })
+        visualizer.onPageLoadAsEditor()
     } else {
-        wrapper.classList.add("participant")
-        
         // debug mode
         if (wrapper.classList.contains("debug")) {
-            // debug mode set up
-            debug = true
-
-            const uploader = document.getElementById("svg-uploader");
-            uploader.removeAttribute("hidden")
-            uploader.addEventListener("change", handleSvgUpload);  
-
-            document.getElementById("editor-button").removeAttribute("hidden")
-            document.getElementById("participant-button").removeAttribute("hidden")
-            document.getElementById("save-svg").removeAttribute("hidden")
-
-            // make buttons functional
-            document.getElementById("editor-button").addEventListener("click", (evt) => {
-                wrapper.classList.remove("participant") 
-                wrapper.classList.add("editor") 
-                document.getElementById("pan-button").removeAttribute("hidden")
-                document.getElementById("create-button").removeAttribute("hidden")
-                document.getElementById("delete-button").removeAttribute("hidden")
-            })
-
-            document.getElementById("participant-button").addEventListener("click", (evt) => {
-                wrapper.classList.remove("editor") 
-                wrapper.classList.add("participant") 
-                mouseMode = "pan"
-                document.getElementById("pan-button").setAttribute("hidden", "true")
-                document.getElementById("create-button").setAttribute("hidden", "true")
-                document.getElementById("delete-button").setAttribute("hidden", "true")
-            })
-
-            //Locally saves the current .SVG file being displayed
-            document.getElementById("save-svg").addEventListener("click", () => {
-                // we don't want to save modified scale and position
-                visualizationElement.resetScaleAndPosition()
-
-                // 1) Convert the current <svg> to a string
-                //    Using XMLSerializer preserves all attributes and nested elements
-                const serializer = new XMLSerializer();
-                const svgString = serializer.serializeToString(svgElement);
-            
-                // 2) Create a Blob from the string, then a URL from the Blob
-                const blob = new Blob([svgString], { type: "image/svg+xml" });
-                const url = URL.createObjectURL(blob);
-            
-                // 3) Create a temporary link element
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = "edited-visual.svg"; // default file name in download dialog
-                document.body.appendChild(link);
-            
-                // 4) Programmatically click it to start the download, then clean up
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            });
+            visualizer.onPageLoadDebug()
         }
+
+        page.mode = wrapper.className
+        visualizer.onPageLoadAsParticipant()
     }
 
     if (visualContainer.firstElementChild) {
         svgElement = visualContainer.firstElementChild
         visualizationElement = new VisualizationElement(svgElement)
-        OnLoadSvg();
-        OnFirstUpload();
+        visualizer.onLoadSvg();
+        visualizer.onFirstLoadSvg();
     } 
     
 });
-
-
-
 
 
 function handleSvgUpload(event){
@@ -171,31 +286,32 @@ function loadSvgFromText(svgText) {
     visualizationElement = new VisualizationElement(svgElement)
 
     if (!debug) {
-        fetch(window.location.href, { 
-            method: "PUT",
-            body: JSON.stringify({
-                svg: svgElement.outerHTML
-            }),
-            headers: {
-                "Content-type": "application/json",
-            },    
-        })
+        // fetch(window.location.href, { 
+        //     method: "PUT",
+        //     body: JSON.stringify({
+        //         svg: svgElement.outerHTML
+        //     }),
+        //     headers: {
+        //         "Content-type": "application/json",
+        //     },    
+        // })
+        autosave.save()
     }
   
     // Re-initialize pan/zoom
-    OnLoadSvg();
+    visualizer.onLoadSvg();
     if (firstUpload)
-        OnFirstUpload();
+        visualizer.onFirstLoadSvg();
 }
 
-function loadRaster(file) {
+async function loadRaster(file) {
     // send request to upload image
     const formData = new FormData()
     const urlParts = window.location.href.split('/')
     const fileParts = file.name.split('.')
     const fileUrl = window.location.href.split('?')[0] + "/photo"
     formData.append('file', file, urlParts[urlParts.length-1].split('?')[0] + '.' + fileParts[fileParts.length-1]);
-    fetch(fileUrl, { 
+    await fetch(fileUrl, { 
         method: "POST",
         body: formData
     })
@@ -218,248 +334,34 @@ function loadRaster(file) {
 
     visualizationElement = new VisualizationElement(svgElement)
 
-    fetch(window.location.href, { 
-        method: "PUT",
-        body: JSON.stringify({
-            svg: svgElement.outerHTML
-        }),
-        headers: {
-            "Content-type": "application/json",
-        },    
-    })
-
-    window.location.replace(window.location.href)
+    autosave.save()
+    // fetch(window.location.href, { 
+    //     method: "PUT",
+    //     body: JSON.stringify({
+    //         svg: svgElement.outerHTML
+    //     }),
+    //     headers: {
+    //         "Content-type": "application/json",
+    //     },    
+    // })
   
     // Re-initialize pan/zoom
-    OnLoadSvg();
+    visualizer.onLoadSvg();
     if (firstUpload)
-        OnFirstUpload();
+        visualizer.onFirstLoadSvg();
 }
 
-function OnLoadSvg() {
-    EnableSelection()
-}
-
-function OnFirstUpload() {
-    if (wrapper.classList.contains("editor") || debug) {
-        document.getElementById("set-all-selectable-button").removeAttribute("hidden")
-        document.getElementById("set-all-selectable-button").addEventListener("click", (evt) => {
-            visualizationElement.setAllSelectable()
-        })
-
-        document.getElementById("set-all-not-selectable-button").removeAttribute("hidden")
-        document.getElementById("set-all-not-selectable-button").addEventListener("click", (evt) => {
-            visualizationElement.setAllNotSelectable()
-        })
-    }
-    
-
-    EnablePanning()
-    EnableZoom()
-    EnableBox()
-}
-
-// Enable user to select/deselect vector elements by clicking on them
-function EnableSelection() {
-    // loop through all visual elements and add event listeners to each
-    for(const visualElement of visualizationElement.visualElements) {
-        EnableSelectionOfElement(visualElement)
-    }
-}
-
-// Enable user to select/deselect a single visual element
-function EnableSelectionOfElement(visualElement) {
-    // clicking on selectable element as a participant marks/unmarks as "selected"
-    visualElement.addEventListener("click", evt => { 
-        if (mouseMode == "pan" || mouseMode == "select") {
-            if (wrapper.classList.contains("participant") && visualizationElement.isSelectable(evt.currentTarget)) { 
-                visualizationElement.toggleSelection(evt.currentTarget)
-            } 
-        }
-    })
-
-    // clicking on element as an editor marks/unmarks as "selectable"
-    visualElement.addEventListener("click", evt => { 
-        if (mouseMode == "pan" || mouseMode == "select") {
-            if (wrapper.classList.contains("editor")) { 
-                visualizationElement.toggleSelectable(evt.currentTarget)
-            } 
-        }
-    })
-
-    // clicking on element in delete mode deletes it (only for custom elements)
-    if (visualizationElement.isCustom(visualElement)) {
-        visualElement.addEventListener("click", evt => {
-            if (mouseMode == "delete") {
-                visualizationElement.removeVisualElement(visualElement)
-            }
-        })
-    }
-}
-
-// Enable user to pan the visual by clicking and dragging anywhere on the page
-function EnablePanning() {
-    let isPanning = false
-    let startXMouse, startYMouse
-    let startXVisual, startYVisual
-
-    // define behavior for when user presses mouse button down anywhere on the page
-    wrapper.addEventListener("mousedown", evt => {
-        if (mouseMode == "pan") {
-            evt.preventDefault()
-            // while user holds the mouse button down, the user is panning
-            isPanning = true
-    
-            // get starting coordinates for visual and mouse
-            startXMouse = evt.clientX
-            startYMouse = evt.clientY
-            startXVisual = visualizationElement.x
-            startYVisual = visualizationElement.y
-    
-            // change cursor image to grabbing
-            wrapper.style.cursor = "grabbing"
-        }
-    })
-
-    // define behavior for when user moves mouse while panning
-    document.addEventListener("mousemove", evt => {
-        if (isPanning) {
-            // prevent mouse from highlighting text while panning
-            evt.preventDefault()
-
-            // get scale of visualization as it is displayed in the window
-            const svgBoundingBox = visualizationElement.svg.getBoundingClientRect()
-            const svgWindowScale = svgBoundingBox.height < svgBoundingBox.width ? svgBoundingBox.height : svgBoundingBox.width
-
-            // panning speed adjusts based on visualization's programmed scale and its window scale 
-            const speedModifier = visualizationElement.scale / svgWindowScale
-
-            // coordinates to move visual to
-            visualizationElement.x = startXVisual - (evt.clientX - startXMouse) * speedModifier
-            visualizationElement.y = startYVisual - (evt.clientY - startYMouse) * speedModifier
-        }
-    })
-
-    // define behavior for when user releases mouse button
-    document.addEventListener("mouseup", () => {
-        if (mouseMode == "pan") {
-            // the user is not panning if the mouse button is not pressed down
-            isPanning = false
-
-            // change cursor image to grab
-            wrapper.style.cursor = "grab"
-        }
-    })
-}
-
-// Enable user to zoom the visual by clicking the zoom buttons
-function EnableZoom() {
-    const zoomOutIntensity = 2
-    const zoomInIntensity = 1./zoomOutIntensity     // inverse
-    
-    // define zoom in event for clicking zoom in button
-    document.getElementById("zoom-in").addEventListener("click", () => {
-        let newSize = visualizationElement.scale * zoomInIntensity
-
-        visualizationElement.scale = newSize
-    })
-
-    // define zoom out event for clicking zoom out button
-    document.getElementById("zoom-out").addEventListener("click", () => {
-        let newSize = visualizationElement.scale * zoomOutIntensity
-
-        visualizationElement.scale = newSize
-    })
-}
-
-// Enable user to draw a box on the screen
-function EnableBox() {
-    let box
-    let boxStartingPoint
-    let isStartDrawing = false
-    let isDrawingBox = false
-
-    // when user presses mouse in select or create mode, enable box drawing
-    wrapper.addEventListener("mousedown", evt => {
-        if (mouseMode == "select" || mouseMode == "create") {
-            evt.preventDefault()
-            isStartDrawing = true
-        }
-    })
-
-    document.addEventListener("mousemove", evt => {
-        if (isStartDrawing) {       // when user has just started moving mouse after pressing down
-            evt.preventDefault()
-
-            // create rectangle element to start drawing the box at the mouse point
-            box = document.createElementNS("http://www.w3.org/2000/svg", "rect")
-            box.setAttribute("width", 0)
-            box.setAttribute("height", 0)
-            boxStartingPoint = screenToSVG(evt.clientX, evt.clientY)
-            box.setAttribute("x", boxStartingPoint.x)
-            box.setAttribute("y", boxStartingPoint.y)
-            box.setAttribute("id", "user-box")
-
-            visualizationElement.svg.appendChild(box)
-
-            isDrawingBox = true
-            isStartDrawing = false
-        } else if (isDrawingBox) {  // when user continues to move mouse
-            // prevent mouse from highlighting text while drawing
-            evt.preventDefault()
-
-            // calculate box dimensions based on where mouse has moved from its starting point
-            const newPoint = screenToSVG(evt.clientX, evt.clientY)
-            const newWidth = newPoint.x - boxStartingPoint.x
-            const newHeight = newPoint.y - boxStartingPoint.y
-
-            // width and height grow box to the right and down respectively
-            // if the user moves the mouse to the left or up (indicated by negative dimensions),
-            // the box needs to be shifted accordingly in the same direction to appear to grow in that direction
-            if (newWidth <= 0) {
-                box.setAttribute("x", boxStartingPoint.x + newWidth)
-            }
-            if (newHeight <= 0) {
-                box.setAttribute("y", boxStartingPoint.y + newHeight)
-            }
-
-            // set new box dimensions, can only be positive
-            box.setAttribute("width", Math.abs(newWidth))
-            box.setAttribute("height", Math.abs(newHeight))
-            
-        }
-    })
-
-    document.addEventListener("mouseup", evt => {
-        // user is not longer drawing on mouse release
-        isDrawingBox = false
-        isStartDrawing = false
-        if (box) {
-            if (mouseMode == "select") {
-                box.remove()
-                // FUTURE GOAL: box selection
-            } else if (mouseMode == "create") {
-                // change from temporary box to actual visual element 
-                box.removeAttribute("id")
-                visualizationElement.addVisualElement(box)
-                EnableSelectionOfElement(box)
-            }
-
-            box = null
-        }
-    })
-}
 
 // The following function was adapted from stackoverflow user "inna" (Jan 19, 2018)
 // Adapted from function transformPoint() (name was taken from Paul LeBeau's answer) 
 // Sourced on 1/30/2025
 // Source URL: https://stackoverflow.com/questions/48343436/how-to-convert-svg-element-coordinates-to-screen-coordinates
-function screenToSVG(screenX, screenY) {
+export const screenToSVG = function(screenX, screenY) {
     const p = DOMPoint.fromPoint(svgElement)
     p.x = screenX
     p.y = screenY
     return p.matrixTransform(svgElement.getScreenCTM().inverse());
- }
+}
 
 // this is in response for an iframe message for the count of selected elements, ids of selected elements, or selection based on array of ids
 window.addEventListener('message', (event) => {
@@ -467,11 +369,32 @@ window.addEventListener('message', (event) => {
         event.source.postMessage({ type: "count", count: visualizationElement.getNumberOfSelectedElements() }, "*")
     else if (event.data == "ids")
         event.source.postMessage({ type: "ids", ids: visualizationElement.getSelectedIds() }, "*")
-    else if (event.data.selectIds) {
+    else if (event.data == "coordinates") {
+        let coordinates = []
+        const markContainer = document.getElementsByClassName("mark-container")[0]
+        if (markContainer) {
+            for (const mark of markContainer.getElementsByClassName("mark")) {
+                coordinates.push("x:" + mark.cx.baseVal.value + "y:" + mark.cy.baseVal.value)
+            }
+        }
+        event.source.postMessage({ type: "coordinates", coordinates: coordinates }, "*")
+    } else if (event.data.selectIds) {
         for (const id of event.data.selectIds) {
             const elementToSelect = visualizationElement.getElementById(id)
             if (elementToSelect)
                 visualizationElement.select(elementToSelect)
+        }
+    } else if (event.data.markCoordinates) {
+        const markContainer = document.createElementNS("http://www.w3.org/2000/svg", "g")
+        visualizationElement.svg.appendChild(markContainer)
+        markContainer.classList.add("mark-container")
+
+        for (const coordinate of event.data.markCoordinates) {
+            const x = coordinate.split(":")[1].slice(0,-1)
+            const y = coordinate.split(":")[2]
+            const point = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+            markContainer.appendChild(point)
+            point.outerHTML = `<circle cx=\"${x}\" cy=\"${y}\" class=\"mark\"></circle>`
         }
     }
 })

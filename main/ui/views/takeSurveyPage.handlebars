@@ -19,7 +19,7 @@
                 
                 <div class="image-section">
                     {{#unless DEBUG}}
-                        <iframe id="displayedImage" src="{{visualURL}}/{{visualizationContentId}}" height="100%" width="100%"></iframe>
+                        <iframe id="displayedImage" src="{{visualURL}}/{{visualizationContentId}}?{{visualModeLabel}}=true" height="100%" width="100%"></iframe>
                     {{/unless}}
                     {{#if DEBUG}}
                         <iframe id="displayedImage" src="{{visualURL}}" height="100%" width="100%"></iframe>
@@ -43,23 +43,35 @@
                 </div>
 
                 <div class="box answer-box">
-                    <meta id="requirements" number={{number}} min={{min}} max={{max}} required={{required}} questionType="{{questionType}}">
-                    {{#if shortAnswer}}
-                        <p><strong>Short answer:</strong>{{shortAnswerRequirement}}</p>
-                        <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer">{{response}}</textarea>
-                        <span id="character-tracker"><span id="current-characters"></span>{{#if hasMax}} / {{max}}{{/if}}</span>
-                    {{/if}}
+                    <meta id="requirements" number={{number}} min={{min}} max={{max}} {{#if required}}required="true"{{/if}} questionType="{{questionType}}">
+                    <span><strong>{{prompt}}</strong></span>
+                    <div class="answer-space">
+                        {{#if shortAnswer}}
+                            {{#if min}} must be at least {{min}} characters{{/if}}
+                            <textarea class="text-entry-box answer-entry-box" type="text" id="short-answer" name="short-answer">{{response}}</textarea>
+                            <span id="character-tracker"><span id="current-characters"></span>{{#if max}} / {{max}}{{/if}}</span>
+                        {{/if}}
+                        
+                        {{#if multipleChoice}}
+                            {{#each choices}}
+                                <input class="multiple-choice-box" type="checkbox" id="{{this.id}}" name="{{this.id}}" value="{{this.choice}}" {{#if this.checked}}checked{{/if}}>
+                                <label for="{{this.id}}"> {{this.choice}}</label>
+                                <br>
+                            {{/each}}
+                        {{/if}}
 
-                    {{#if selectElements}}
-                        <p><strong>Please select {{choiceRequirement}}elements on the visual to the left.</strong></p>
-                    {{/if}}
-                    
-                    {{#if multipleChoice}}
-                        <p><strong>Select {{choiceRequirement}}items:</strong></p>
-                        {{#each choices}}
-                            {{> choiceCheckItem}}
-                        {{/each}}
-                    {{/if}}
+                        {{#if radioChoice}}
+                            {{#each choices}}
+                                <input class="radio-choice" type="radio" id="{{this.id}}" name="radio" value="{{this.choice}}" {{#if this.checked}}checked{{/if}}>
+                                <label for="{{this.id}}"> {{this.choice}}</label>
+                                <br>
+                            {{/each}}
+                        {{/if}}
+
+                        {{#if writeInAnswer}}
+                            <input class="write-in-field" type="text" id="write-in" name="write-in" value="{{response}}">
+                        {{/if}}
+                    </div>
                 </div>
 
                 {{#if allowComment}}

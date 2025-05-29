@@ -73,7 +73,8 @@ const VisualizationElement = class {
      * @param {Element} element 
      */
     select(element) {
-        element.classList.add(SELECTION_LABEL)
+        if (element.classList.contains(SELECTABLE_LABEL))
+            element.classList.add(SELECTION_LABEL)
     }
 
     /**
@@ -89,7 +90,10 @@ const VisualizationElement = class {
      * @param {Element} element 
      */
     toggleSelection(element) {
-        element.classList.toggle(SELECTION_LABEL)
+        if (element.classList.contains(SELECTABLE_LABEL) && !element.classList.contains(SELECTION_LABEL))
+            element.classList.add(SELECTION_LABEL)
+        else
+            element.classList.remove(SELECTION_LABEL)
     }
 
     /**
@@ -176,7 +180,6 @@ const VisualizationElement = class {
 
     /**
      * Marks all elements as selectable
-     * @param {Array} elements 
      */
     setAllSelectable() {
         for (const element of this.visualElements) {
@@ -186,11 +189,28 @@ const VisualizationElement = class {
 
     /**
      * Marks all elements as not selectable
-     * @param {Array} elements 
      */
     setAllNotSelectable() {
         for (const element of this.visualElements) {
             this.setNotSelectable(element)
+        }
+    }
+
+    /**
+     * selects all elements
+     */
+    selectAll() {
+        for (const element of this.visualElements) {
+            this.select(element)
+        }
+    }
+
+    /**
+     * Marks all elements as selectable
+     */
+    deselectAll() {
+        for (const element of this.visualElements) {
+            this.deselect(element)
         }
     }
 

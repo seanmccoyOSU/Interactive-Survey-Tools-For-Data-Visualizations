@@ -6,15 +6,11 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const path = require('path');
-app.use(express.static(path.join(__dirname, "public")))
-const fs = require('fs')
+app.use(express.static(path.join(__dirname, "public"), { extensions: ['html'] }))
 
 // setup required for processing cookies
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-const { wrapper } = require('axios-cookiejar-support')
-const tough = require('tough-cookie');
-const cookieJar = new tough.CookieJar();
 
 // setup axios API interface
 const DEBUG = process.argv[2] == "-debug"
@@ -24,12 +20,16 @@ const api = (DEBUG) ? (
     require('./debugApi')
 ) : (
     // else, use the real API
-    wrapper(axios.create({
-        baseURL: process.env.MAIN_API_URL,
-        jar: cookieJar,
-        withCredentials: true
-    }))
+    axios.create({
+        baseURL: process.env.MAIN_API_URL
+    })
 )
+
+// use this function as a parameter in an API call to send auth data
+// this function just returns the authorization header using the parameter 'token'
+function withAuth(token) {
+    return { headers: { Authorization: `Bearer ${token}` } }
+}
 
 // body-parser setup
 // needed to parse HTML form submissions for API requests
@@ -47,17 +47,12 @@ app.engine("handlebars", exphbs.engine({
 }))
 app.set("view engine", "handlebars")
 
-// map certain API endpoints to name of page to render
-const apiPageNames = {
-    '/users': 'register',
-    '/users/login': 'login'
-}
+
 
 // some browsers request this automatically, ignoring for now
 app.get('/favicon.ico', (req, res, next) => {
     return
 })
-
 
 
 // Default path
@@ -67,12 +62,12 @@ app.get('/', async (req, res, next) => {
     
     try {
         // get user info
-        const response = await api.get('/users')
+        const response = await api.get('/users', withAuth(req.cookies.access_token))
         user = response.data
     } catch (error) {
         if (error.response) {
             // if not logged in, display generic home page
-            res.render("home")
+            res.sendFile(path.join(__dirname, "public/home.html"))
         } else {
             next(error)
         }
@@ -90,19 +85,19 @@ app.get('/', async (req, res, next) => {
         let pSurError = ""
 
         try {
-            userVisualizations = await api.get(`/users/${user.id}/visualizations`)
+            userVisualizations = await api.get(`/users/${user.id}/visualizations`, withAuth(req.cookies.access_token))
         } catch {
             visError = "Unable to load visualizations."
         }
         
         try {
-            userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`)
+            userSurveyDesigns = await api.get(`/users/${user.id}/surveyDesigns`, withAuth(req.cookies.access_token))
         } catch {
             surError = "Unable to load survey designs."
         }
 
         try {
-            userPublishedSurveys = await api.get(`/users/${user.id}/publishedSurveys`)
+            userPublishedSurveys = await api.get(`/users/${user.id}/publishedSurveys`, withAuth(req.cookies.access_token))
         } catch {
             pSurError = "Unable to load published surveys."
         }
@@ -133,9 +128,19 @@ app.get('/login', (req, res) => {
 
 // handles what to do on ui registration, login, or logout
 app.post('/users(/*)?', async (req, res, next) => {
+
+    // map certain API endpoints to name of page to render
+    const apiPageNames = {
+        '/users': 'register',
+        '/users/login': 'login'
+    }
+
     try {
         // relay post request to api
         const response = await api.post(req.originalUrl, req.body)
+
+        // save credentials as a cookie
+        res.cookie("access_token", response.data.token, { httpOnly: true })
 
         // on success, go back to home page
         res.redirect(req.protocol + "://" + req.get("host"))
@@ -156,7 +161,7 @@ app.post('/users(/*)?', async (req, res, next) => {
 app.get('/visualizations/:id', async (req, res, next) => {
     try {
         // relay post request to api
-        const response = await api.get(req.originalUrl)
+        const response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
 
         // on success, refresh page
         res.render("visualization", {
@@ -172,44 +177,46 @@ app.get('/visualizations/:id', async (req, res, next) => {
 
 // Edit survey design
 app.get('/surveyDesigns/:id', async (req, res, next) => {
-    let response
+    let response = null
 
     try {
-        response = await api.get(req.originalUrl)
+        response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
     } catch (error) {
         next(error)
     }
 
-    const localOffset = new Date(Date.now()).getTimezoneOffset()
-    const today = new Date(Date.now() - (localOffset * 60000))
-	const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
+    if (response) {
 
-    try {
-        const questionResponse = await api.get(req.originalUrl + "/questions")
-        
-        res.render("editsurveydesign", {
-            name: response.data.name,
-            id: response.data.id,
-            title: response.data.title,
-            introText: response.data.introText,
-            questions: questionResponse.data.questions,
-            conclusionText: response.data.conclusionText,
-            today: today.toISOString().substring(0, 16),
-            tomorrow: tomorrow.toISOString().substring(0, 16)
-        })
-    } catch (error) {
-        res.render("editsurveydesign", {
-            name: response.data.name,
-            id: response.data.id,
-            title: response.data.title,
-            introText: response.data.introText,
-            questionError: "Unable to load questions",
-            conclusionText: response.data.conclusionText,
-            today: today.toISOString().substring(0, 16),
-            tomorrow: tomorrow.toISOString().substring(0, 16)
-        })
+        const localOffset = new Date(Date.now()).getTimezoneOffset()
+        const today = new Date(Date.now() - (localOffset * 60000))
+        const tomorrow = new Date(Date.now() + 86400000 - (localOffset * 60000))
+
+        try {
+            const questionResponse = await api.get(req.originalUrl + "/questions", withAuth(req.cookies.access_token))
+            
+            res.render("editsurveydesign", {
+                name: response.data.name,
+                id: response.data.id,
+                title: response.data.title,
+                introText: response.data.introText,
+                questions: questionResponse.data.questions,
+                conclusionText: response.data.conclusionText,
+                today: today.toISOString().substring(0, 16),
+                tomorrow: tomorrow.toISOString().substring(0, 16)
+            })
+        } catch (error) {
+            res.render("editsurveydesign", {
+                name: response.data.name,
+                id: response.data.id,
+                title: response.data.title,
+                introText: response.data.introText,
+                questionError: "Unable to load questions",
+                conclusionText: response.data.conclusionText,
+                today: today.toISOString().substring(0, 16),
+                tomorrow: tomorrow.toISOString().substring(0, 16)
+            })
+        }
     }
-        
 
     
 });
@@ -217,7 +224,7 @@ app.get('/surveyDesigns/:id', async (req, res, next) => {
 // button for publishing survey design
 app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
     try {
-        await api.post(req.originalUrl, req.body)
+        await api.post(req.originalUrl, req.body, withAuth(req.cookies.access_token))
         res.redirect(req.protocol + "://" + req.get("host"))
     } catch (error) {
         next(error)
@@ -227,18 +234,27 @@ app.post('/surveyDesigns/:id/publishedSurveys', async (req, res, next) => {
 // Edit survey question
 app.get('/questions/:id', async (req, res, next) => {
     try {
-        const response = await api.get(req.originalUrl)
-        const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`)
-        const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`)
+        const questionTypes = (await import("./public/src/questionTypes.mjs")).default
+        const response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
+        const designResponse = await api.get(`/surveyDesigns/${response.data.surveyDesignId}`, withAuth(req.cookies.access_token))
+        const visualResponse = await api.get(`/users/${designResponse.data.userId}/visualizations`, withAuth(req.cookies.access_token))
+
+        let editQuestionTypes = []
+        for (const type of questionTypes) {
+            editQuestionTypes.push({
+                name: type.name,
+                label: type.label,
+                selected: response.data.type == type.name
+            })
+        }
         
         res.render("editquestion", {
+            layout: false,
             number: response.data.number,
             id: response.data.id,
             surveyDesignId: response.data.surveyDesignId,
             text: response.data.text,
-            multipleChoice: response.data.type == "Multiple Choice",
-            shortAnswer: response.data.type == "Short Answer",
-            selectElements: response.data.type == "Select Elements",
+            questionTypes: editQuestionTypes,
             choices: response.data.choices,
             min: response.data.min,
             max: response.data.max,
@@ -258,7 +274,7 @@ app.get('/questions/:id', async (req, res, next) => {
 // View published survey
 app.get('/publishedSurveys/:id', async (req, res, next) => {
     try {
-        const response = await api.get(req.originalUrl)
+        const response = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
         let openDateTime
         let closeDateTime
         if (response.data.openDateTime instanceof Date) {
@@ -274,19 +290,13 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
         }
 
         if (req.query.downloadCSV) {
-            const { data: pub } = await api.get(req.originalUrl)
+            const { data: pub } = await api.get(req.originalUrl, withAuth(req.cookies.access_token))
             const participants = pub.results?.participants || []
             // build one flat row per answer
             const records = []
             participants.forEach(p =>
               p.answers.forEach(a => {
                 records.push({
-                  surveyId:         pub.id,
-                  surveyName:       pub.name,
-                  status:           pub.status,
-                  openDateTime:     new Date(pub.openDateTime).toISOString(),
-                  closeDateTime:    new Date(pub.closeDateTime).toISOString(),
-                  downloadDateTime: new Date().toISOString(),
                   participantId:    p.participantId,
                   questionNumber:   a.questionNumber,
                   response:         a.response,
@@ -297,8 +307,6 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
       
             // defines column order
             const fields = [
-              'surveyId','surveyName','status',
-              'openDateTime','closeDateTime','downloadDateTime',
               'participantId','questionNumber','response','comment'
             ]
             const parser = new Parser({ fields })
@@ -308,7 +316,7 @@ app.get('/publishedSurveys/:id', async (req, res, next) => {
             .status(200)
             .set({
               'Content-Type':        'text/csv',
-              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-results.csv"`
+              'Content-Disposition': `attachment; filename="${pub.name.replace(/\W+/g,'_')}-${pub.status}-results.csv"`
             })
             .send(csv)
         }
@@ -335,7 +343,7 @@ app.post('/questions/:id/PATCH', async (req, res, next) => {
         req.body.allowComment = !!req.body.allowComment
         req.body.required = !!req.body.required
 
-        const response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body)
+        const response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body, withAuth(req.cookies.access_token))
         res.redirect(req.get('Referrer'))
     } catch (error) {
         next(error)
@@ -359,6 +367,7 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                 const parsedAnswers = JSON.parse(req.cookies.answers)
                 await api.patch(req.originalUrl, { answers: parsedAnswers.answers })
             } else {
+                const questionTypes = (await import("./public/src/questionTypes.mjs")).default
                 const question = response.data.questions.filter(obj => obj.number == req.query.page)[0]
 
                 let comment = ""
@@ -377,52 +386,33 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     }
                 }
 
+                const typeInfo = questionTypes.filter(type => type.name == question.type)[0]
+
                 let choices = []
-                if (question.type == "Multiple Choice") {
+                if (typeInfo.hasChoices) {
                     const qChoices = question.choices.split('|')
                     const userSelections = userResponse.split('|')
 
                     for (let i = 0; i < qChoices.length; i++)
                         choices.push({ id: `choice${i}`, choice: qChoices[i], checked: userSelections.includes(qChoices[i]) })
-                }
-                
-                let choiceRequirement = ""
-                if (question.max == 0) {
-                    choiceRequirement = ""
-                } else if (question.min > 0) {
-                    if (question.max == question.min) {
-                        choiceRequirement = `exactly ${question.min} `
-                    } else if (question.max < choices.length) {
-                        choiceRequirement = `${question.min} to ${question.max} `
-                    } else {
-                        choiceRequirement = `at least ${question.min} `
-                    }
-                } else if (question.max < choices.length) {
-                    choiceRequirement = `up to ${question.max} `
-                } 
-
-                
+                }        
 
                 res.render("takeSurveyPage", {
                     layout: false,
                     linkHash: response.data.linkHash,
                     text: question.text,
                     visualURL: process.env.VISUAL_UI_URL,
+                    visualModeLabel: typeInfo.visualModeLabel,
                     visualizationContentId: question.visualizationContentId,
                     number: question.number,
                     progress: question.number-1,
                     total: response.data.questions.length,
                     percent: (((question.number-1) / response.data.questions.length) * 100).toFixed(2),
-                    multipleChoice: question.type == "Multiple Choice",
-                    selectElements: question.type == "Select Elements",
-                    shortAnswer: question.type == "Short Answer",
                     choices: choices,
-                    choiceRequirement: choiceRequirement,
-                    shortAnswerRequirement: (question.min > 0) ? ` must be at least ${question.min} characters` : "",
+                    prompt: typeInfo.getPromptString(question.min, question.max),
                     allowComment: question.allowComment,
                     min: question.min,
                     max: question.max,
-                    hasMax: question.max > 0,
                     required: question.required,
                     questionType: question.type,
                     comment: comment,
@@ -430,7 +420,8 @@ app.get('/takeSurvey/:hash', async (req, res, next) => {
                     prev: question.number-1,
                     next: question.number+1,
                     nextText: (question.number == response.data.questions.length) ? "Finish & Submit" : "Next Question",
-                    DEBUG: DEBUG
+                    DEBUG: DEBUG,
+                    ...typeInfo?.pageRenderOptions
                 })
             }
         } else if (!req.query.page || req.query.page == 0) {
@@ -476,10 +467,6 @@ app.patch('/takeSurvey/:hash', async (req, res, next) => {
     res.send()
 })
 
-// for submitting survey responses
-// app.post('/takeSurvey/:hash', async (req, res, next) => {
-// }
-
 // handle ui buttons for POST, PATCH, and DELETE for user resource collections (such as visualizations, survey designs)
 app.post('/:resource/:id?/:method?', async (req, res, next) => {
     let response
@@ -488,16 +475,16 @@ app.post('/:resource/:id?/:method?', async (req, res, next) => {
         // relay request to api
         switch (req.params.method) {
             case 'PATCH':
-                response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body)
+                response = await api.patch(req.originalUrl.split('/PATCH')[0], req.body, withAuth(req.cookies.access_token))
                 break;
             case 'DELETE':
-                response = await api.delete(req.originalUrl.split('/DELETE')[0], req.body)
+                response = await api.delete(req.originalUrl.split('/DELETE')[0], withAuth(req.cookies.access_token))
                 break;
             case 'POST':
-                response = await api.post(req.originalUrl.split('/POST')[0], req.body)
+                response = await api.post(req.originalUrl.split('/POST')[0], req.body, withAuth(req.cookies.access_token))
                 break;
             default:
-                response = await api.post(req.originalUrl, req.body)
+                response = await api.post(req.originalUrl, req.body, withAuth(req.cookies.access_token))
         }
 
         // refresh
@@ -511,17 +498,26 @@ app.post('/:resource/:id?/:method?', async (req, res, next) => {
 
 // anything else is 404
 app.use('*', function (req, res, next) {
-    res.render("404page")
+    res.sendFile(path.join(__dirname, "public/404.html"))
 })
 
 // error case
 app.use('*', function (err, req, res, next) {
-    console.error("== Error:", err)
-    
-    res.status(500).send({
-        error: "Server error.  Please try again later."
-        
-    })
+    switch(err.response?.status) {
+        case 400:
+            res.sendFile(path.join(__dirname, "public/badrequest.html"))
+            break;
+        case 401:
+        case 403:
+            res.sendFile(path.join(__dirname, "public/unauthorized.html"))
+            break;
+        case 404:
+            res.sendFile(path.join(__dirname, "public/404.html"))
+            break;
+        default:
+            console.error("== Error:", err)
+            res.sendFile(path.join(__dirname, "public/internalerror.html"))
+    }
 })
 
 // start server
