@@ -30,7 +30,7 @@ services:
   main-api:
     build: .
     container_name: main-api
-    command: ["./wait-for.sh", "mysql-main", "3306", "node", "main/api/server.js"]
+    command: ["./wait-for.sh", "mysql-main:3306", "node", "main/api/server.js"]
     ports:
       - "${MAIN_API_PORT}:5050"
     volumes:
@@ -58,7 +58,7 @@ services:
   visual-api:
     build: .
     container_name: visual-api
-    command: ["./wait-for.sh", "mysql-visual", "3306", "node", "visualization/api/server.js"]
+    command: ["./wait-for.sh", "mysql-visual:3306", "node", "visualization/api/server.js"]
     ports:
       - "${VISUAL_API_PORT}:8080"
     volumes:
