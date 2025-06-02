@@ -2,6 +2,8 @@
 The goal of this project is to develop a custom web-based survey tool that allows researchers at Oregon State University (or other
 organizations) to create interactive surveys featuring advanced data visualizations. Unlike existing platforms like Qualtrics, this tool supports dynamic elements such as zooming, panning, and selecting regions on visual assets like SVGs, allowing researchers to gather more nuanced and insightful data and responses. The platform emphasizes usability, accessibility, and data security, aiming to enhance both the researcher and participant experience while addressing the limitations of current survey tools.
 
+Visit the landing page here: [https://seanmccoyosu.github.io/Interactive-Survey-Tools-For-Data-Visualizations/]
+
 # Dependencies
 To run this application on your local device, copy the repository and ensure the necessary dependencies are installed.
 
@@ -25,9 +27,13 @@ docker --version
 docker compose version
 ```
 
-# Testing
+# Quick Testing Guide for Your Local Machine
 ### Launching
-Run `docker compose up --build` to run the application. Visit `http://localhost:5000/` and `http://localhost:8000/` to verify.
+Rename the file `.env` for later use.
+
+Run `mv .env.local .env`.
+
+Run `docker compose up --build` to run the application. This may take a while. Visit `http://localhost:5000/` and `http://localhost:8000/` to verify.
 
 ### Cleaning
 Run `docker compose down` to clean up after you've tested.
