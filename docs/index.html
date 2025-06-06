@@ -16,7 +16,7 @@
     </head>
     <body>
         <!-- Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <nav class="navbar navbar-expand navbar-dark bg-dark fixed-top small">
             <div class="container">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
@@ -27,6 +27,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#technical">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#getStarted">Get Started</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#contact">The Team</a>
@@ -88,24 +91,27 @@
         <section class="showcase" id="features">
             <div class="container-fluid p-0">
                 <div class="row g-0">
-                    <video autoplay="true" controls="true" loop="true" class="col-lg-6 order-lg-2 text-white showcase-img"><source src="assets/vid/take_survey.mp4" type="video/mp4"><track kind="captions" srclang="en" label="english_captions">
-  Your browser does not support the video tag.</video>
+                    <iframe id="kaltura_player" class="col-lg-6 order-lg-2 text-white showcase-img" src='https://cdnapisec.kaltura.com/p/391241/embedPlaykitJs/uiconf_id/55338833?iframeembed=true&amp;entry_id=1_zi68uakl&amp;config%5Bprovider%5D=%7B%22widgetId%22%3A%221_yafs3zor%22%7D&amp;config%5Bplayback%5D=%7B%22startTime%22%3A0%7D' 
+                        allowfullscreen webkitallowfullscreen mozAllowFullScreen allow="autoplay *; fullscreen *; encrypted-media *" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" 
+                            title="Hypergraph demo short"></iframe>
                     <div class="col-lg-6 order-lg-1 my-auto showcase-text">
                         <h2>Answer visually interactive survey questions</h2>
                         <p class="lead mb-0">Engage respondents by letting them click, drag, and respond directly with a variety of images. Interactive hitboxes and real-time feedback turn passive multiple-choice surveys into an immersive experience.</p>
                     </div>
                 </div>
                 <div class="row g-0">
-                    <video autoplay="true" controls="true" loop="true" class="col-lg-6 text-white showcase-img"><source src="assets/vid/design_survey.mp4" type="video/mp4"><track kind="captions" srclang="en" label="english_captions">
-  Your browser does not support the video tag.</video>
+                    <iframe id="kaltura_player" class="col-lg-6 text-white showcase-img" src='https://cdnapisec.kaltura.com/p/391241/embedPlaykitJs/uiconf_id/55338833?iframeembed=true&amp;entry_id=1_76jjn259&amp;config%5Bprovider%5D=%7B%22widgetId%22%3A%221_361bgzro%22%7D&amp;config%5Bplayback%5D=%7B%22startTime%22%3A0%7D'
+                        allowfullscreen webkitallowfullscreen mozAllowFullScreen allow="autoplay *; fullscreen *; encrypted-media *" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" 
+                        title="Survey edit demo"></iframe>
                     <div class="col-lg-6 my-auto showcase-text">
                         <h2>Design, publish, and share surveys</h2>
                         <p class="lead mb-0">Create custom surveys with intuitive tools and configurable question types. Publish your survey and share it via a unique link in seconds. Gather all your responses conveniently in a pre-formatted .csv file.</p>
                     </div>
                 </div>
                 <div class="row g-0">
-                    <video autoplay="true" controls="true" loop="true" class="col-lg-6 order-lg-2 text-white showcase-img"><source src="assets/vid/design_visual.mp4" type="video/mp4"><track kind="captions" srclang="en" label="english_captions">
-  Your browser does not support the video tag.</video>
+                    <iframe id="kaltura_player" class="col-lg-6 order-lg-2 text-white showcase-img" src='https://cdnapisec.kaltura.com/p/391241/embedPlaykitJs/uiconf_id/55338833?iframeembed=true&amp;entry_id=1_ve679y7y&amp;config%5Bprovider%5D=%7B%22widgetId%22%3A%221_nku81qax%22%7D&amp;config%5Bplayback%5D=%7B%22startTime%22%3A0%7D'
+                        allowfullscreen webkitallowfullscreen mozAllowFullScreen allow="autoplay *; fullscreen *; encrypted-media *" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" 
+                        title="Visual edit demo"></iframe>
                     <div class="col-lg-6 order-lg-1 my-auto showcase-text">
                         <h2>Design interactive visuals</h2>
                         <p class="lead mb-0">Upload a vector or raster image and customize it to be used in a visually interactive survey question. Choose what areas respondents are able to interact with and what points to spotlight for the question.</p>
@@ -126,11 +132,13 @@
             </div>
         </section><section class="testimonials text-center" id="getStarted">
             <div class="container">
-                <h2 class="mb-5">Where to Get Started?</h2>
+                <h2 class="mb-5">How to Get Started?</h2>
                 <ol class="text-start">
                     <li class="lead mb-3">You can pull the latest source code from <a href="https://github.com/seanmccoyOSU/Interactive-Survey-Tools-For-Data-Visualizations">here</a></li>
                     <li class="lead mb-3">Make sure you have both <a href="https://nodejs.org/">Node.js</a> and <a href="https://www.docker.com/">Docker</a> installed on your system</li>
-                    <li class="lead mb-3">You can launch the web app on your local machine by following <a href="https://github.com/seanmccoyOSU/Interactive-Survey-Tools-For-Data-Visualizations/wiki/Running-the-Modules-for-Testing#running-the-login-page">this guide</a></li>
+                    <li class="lead mb-3">Set the correct environment variables with the command "mv .env.local .env", then, with Docker running, run the command "docker compose up --build" to build and launch the app</li>
+                    <li class="lead mb-3">Access the app through the URL "http://localhost:5000/"</li>
+                    <li class="lead mb-3">Read the repository's readme for more info, or visit <a href="https://github.com/seanmccoyOSU/Interactive-Survey-Tools-For-Data-Visualizations/wiki/">the wiki</a></li>
                 </ol>
             </div>
         </section>
