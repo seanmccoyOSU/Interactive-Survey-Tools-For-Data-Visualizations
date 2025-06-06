@@ -35,6 +35,8 @@ Run `mv .env.local .env`.
 
 Run `docker compose up --build` to run the application. This may take a while. Visit `http://localhost:5000/` and `http://localhost:8000/` to verify.
 
+Note: the command `sed -i 's/\r$//' wait-for.sh` may be helpful if you have trouble launching.
+
 ### Cleaning
 Run `docker compose down` to clean up after you've tested.
 
